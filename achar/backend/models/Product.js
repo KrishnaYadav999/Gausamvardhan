@@ -1,0 +1,85 @@
+import mongoose from "mongoose";
+
+// ---------------- Review Schema ----------------
+const reviewSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, required: true },
+    images: [{ type: String }],
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
+// ---------------- More About This Pack Schema ----------------
+const moreAboutThisPackSchema = new mongoose.Schema({
+  header: { type: String },
+  description: { type: String },
+  images: [{ type: String }],
+});
+
+// ---------------- More About Product Schema ----------------
+const moreAboutProductSchema = new mongoose.Schema({
+  image: { type: String }, // single image
+  description: { type: String }, // description text
+}, { _id: false }); // optional, no separate _id for each item
+
+// ---------------- Product Schema ----------------
+const productSchema = new mongoose.Schema(
+  {
+    productName: { type: String, required: true, trim: true },
+    rating: { type: Number, default: 0 },
+    numberOfReviews: { type: Number, default: 0 },
+
+    tasteDescription: { type: String },
+    cutPrice: { type: String },
+    currentPrice: { type: String },
+    buyMoreTogether: { type: String },
+    weightOptions: { type: String },
+    moreAboutPickle: { type: String },
+    productImages: [{ type: String, required: true }],
+    traditionalRecipes: { type: String },
+    localIngredients: { type: String },
+    driedNaturally: { type: String },
+    moreAboutThisPack: moreAboutThisPackSchema,
+
+    // ✅ New fields
+    pricePerGram: { type: String },
+    stock: { type: Boolean, default: true },
+
+    stockQuantity: { type: Number, required: true, default: 0 },
+    // ✅ Reviews array
+    reviews: [reviewSchema],
+
+    // ✅ Video URL
+    videoUrl: { type: String },
+
+    // ✅ More About Product array
+    moreAboutProduct: [moreAboutProductSchema],
+
+    // Relation with Category
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+// ---------------- Methods for avg rating update ----------------
+productSchema.methods.calculateAverageRating = function () {
+  if (this.reviews.length === 0) {
+    this.rating = 0;
+    this.numberOfReviews = 0;
+  } else {
+    const total = this.reviews.reduce((acc, review) => acc + review.rating, 0);
+    this.rating = (total / this.reviews.length).toFixed(1);
+    this.numberOfReviews = this.reviews.length;
+  }
+  return this.save();
+};
+
+const Product = mongoose.model("Product", productSchema);
+export default Product;
