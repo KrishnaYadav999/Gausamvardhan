@@ -31,7 +31,7 @@ const MasalaCategoryProduct = () => {
           images[product._id] = product.images?.[0]
             ? product.images[0].startsWith("http")
               ? product.images[0]
-              : `http://localhost:5000/${product.images[0]}`
+              : `/${product.images[0]}`
             : "https://via.placeholder.com/300";
         });
 

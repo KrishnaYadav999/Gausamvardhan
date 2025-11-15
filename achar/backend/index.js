@@ -30,8 +30,12 @@ app.use(express.json());
 // ✅ Correct CORS setup
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend
-    credentials: true,               // allow cookies/headers
+    origin: [
+      "http://localhost:3000",       // local frontend
+      "https://gausamvardhan.com",   // live frontend
+      "https://www.gausamvardhan.com"
+    ],
+    credentials: true,
   })
 );
 
