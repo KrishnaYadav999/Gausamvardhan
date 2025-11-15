@@ -111,7 +111,7 @@ const LoginFlow = () => {
     try {
       const otpString = otp.join("");
       const res = await toast.promise(
-        axios.post("http://localhost:5000/api/auth/verify-otp", { email, otp: otpString }),
+        axios.post("/api/auth/verify-otp", { email, otp: otpString }),
         {
           loading: "Verifying OTP...",
           success: "OTP verified! Logging you in...",
