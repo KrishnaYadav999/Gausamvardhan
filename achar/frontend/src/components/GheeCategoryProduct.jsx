@@ -27,7 +27,7 @@ const GheeCategoryProduct = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/ghee-products/category/${slug}`
+          `/api/ghee-products/category/${slug}`
         );
         setProducts(data);
         setFilteredProducts(data);
@@ -45,7 +45,7 @@ const GheeCategoryProduct = () => {
           images[product._id] = product.images?.[0]
             ? product.images[0].startsWith("http")
               ? product.images[0]
-              : `http://localhost:5000/${product.images[0]}`
+              : `/${product.images[0]}`
             : "https://via.placeholder.com/300";
         });
         setSelectedWeights(defaults);

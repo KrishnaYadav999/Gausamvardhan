@@ -12,7 +12,7 @@ const AdminCategoryCreate = () => {
   // Fetch all categories
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/categories");
+      const res = await axios.get("/api/categories");
       setCategories(res.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -31,14 +31,14 @@ const AdminCategoryCreate = () => {
       if (editingId) {
         // ✅ Update
         const { data } = await axios.put(
-          `http://localhost:5000/api/categories/${editingId}`,
+          `/api/categories/${editingId}`,
           { name, image, description }
         );
         setMessage(`✅ Category "${data.category.name}" updated successfully!`);
       } else {
         // ✅ Create
         const { data } = await axios.post(
-          "http://localhost:5000/api/categories",
+          "/api/categories",
           { name, image, description }
         );
         setMessage(`✅ Category "${data.name}" created successfully!`);
@@ -62,7 +62,7 @@ const AdminCategoryCreate = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this category?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/categories/${id}`);
+      await axios.delete(`/api/categories/${id}`);
       alert("🗑️ Category deleted successfully");
       fetchCategories();
     } catch (error) {

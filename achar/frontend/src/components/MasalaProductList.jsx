@@ -155,7 +155,7 @@ const MasalaProductList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/masala-products");
+        const { data } = await axios.get("/api/masala-products");
         setProducts(data);
 
         // Default weight

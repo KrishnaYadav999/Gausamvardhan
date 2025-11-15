@@ -19,7 +19,7 @@ const CategoryProducts = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/products/category/${slug}`
+          `/api/products/category/${slug}`
         );
         setProducts(data);
         setFilteredProducts(data);

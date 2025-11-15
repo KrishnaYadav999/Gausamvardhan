@@ -41,7 +41,7 @@ const AcharProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/products/category/${slug}/${id}`
+          `/api/products/category/${slug}/${id}`
         );
 
         const avgRating =

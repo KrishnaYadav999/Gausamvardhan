@@ -28,7 +28,7 @@ const ProfileDashboard = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/orders/user-orders/${userId}`
+          `/api/orders/user-orders/${userId}`
         );
 
         if (res.data.success) {
@@ -65,7 +65,7 @@ const handleCancelOrder = async (orderId) => {
   try {
     // 1️⃣ Call backend to cancel order
     const res = await axios.post(
-      "http://localhost:5000/api/orders/cancel-order",
+      "/api/orders/cancel-order",
       { orderId, reason }
     );
 
@@ -83,7 +83,7 @@ const handleCancelOrder = async (orderId) => {
       const storedUser = user || JSON.parse(localStorage.getItem("user"));
       if (storedUser?._id) {
         const ordersRes = await axios.get(
-          `http://localhost:5000/api/orders/user-orders/${storedUser._id}`
+          `/api/orders/user-orders/${storedUser._id}`
         );
 
         if (ordersRes.data.success) {

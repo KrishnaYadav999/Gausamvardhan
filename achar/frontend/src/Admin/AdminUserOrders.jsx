@@ -36,7 +36,7 @@ const AdminUserOrders = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/orders/admin/orders?filter=${selectedFilter}`
+        `/api/orders/admin/orders?filter=${selectedFilter}`
       );
       if (res.data.success) {
         setOrders(res.data.orders);
@@ -58,7 +58,7 @@ const AdminUserOrders = () => {
 
   const handleUpdateStatus = async (orderId, status) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/orders/update-status", { orderId, status });
+      const res = await axios.post("/api/orders/update-status", { orderId, status });
       if (res.data.success) {
         setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, status } : o)));
       }
@@ -72,7 +72,7 @@ const AdminUserOrders = () => {
     if (!reason) return;
 
     try {
-      const res = await axios.post("http://localhost:5000/api/orders/cancel-order", { orderId, reason });
+      const res = await axios.post("/api/orders/cancel-order", { orderId, reason });
       if (res.data.success) {
         setOrders((prev) =>
           prev.map((o) =>

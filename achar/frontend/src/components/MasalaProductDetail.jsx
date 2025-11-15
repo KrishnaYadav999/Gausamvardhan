@@ -23,7 +23,7 @@ const navigate = useNavigate();
       setMainImage("");
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/masala-products/${id}`
+          `/api/masala-products/${id}`
         );
         setProduct(data);
 
@@ -49,7 +49,7 @@ const navigate = useNavigate();
       if (!product) return;
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/masala-products/${product._id}/similar`
+          `/api/masala-products/${product._id}/similar`
         );
         setSimilarProducts(data);
       } catch (error) {

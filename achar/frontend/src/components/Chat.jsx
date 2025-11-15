@@ -23,7 +23,7 @@ const Chat = () => {
     setInput("");
 
     try {
-      const { data } = await axios.post("http://localhost:5000/api/chat", {
+      const { data } = await axios.post("/api/chat", {
         message: input,
       });
       const botMsg = { from: "bot", text: data.answer || "No answer." };

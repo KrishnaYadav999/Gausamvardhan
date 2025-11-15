@@ -35,7 +35,7 @@ const SignIn = () => {
     try {
       // Use toast.promise for async handling
       await toast.promise(
-        axios.post("http://localhost:5000/api/auth/register", { name, email, password }),
+        axios.post("/api/auth/register", { name, email, password }),
         {
           loading: "Signing up...",
           success: "Signup successful! Redirecting to login...",

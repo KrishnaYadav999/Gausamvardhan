@@ -37,7 +37,7 @@ const LoginFlow = () => {
     setError("");
     try {
       await toast.promise(
-        axios.post("http://localhost:5000/api/auth/request-otp", { email }),
+        axios.post("/api/auth/request-otp", { email }),
         {
           loading: "Sending OTP...",
           success: "OTP sent! Check your email.",

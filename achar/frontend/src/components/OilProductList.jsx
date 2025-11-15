@@ -159,8 +159,8 @@ const OilProductList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        let url = "http://localhost:5000/api/oils";
-        if (slug) url = `http://localhost:5000/api/oils/category/${slug}`;
+        let url = "/api/oils";
+        if (slug) url = `/api/oils/category/${slug}`;
 
         const { data } = await axios.get(url);
         setProducts(data);

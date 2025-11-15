@@ -41,7 +41,7 @@ const OilCategoryProduct = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/oils/category/${slug}`);
+        const { data } = await axios.get(`/api/oils/category/${slug}`);
         setProducts(data);
         setFilteredProducts(data);
 

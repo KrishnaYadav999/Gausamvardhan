@@ -28,7 +28,7 @@ const AdminUserAllData = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/all");
+      const res = await axios.get("/api/auth/all");
       if (res.data.success) setUsers(res.data.users);
       else setErrorUsers("Failed to fetch users.");
     } catch (err) {
@@ -42,7 +42,7 @@ const AdminUserAllData = () => {
     setLoadingOrders(true);
     setUserOrders([]);
     try {
-      const res = await axios.get(`http://localhost:5000/api/orders/user-orders/${userId}`);
+      const res = await axios.get(`/api/orders/user-orders/${userId}`);
       if (res.data.success) setUserOrders(res.data.orders);
       else setErrorOrders("Failed to fetch orders.");
     } catch (err) {

@@ -13,10 +13,10 @@ const NavbarDropdown = () => {
       try {
         // Fetch all product categories simultaneously
         const [acharRes, gheeRes, masalaRes, oilRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/products/category/achar"),
-          axios.get("http://localhost:5000/api/ghee-products"),
-          axios.get("http://localhost:5000/api/masala-products"),
-          axios.get("http://localhost:5000/api/oils/category/oil"), // ✅ Oil API
+          axios.get("/api/products/category/achar"),
+          axios.get("/api/ghee-products"),
+          axios.get("/api/masala-products"),
+          axios.get("/api/oils/category/oil"), // ✅ Oil API
         ]);
 
         setAcharProducts(acharRes.data);

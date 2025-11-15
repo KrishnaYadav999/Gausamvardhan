@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 
-const API_URL = "http://localhost:5000/api/ghee-products";
+const API_URL = "/api/ghee-products";
 
 const GheeProductUpdateDelete = () => {
   const [products, setProducts] = useState([]);

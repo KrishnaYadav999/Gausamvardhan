@@ -10,7 +10,7 @@ const AcharBannerTwo = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/smallbanners");
+        const res = await axios.get("/api/smallbanners");
         
         console.log("Fetched banners:", res.data); // 🔍 Debug
 

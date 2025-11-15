@@ -86,7 +86,7 @@ const ProceedToCheckout = () => {
 
       // ✅ Create order with GST included
       const res = await axios.post(
-        "http://localhost:5000/api/orders/create-order",
+        "/api/orders/create-order",
         {
           userId: user._id || user.id,
           products,
@@ -109,7 +109,7 @@ const ProceedToCheckout = () => {
         handler: async (response) => {
           try {
             const verifyRes = await axios.post(
-              "http://localhost:5000/api/orders/verify-payment",
+              "/api/orders/verify-payment",
               {
                 razorpayOrderId: response.razorpay_order_id,
                 razorpayPaymentId: response.razorpay_payment_id,

@@ -9,7 +9,7 @@ const Category = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/categories");
+        const { data } = await axios.get("/api/categories");
         setCategories(data);
       } catch (error) {
         console.error("Error fetching categories:", error);

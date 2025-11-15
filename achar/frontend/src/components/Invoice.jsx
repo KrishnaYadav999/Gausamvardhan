@@ -36,7 +36,7 @@ const Invoice = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/orders/${id}`);
+        const res = await axios.get(`/api/orders/${id}`);
         if (res.data.success) setOrder(res.data.order);
         else setError("Failed to fetch invoice.");
       } catch (err) {

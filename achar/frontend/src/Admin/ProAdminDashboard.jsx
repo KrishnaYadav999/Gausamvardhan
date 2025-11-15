@@ -80,12 +80,12 @@ export default function ProAdminDashboard() {
 
       try {
         const [ordersRes, p1, p2, p3, p4, cats] = await Promise.all([
-          axios.get("http://localhost:5000/api/orders", getAuthConfig()),
-          axios.get("http://localhost:5000/api/products", getAuthConfig()),
-          axios.get("http://localhost:5000/api/ghee-products", getAuthConfig()),
-          axios.get("http://localhost:5000/api/masala-products", getAuthConfig()),
-          axios.get("http://localhost:5000/api/oils", getAuthConfig()),
-          axios.get("http://localhost:5000/api/categories", getAuthConfig()),
+          axios.get("/api/orders", getAuthConfig()),
+          axios.get("/api/products", getAuthConfig()),
+          axios.get("/api/ghee-products", getAuthConfig()),
+          axios.get("/api/masala-products", getAuthConfig()),
+          axios.get("/api/oils", getAuthConfig()),
+          axios.get("/api/categories", getAuthConfig()),
         ]);
 
         const mergedProducts = [

@@ -15,7 +15,7 @@ const MasalaCategoryProduct = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/masala-products/category/${slug}`
+          `/api/masala-products/category/${slug}`
         );
         setProducts(data);
 

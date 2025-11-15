@@ -72,10 +72,10 @@ const Navbar = () => {
       setLoading(true);
       try {
         const [gheeRes, masalaRes, oilRes, productRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/ghee-products/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`http://localhost:5000/api/masala-products/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`http://localhost:5000/api/oils/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`http://localhost:5000/api/products/search/${encodeURIComponent(searchQuery)}`),
+          axios.get(`/api/ghee-products/search/${encodeURIComponent(searchQuery)}`),
+          axios.get(`/api/masala-products/search/${encodeURIComponent(searchQuery)}`),
+          axios.get(`/api/oils/search/${encodeURIComponent(searchQuery)}`),
+          axios.get(`/api/products/search/${encodeURIComponent(searchQuery)}`),
         ]);
 
         const combinedResults = [

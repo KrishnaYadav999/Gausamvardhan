@@ -86,7 +86,7 @@ const GheeProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/ghee-products/category/${slug}/${id}`
+          `/api/ghee-products/category/${slug}/${id}`
         );
 
         const avgRating =
@@ -118,7 +118,7 @@ const GheeProductDetail = () => {
     const fetchSimilarProducts = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/ghee-products/${id}/similar`
+          `/api/ghee-products/${id}/similar`
         );
         setSimilarProducts(data);
       } catch (error) {

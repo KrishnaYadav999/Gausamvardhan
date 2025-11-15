@@ -38,7 +38,7 @@ const OilProductDetail = () => {
     const fetchProduct = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/oils/category/${slug}/${id}`
+          `/api/oils/category/${slug}/${id}`
         );
         setProduct(data);
         setSelectedVolume(data.perPriceLiter?.[0]?.volume || "");
@@ -49,7 +49,7 @@ const OilProductDetail = () => {
         data.perPriceLiter?.forEach((v) => (qtyObj[v.volume] = 1));
         setVolumeQuantities(qtyObj);
 
-        const simRes = await axios.get(`http://localhost:5000/api/oils/${id}/similar`);
+        const simRes = await axios.get(`/api/oils/${id}/similar`);
         setSimilarProducts(simRes.data);
       } catch (error) {
         console.error(error);
