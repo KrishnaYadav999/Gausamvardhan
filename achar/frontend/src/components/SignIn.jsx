@@ -10,13 +10,64 @@ const images = [
 ];
 
 const SignIn = () => {
+
+  const { loginUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const API_URL = import.meta.env.VITE_API_URL;
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+
   const [currentImage, setCurrentImage] = useState(0);
   const [fade, setFade] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+
+
+  // ⭐ GOOGLE LOGIN HANDLER
+  const handleGoogleResponse = async (response) => {
+    try {
+      const googleToken = response.credential;
+
+      const res = await axios.post(`${API_URL}/api/googleauth/google`, {
+        token: googleToken,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      loginUser(res.data.user);
+
+      toast.success("Google Login Successful!");
+
+      navigate("/");
+    } catch (err) {
+      const msg =
+        err.response?.data?.message || "Google Login Failed (Unauthorized)";
+      toast.error(msg);
+    }
+  };
+
+  // ⭐ GOOGLE ONE TAP INITIALIZE
+  useEffect(() => {
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("googleLoginButton"),
+        {
+          theme: "outline",
+          size: "large",
+          width: 350,
+        }
+      );
+    }
+  }, []);
+
+  // ⭐ IMAGE SLIDER
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -35,7 +86,14 @@ const SignIn = () => {
     try {
       // Use toast.promise for async handling
       await toast.promise(
+
         axios.post("/api/auth/register", { name, email, password }),
+
+        axios.post(`${API_URL}/api/auth/register`, {
+          name,
+          email,
+          password,
+        }),
         {
           loading: "Signing up...",
           success: "Signup successful! Redirecting to login...",
@@ -59,6 +117,10 @@ const SignIn = () => {
       {/* React Hot Toast container */}
       <Toaster position="top-right" reverseOrder={false} />
 
+
+
+      {/* LEFT IMAGE */}
+
       <div className="w-full md:w-1/2 flex items-center justify-center mb-8 md:mb-0">
         <img
           src={images[currentImage]}
@@ -79,7 +141,10 @@ const SignIn = () => {
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Full Name"
+
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all duration-300"
+
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-red-500"
             />
           </div>
           <div className="relative">
@@ -90,7 +155,10 @@ const SignIn = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="E-mail"
+
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all duration-300"
+
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-red-500"
             />
           </div>
           <div className="relative">
@@ -101,7 +169,10 @@ const SignIn = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Password"
+
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none transition-all duration-300"
+
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-red-500"</input>
             />
           </div>
           <button
