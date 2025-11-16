@@ -52,7 +52,6 @@ function App() {
       <AnimatedText />
       <Navbar />
       <NavbarDropdown />
-      <ServicesNav />
 
       <Chat />
       <Toaster position="top-right" reverseOrder={false} />
@@ -67,11 +66,12 @@ function App() {
             <div className="flex flex-col gap-10">
               <AcharBanner />
               <Category />
-              <div className="bg-[#FCF6EF]">
+              <div className="">
                 <AcharProductList />
               </div>
               <AcharBannerTwo />
               <GheeProductList />
+              <ServicesNav />
               <MasalaProductList />
               <OilProductList />
             </div>

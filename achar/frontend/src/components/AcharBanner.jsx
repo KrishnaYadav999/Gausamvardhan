@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Skeleton for banner loading
 const BannerSkeleton = () => (
-  <div className="relative w-full max-w-6xl mx-auto h-[30vh] md:h-[40vh] overflow-hidden rounded-xl shadow-md bg-gray-200 animate-pulse"></div>
+  <div className="relative w-full h-[55vh] md:h-[80vh] overflow-hidden bg-gray-200 animate-pulse"></div>
 );
 
-const AcharBanner = ({ className = "" }) => {
+const AcharBanner = () => {
   const [banners, setBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -27,7 +26,6 @@ const AcharBanner = ({ className = "" }) => {
     fetchBanners();
   }, []);
 
-  // Auto-slide
   useEffect(() => {
     if (banners.length === 0) return;
 
@@ -45,7 +43,7 @@ const AcharBanner = ({ className = "" }) => {
   }, [banners, currentBannerIndex]);
 
   if (loading) return <BannerSkeleton />;
-  if (banners.length === 0) return null;
+  if (!banners.length) return null;
 
   const currentBanner = banners[currentBannerIndex];
   const images = currentBanner.images || [];
@@ -53,43 +51,49 @@ const AcharBanner = ({ className = "" }) => {
 
   return (
     <div
-      className={`relative w-full max-w-6xl mx-auto h-[30vh] md:h-[40vh] overflow-hidden rounded-xl shadow-md bg-black ${className} mt-5`}
+      className="
+        relative 
+        w-full 
+        h-[55vh] md:h-[80vh]   /* 🔥 BIG HEIGHT HERE */
+        overflow-hidden 
+        bg-black 
+        mt-0
+      "
     >
-      {/* Animated Image with Framer Motion */}
       <AnimatePresence mode="wait">
         <motion.img
-          key={currentImage} // ensures unique animation on change
+          key={currentImage}
           src={currentImage}
-          alt={`Banner ${currentBannerIndex} - Image ${currentImageIndex}`}
+          alt="banner"
           className="absolute inset-0 w-full h-full object-cover"
-          initial={{ opacity: 0, scale: 1.05 }}
+          initial={{ opacity: 0, scale: 1.08 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
+          exit={{ opacity: 0, scale: 0.96 }}
+          transition={{ duration: 1.25, ease: 'easeInOut' }}
         />
       </AnimatePresence>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
       {/* Button */}
-      <div className="absolute bottom-3 left-3 z-10">
+      <div className="absolute bottom-8 left-8 z-10">
         <a href={currentBanner.buttonLink}>
-          <button className="bg-white text-black px-4 py-1.5 text-xs md:text-sm font-medium rounded-full hover:bg-gray-100 transition shadow">
+          <button className="bg-white text-black px-6 py-2 text-sm md:text-base font-semibold rounded-full shadow-md hover:bg-gray-100 transition">
             {currentBanner.buttonText}
           </button>
         </a>
       </div>
 
-      {/* Dots Indicator */}
-      <div className="absolute bottom-3 right-3 flex gap-2 z-10">
-        {images.map((_, idx) => (
+      {/* Dots */}
+      <div className="absolute bottom-8 right-8 flex gap-3 z-10">
+        {images.map((_, i) => (
           <div
-            key={idx}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              idx === currentImageIndex ? "bg-white scale-125" : "bg-white/40"
+            key={i}
+            className={`w-3.5 h-3.5 rounded-full transition ${
+              i === currentImageIndex ? "bg-white shadow-md scale-125" : "bg-white/40"
             }`}
-          />
+          ></div>
         ))}
       </div>
     </div>

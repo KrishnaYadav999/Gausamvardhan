@@ -31,13 +31,16 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
   const discount =
     product.cutPrice && selectedPrice
-      ? Math.round(((product.cutPrice - selectedPrice) / product.cutPrice) * 100)
+      ? Math.round(
+          ((product.cutPrice - selectedPrice) / product.cutPrice) * 100
+        )
       : 0;
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     if (!selectedWeight) return toast.error("❌ Please select a weight");
-    if (product.stock <= 0) return toast.error("❌ This product is out of stock!");
+    if (product.stock <= 0)
+      return toast.error("❌ This product is out of stock!");
 
     addToCart({
       _id: product._id,
@@ -49,14 +52,15 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       productImages: product.productImages || [],
     });
 
-    toast.success(`🛒 ${product.productName} (${selectedWeight}) added to cart!`);
+    toast.success(
+      `🛒 ${product.productName} (${selectedWeight}) added to cart!`
+    );
   };
 
   return (
     <div
       onClick={handleClick}
-      className="relative border rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-4 flex flex-col w-44 flex-shrink-0"
-    >
+       className="relative border rounded-xl h-[350px] sm:h-[380px] md:h-[420px] lg:h-[420px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-4 flex flex-col w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0">
       {/* Discount Badge */}
       {discount > 0 && (
         <div className="absolute top-2 left-2 z-50">
@@ -68,48 +72,56 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       )}
 
       {/* Image */}
-      <div className="w-full h-32 mb-3 flex justify-center items-center bg-gray-50 rounded-md overflow-hidden">
+      <div className="w-full h-48 lg:h-56 mb-4 flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden">
         <img
           src={product.productImages?.[0]}
           alt={product.productName}
-          className="max-h-28 object-contain transition-transform duration-300 hover:scale-105"
+          className="max-h-48 lg:max-h-56 object-contain transition-transform duration-300 hover:scale-105"
         />
       </div>
 
       {/* Title */}
-      <h3 className="text-sm font-medium line-clamp-2 mb-2">{product.productName}</h3>
+  <h3 className="text-base lg:text-md font-medium line-clamp-2 mb-3">
+        {product.productName}
+      </h3>
 
       {/* Weight Selector */}
-      {product.pricePerGram && (
-        <div className="flex space-x-2 mb-3 flex-wrap">
-          {product.pricePerGram.split(",").map((p) => {
-            const weight = p.split("=")[0].trim();
-            return (
-              <button
-                key={weight}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedWeight(weight);
-                }}
-                className={`px-2 py-1 border rounded text-xs ${
-                  selectedWeight === weight
-                    ? "border-blue-600 text-blue-600"
-                    : "border-gray-300 text-gray-700"
-                }`}
-                disabled={product.stock <= 0}
-              >
-                {weight}
-              </button>
-            );
-          })}
-        </div>
-      )}
+{product.pricePerGram && (
+  <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
+    {product.pricePerGram.split(",").map((p) => {
+      const weight = p.split("=")[0].trim();
+      return (
+        <button
+          key={weight}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedWeight(weight);
+          }}
+          className={`px-2 sm:px-3 py-1 sm:py-2 border rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
+            selectedWeight === weight
+              ? "border-blue-600 text-blue-600 bg-blue-50"
+              : "border-gray-300 text-gray-700 hover:border-gray-500 hover:text-gray-900"
+          }`}
+          disabled={product.stock <= 0}
+        >
+          {weight}
+        </button>
+      );
+    })}
+  </div>
+)}
+
+
 
       {/* Price */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg font-semibold text-gray-800">₹{selectedPrice}</span>
+        <span className="text-lg font-semibold text-gray-800">
+          ₹{selectedPrice}
+        </span>
         {product.cutPrice && product.cutPrice > selectedPrice && (
-          <span className="text-sm line-through text-gray-400">₹{product.cutPrice}</span>
+          <span className="text-sm line-through text-gray-400">
+            ₹{product.cutPrice}
+          </span>
         )}
       </div>
 
@@ -134,7 +146,11 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
           stroke="currentColor"
           strokeWidth={2}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4v16m8-8H4"
+          />
         </svg>
         {product.stock <= 0 ? "Out of Stock" : "ADD"}
       </button>
@@ -168,7 +184,10 @@ const AcharProductList = () => {
         const defaults = {};
         data.forEach((product) => {
           if (product.pricePerGram) {
-            const firstWeight = product.pricePerGram.split(",")[0].split("=")[0].trim();
+            const firstWeight = product.pricePerGram
+              .split(",")[0]
+              .split("=")[0]
+              .trim();
             defaults[product._id] = firstWeight;
           } else {
             defaults[product._id] = product.weightOptions?.split(",")[0] || "";
@@ -224,14 +243,19 @@ const AcharProductList = () => {
           style={{ scrollBehavior: "smooth" }}
         >
           {loading
-            ? Array.from({ length: 12 }).map((_, i) => <AcharProductSkeleton key={i} />)
+            ? Array.from({ length: 12 }).map((_, i) => (
+                <AcharProductSkeleton key={i} />
+              ))
             : products.map((product) => (
                 <AcharProductCard
                   key={product._id}
                   product={product}
                   selectedWeight={selectedWeights[product._id]}
                   setSelectedWeight={(weight) =>
-                    setSelectedWeights((prev) => ({ ...prev, [product._id]: weight }))
+                    setSelectedWeights((prev) => ({
+                      ...prev,
+                      [product._id]: weight,
+                    }))
                   }
                 />
               ))}

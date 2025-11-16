@@ -7,20 +7,20 @@ const AcharBannerTwo = () => {
   const [banners, setBanners] = useState([]);
   const [current, setCurrent] = useState(0);
 
+  // Fetch banners from backend
   useEffect(() => {
     const fetchBanners = async () => {
       try {
         const res = await axios.get("/api/smallbanners");
-        
-        console.log("Fetched banners:", res.data); // 🔍 Debug
+        console.log("Fetched banners:", res.data);
 
         // Map backend response to frontend-friendly structure
         const mapped = res.data.map((b) => ({
           _id: b._id,
-          img: b.img,
-          title: b.title,
-          btnText: b.btnText,
-          links: b.links,
+          img: b.image,            // backend field
+          links: b.link,           // backend field
+          title: b.title || "",    // fallback empty
+          btnText: b.btnText || "Shop Now", // fallback default
         }));
 
         setBanners(mapped);
@@ -42,6 +42,7 @@ const AcharBannerTwo = () => {
     );
   }
 
+  // Separate main banners for desktop hero grid
   const mainBanners = banners.slice(0, 2);
   const extraBanners = banners.slice(2);
 
@@ -53,43 +54,32 @@ const AcharBannerTwo = () => {
   return (
     <div className="px-4 md:px-16 py-8">
       {/* Desktop Hero Grid */}
-      {mainBanners.length === 2 && (
+      {mainBanners.length > 0 && (
         <div className="hidden md:grid grid-cols-3 gap-6 h-[380px] mb-8">
-          <div className="relative rounded-2xl overflow-hidden shadow-lg group col-span-2 bg-white">
-            <img
-              src={mainBanners[0].img}
-              alt={mainBanners[0].title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-12">
-              <h2 className="text-white text-4xl font-extrabold mb-6 drop-shadow-lg">
-                {mainBanners[0].title}
-              </h2>
-              <a href={mainBanners[0].links}>
-                <button className="bg-[#7ED957] hover:bg-[#008031] text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-md">
-                  {mainBanners[0].btnText} <ArrowRight size={20} />
-                </button>
-              </a>
+          {mainBanners.map((banner, index) => (
+            <div
+              key={banner._id}
+              className={`relative rounded-2xl overflow-hidden shadow-lg group bg-white ${
+                index === 0 ? "col-span-2" : "col-span-1"
+              }`}
+            >
+              <img
+                src={banner.img}
+                alt={banner.title || "Banner"}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-8">
+                <h2 className={`text-white font-extrabold mb-4 drop-shadow-lg ${index === 0 ? "text-4xl" : "text-3xl"}`}>
+                  {banner.title || ""}
+                </h2>
+                <a href={banner.links || "#"}>
+                  <button className="bg-[#7ED957] hover:bg-[#008031] text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-md">
+                    {banner.btnText || "Shop Now"} <ArrowRight size={20} />
+                  </button>
+                </a>
+              </div>
             </div>
-          </div>
-
-          <div className="relative rounded-2xl overflow-hidden shadow-lg group col-span-1 bg-white">
-            <img
-              src={mainBanners[1].img}
-              alt={mainBanners[1].title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-8">
-              <h2 className="text-white text-3xl font-bold mb-4 drop-shadow-lg">
-                {mainBanners[1].title}
-              </h2>
-              <a href={mainBanners[1].links}>
-                <button className="bg-[#7ED957] hover:bg-[#008031] text-white font-semibold px-5 py-3 rounded-lg flex items-center gap-2 shadow-md">
-                  {mainBanners[1].btnText} <ArrowRight size={20} />
-                </button>
-              </a>
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
@@ -103,13 +93,13 @@ const AcharBannerTwo = () => {
             >
               <img
                 src={banner.img}
-                alt={banner.title}
+                alt={banner.title || "Banner"}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/20 flex items-end justify-start p-6">
-                <a href={banner.links}>
+                <a href={banner.links || "#"}>
                   <button className="border border-white text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow-md transition hover:bg-white hover:text-black">
-                    {banner.btnText} <ArrowRight size={18} />
+                    {banner.btnText || "Shop Now"} <ArrowRight size={18} />
                   </button>
                 </a>
               </div>
@@ -130,16 +120,16 @@ const AcharBannerTwo = () => {
               <div className="relative rounded-2xl overflow-hidden shadow-lg bg-white">
                 <img
                   src={banner.img}
-                  alt={banner.title}
+                  alt={banner.title || "Banner"}
                   className="w-full h-[300px] object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-6">
                   <h2 className="text-white text-2xl font-bold mb-4 drop-shadow-lg">
-                    {banner.title}
+                    {banner.title || ""}
                   </h2>
-                  <a href={banner.links}>
+                  <a href={banner.links || "#"}>
                     <button className="bg-[#7ED957] hover:bg-[#008031] text-white font-semibold px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-md">
-                      {banner.btnText} <ArrowRight size={18} />
+                      {banner.btnText || "Shop Now"} <ArrowRight size={18} />
                     </button>
                   </a>
                 </div>

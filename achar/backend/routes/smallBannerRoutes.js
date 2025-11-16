@@ -1,4 +1,3 @@
-// routes/smallBannerRoutes.js
 import express from "express";
 import {
   createSmallBanner,

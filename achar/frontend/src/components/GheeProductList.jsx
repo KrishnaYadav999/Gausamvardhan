@@ -49,7 +49,11 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   };
 
   return (
-    <div className="relative border rounded-xl shadow-sm hover:shadow-lg transition bg-white p-4 flex flex-col w-44 flex-shrink-0">
+<div className="relative border rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-3 sm:p-4 flex flex-col 
+  w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0 
+ h-[350px] sm:h-[450px] md:h-[480px] lg:h-[480px]">
+
+
       {/* ✅ Offer Badge (original UI unchanged) */}
       {discount > 0 && (
         <div className="absolute top-2 left-2">
@@ -65,48 +69,53 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       )}
 
       {/* Image */}
-      <div className="w-full h-32 mb-3 flex justify-center items-center">
-        <Link to={`/ghee-product/${product.slug}/${product._id}`}>
-          <img
-            src={product.images?.[0]}
-            alt={product.title}
-            className="max-h-28 object-contain cursor-pointer"
-          />
-        </Link>
-      </div>
+   <div className="w-full h-40 sm:h-48 lg:h-56 mb-4 flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden">
+
+  <Link to={`/ghee-product/${product.slug}/${product._id}`}>
+    <img
+      src={product.images?.[0]}
+      alt={product.title}
+      className="max-h-40 sm:max-h-48 lg:max-h-56 object-contain cursor-pointer transition-transform duration-300 hover:scale-105"
+    />
+  </Link>
+</div>
+
 
       {/* Title */}
-      <h3 className="text-sm font-medium line-clamp-2 mb-2">
-        <Link
-          to={`/ghee-product/${product.slug}/${product._id}`}
-          className="hover:text-blue-600"
-        >
-          {product.title}
-        </Link>
-      </h3>
+  <h3 className="text-base sm:text-lg lg:text-lg font-semibold line-clamp-2 mb-3">
+  <Link
+    to={`/ghee-product/${product.slug}/${product._id}`}
+    className="hover:text-blue-600 transition-colors duration-200"
+  >
+    {product.title}
+  </Link>
+</h3>
+
 
       {/* Weight/Volume Selector */}
-      {product.pricePerGram && (
-        <div className="flex space-x-2 mb-1 flex-wrap">
-          {product.pricePerGram.split(",").map((p) => {
-            const weight = p.split("=")[0].trim();
-            return (
-              <button
-                key={weight}
-                onClick={() => setSelectedWeight(weight)}
-                className={`px-2 py-1 border rounded text-xs ${
-                  selectedWeight === weight
-                    ? "border-blue-600 text-blue-600"
-                    : "border-gray-300 text-gray-700"
-                }`}
-                disabled={product.stock <= 0}
-              >
-                {weight}
-              </button>
-            );
-          })}
-        </div>
-      )}
+{product.pricePerGram && (
+  <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
+    {product.pricePerGram.split(",").map((p) => {
+      const weight = p.split("=")[0].trim();
+      return (
+        <button
+          key={weight}
+          onClick={() => setSelectedWeight(weight)}
+          className={`px-2 sm:px-3 py-1 sm:py-2 border rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
+            selectedWeight === weight
+              ? "border-blue-600 text-blue-600 bg-blue-50"
+              : "border-gray-300 text-gray-700 hover:border-gray-500 hover:text-gray-900"
+          }`}
+          disabled={product.stock <= 0}
+        >
+          {weight}
+        </button>
+      );
+    })}
+  </div>
+)}
+
+
 
       {/* Price */}
       <div className="flex items-center gap-2 mb-3">

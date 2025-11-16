@@ -3,13 +3,13 @@ import SmallBanner from "../models/SmallBanner.js";
 // Create SmallBanner
 export const createSmallBanner = async (req, res) => {
   try {
-    const { title, btnText, img, links } = req.body;
+    const { image, link } = req.body;
 
-    if (!title || !btnText || !img || !links) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!image || !link) {
+      return res.status(400).json({ message: "Image and link are required" });
     }
 
-    const smallBanner = new SmallBanner({ title, btnText, img, links });
+    const smallBanner = new SmallBanner({ image, link });
     await smallBanner.save();
 
     res.status(201).json(smallBanner);
@@ -21,7 +21,7 @@ export const createSmallBanner = async (req, res) => {
 // Get All SmallBanners
 export const getSmallBanners = async (req, res) => {
   try {
-    const banners = await SmallBanner.find();
+    const banners = await SmallBanner.find().sort({ createdAt: -1 });
     res.json(banners);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });

@@ -1,4 +1,3 @@
-// AdminSmallBanner.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -18,12 +17,11 @@ const AdminSmallBanner = () => {
     }
   };
 
-  // On mount, load banners
   useEffect(() => {
     fetchBanners();
   }, []);
 
-  // Handle create banner
+  // Create banner
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -31,20 +29,20 @@ const AdminSmallBanner = () => {
       setMessage("✅ Banner created successfully!");
       setImage("");
       setLink("");
-      fetchBanners(); // Refresh list after create
+      fetchBanners();
     } catch (error) {
       console.error(error);
       setMessage("❌ Failed to create banner.");
     }
   };
 
-  // Handle delete banner
+  // Delete banner
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this banner?")) return;
     try {
       await axios.delete(`/api/smallbanners/${id}`);
       setMessage("🗑️ Banner deleted successfully!");
-      fetchBanners(); // Refresh list after delete
+      fetchBanners();
     } catch (error) {
       console.error(error);
       setMessage("❌ Failed to delete banner.");
@@ -53,15 +51,12 @@ const AdminSmallBanner = () => {
 
   return (
     <div className="max-w-2xl mx-auto mt-10 bg-white shadow-lg rounded-xl p-6">
-      <h2 className="text-xl font-semibold mb-4 text-center">
-        Manage Small Banners
-      </h2>
+      <h2 className="text-xl font-semibold mb-4 text-center">Manage Small Banners</h2>
 
       {message && (
         <p className="mb-3 text-center text-sm text-green-600">{message}</p>
       )}
 
-      {/* Create Banner Form */}
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">
         <div>
           <label className="block mb-1 font-medium">Image URL</label>
@@ -95,7 +90,6 @@ const AdminSmallBanner = () => {
         </button>
       </form>
 
-      {/* Banner List */}
       <h3 className="text-lg font-semibold mb-3">All Small Banners</h3>
       <div className="space-y-4">
         {banners.length === 0 ? (

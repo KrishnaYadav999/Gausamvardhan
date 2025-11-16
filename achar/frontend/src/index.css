@@ -2,55 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Global font */
+html, body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #E8E9E0;
+  scroll-behavior: auto;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Optional animations */
 @keyframes slide-in {
   0% { transform: translateY(100%); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
-
 .animate-slide-in {
   animation: slide-in 0.5s ease-out;
 }
 
-/* let JS handle smoothing; avoid double/conflicting scrolling rules */
-html {
-  scroll-behavior: auto; /* Lenis will handle smoothness */
-}
-
-/* IMPORTANT: don't hide overflow here — that blocks normal scroll behavior
-   which can conflict with Lenis setup. */
-html, body {
-  height: auto;
-  /* remove overflow: hidden; */
-}
-
-body {
-  overscroll-behavior: none; /* fine to keep for mobile bounce handling */
-}
-
-/* If you have any element that sets overflow-hidden on the body (modals, etc.)
-   remove or toggle it only when needed. */
 @keyframes glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 6px #FFD700);
-    opacity: 0.9;
-  }
-  50% {
-    filter: drop-shadow(0 0 14px #F5C518);
-    opacity: 1;
-  }
+  0%,100% { filter: drop-shadow(0 0 6px #FFD700); opacity: 0.9; }
+  50% { filter: drop-shadow(0 0 14px #F5C518); opacity: 1; }
 }
 .animate-glow {
   animation: glow 2s infinite ease-in-out;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
-}
-
-
-
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

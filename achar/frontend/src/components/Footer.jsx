@@ -21,8 +21,29 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gray-50 text-gray-700 pt-10">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-8">
+    <footer
+      className="text-gray-700 pt-10"
+      style={{
+        backgroundImage:
+          "url('https://i.pinimg.com/1200x/af/1a/8c/af1a8c7208540e0fe098c6d294d589f1.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Social Icons Section */}
+      <div className="flex justify-center space-x-3 mb-8">
+        {[FaFacebookF, SiX, FaInstagram, FaLinkedinIn].map((Icon, idx) => (
+          <div
+            key={idx}
+            className="p-3 bg-black text-white rounded-full cursor-pointer hover:bg-gray-800"
+          >
+            <Icon size={20} />
+          </div>
+        ))}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-8 bg-gray-50/80 p-6 rounded-lg">
         {/* Products Section */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -62,7 +83,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Section */}
-      <div className="mt-10 flex flex-col md:flex-row items-center justify-between border-t border-gray-200 pt-6 space-y-4 md:space-y-0">
+      <div className="mt-10 flex flex-col md:flex-row items-center justify-between border-t border-gray-200 pt-6 space-y-4 md:space-y-0 px-6 md:px-12 bg-gray-50/80 rounded-lg">
         {/* Copyright */}
         <p className="text-sm text-gray-500 text-center md:text-left">
           © GAUSAM VARDHAN Private Limited, 2025
@@ -81,18 +102,6 @@ const Footer = () => {
             alt="Google Play"
             className="h-8 cursor-pointer"
           />
-        </div>
-
-        {/* Social Icons */}
-        <div className="flex space-x-3">
-          {[FaFacebookF, SiX, FaInstagram, FaLinkedinIn].map((Icon, idx) => (
-            <div
-              key={idx}
-              className="p-2 bg-black text-white rounded-full cursor-pointer hover:bg-gray-800"
-            >
-              <Icon />
-            </div>
-          ))}
         </div>
       </div>
     </footer>

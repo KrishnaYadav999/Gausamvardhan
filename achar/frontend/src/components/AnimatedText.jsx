@@ -15,16 +15,16 @@ const AnimatedText = () => {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Background smooth animation between two colors
+    // 🌿 Smooth background animation using your new theme colors
     gsap.to(containerRef.current, {
-      backgroundColor: "#B49F72",
+      backgroundColor: "#67AE6E", // Secondary Green
       duration: 4,
       repeat: -1,
       yoyo: true,
       ease: "power1.inOut",
     });
 
-    // Text animation
+    // ✨ Text Animations
     const tl = gsap.timeline({ repeat: -1, repeatDelay: 0.5 });
 
     textRefs.current.forEach((el) => {
@@ -50,7 +50,7 @@ const AnimatedText = () => {
     <div
       ref={containerRef}
       className="relative p-2 shadow-md overflow-hidden h-10 flex items-center justify-center"
-      style={{ backgroundColor: "#008031" }} // start with green
+      style={{ backgroundColor: "#328E6E" }} // Primary (start color)
     >
       {texts.map((text, index) => (
         <p
