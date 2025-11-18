@@ -9,7 +9,7 @@ const VideoAdvertiseList = () => {
   const fetchVideoAds = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/videoadvertise");
+      const res = await axios.get("/api/videoadvertise");
       setAds(res.data);
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to fetch video ads");

@@ -30,7 +30,7 @@ const SignIn = () => {
       const googleToken = response.credential;
 
       const res = await axios.post(
-        "http://localhost:5000/googleauth/google",
+        "/googleauth/google",
         { token: googleToken }
       );
 
