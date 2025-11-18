@@ -17,6 +17,8 @@ import AdminWorkerTracking from "./AdminWorkerTracking";
 import WorkerAdminCreateUser from "./WorkerAdminCreateUser";
 import AdminStockAlert from "./AdminStockAlert";
 import ProAdminDashboard from "./ProAdminDashboard";
+import AdminVideoAdvertiseCreate from "./AdminVideoAdvertiseCreate";
+import AdminAdvertiseDeleteUpdate from "./AdminAdvertiseDeleteUpdate";
 
 const Admin = () => {
   const [activeComponent, setActiveComponent] = useState("dashboard");
@@ -63,6 +65,10 @@ const Admin = () => {
         return <AdminOilProductCreate />;
       case "oilproductupdatedelete":
         return <AdminOilUpdateDelete />;
+        case "videoadvertizecreate":
+  return <AdminVideoAdvertiseCreate />;
+      case "videoadvertizeupdatedelete":
+  return <AdminAdvertiseDeleteUpdate />;
       case "dashboard":
         return (
           <div className="p-6">

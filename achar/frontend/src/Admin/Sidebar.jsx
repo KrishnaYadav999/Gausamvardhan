@@ -16,12 +16,34 @@ const Sidebar = ({ setActive }) => {
   const [open, setOpen] = useState(true);
   const { theme, setTheme, themes } = useTheme();
 
-  // Persist theme locally
   useEffect(() => {
     localStorage.setItem("adminTheme", theme);
   }, [theme]);
 
   const currentGradient = themes[theme]?.gradient || "from-[#2E0057] via-[#4B0082] to-[#5E17EB]";
+
+  const menuItems = [
+    "WORKER CREATE",
+    "WORKER TRACKING",
+    "STOCK QUANTITY",
+    "ALL USER",
+    "USER ORDERS",
+    "BANNER",
+    "SMALL BANNER",
+    "ACHAR CATEGORY",
+    "ACHAR PRODUCT",
+    "ACHAR PRODUCT DELETE UPDATE",
+    "GHEE PRODUCT CREATE",
+    "GHEE PRODUCT UPDATE DELETE",
+    "MASALA PRODUCT CREATE",
+    "MASALA PRODUCT UPDATE DELETE",
+    "OIL PRODUCT CREATE",
+    "OIL PRODUCT UPDATE DELETE",
+    "VIDEO ADVERTIZE CREATE", // new menu item
+    "videoadvertizeupdatedelete",
+    "DASHBOARD",
+    "USERS",
+  ];
 
   return (
     <div
@@ -80,26 +102,7 @@ const Sidebar = ({ setActive }) => {
 
         {/* Menu Items */}
         <ul className="space-y-2">
-          {[
-            "WORKER CREATE",
-            "WORKER TRACKING",
-            "STOCK QUANTITY",
-            "ALL USER",
-            "USER ORDERS",
-            "BANNER",
-            "SMALL BANNER",
-            "ACHAR CATEGORY",
-            "ACHAR PRODUCT",
-            "ACHAR PRODUCT DELETE UPDATE",
-            "GHEE PRODUCT CREATE",
-            "GHEE PRODUCT UPDATE DELETE",
-            "MASALA PRODUCT CREATE",
-            "MASALA PRODUCT UPDATE DELETE",
-            "OIL PRODUCT CREATE",
-            "OIL PRODUCT UPDATE DELETE",
-            "DASHBOARD",
-            "USERS",
-          ].map((item) => (
+          {menuItems.map((item) => (
             <li
               key={item}
               onClick={() => setActive(item.toLowerCase().replace(/\s+/g, ""))}

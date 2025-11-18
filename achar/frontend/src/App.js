@@ -44,6 +44,7 @@ import ContactUs from "./components/ContactUs";
 
 // ✅ ThemeProvider
 import { ThemeProvider } from "./context/ThemeContext";
+import VideoAdvertiseList from "./components/VideoAdvertiseList";
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
               <ServicesNav />
               <MasalaProductList />
               <OilProductList />
+              <VideoAdvertiseList />
             </div>
           }
         />

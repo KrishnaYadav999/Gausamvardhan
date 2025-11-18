@@ -60,8 +60,8 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   return (
     <div
       onClick={handleClick}
-       className="relative border rounded-xl h-[350px] sm:h-[380px] md:h-[420px] lg:h-[420px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-4 flex flex-col w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0">
-      {/* Discount Badge */}
+      className="relative border rounded-xl h-[350px] sm:h-[380px] md:h-[420px] lg:h-[420px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-4 flex flex-col w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0"
+    >
       {discount > 0 && (
         <div className="absolute top-2 left-2 z-50">
           <div className="relative bg-blue-500 text-white text-[10px] font-bold px-2 py-1 shadow-md">
@@ -71,7 +71,6 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         </div>
       )}
 
-      {/* Image */}
       <div className="w-full h-48 lg:h-56 mb-4 flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden">
         <img
           src={product.productImages?.[0]}
@@ -80,40 +79,35 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         />
       </div>
 
-      {/* Title */}
-  <h3 className="text-base lg:text-md font-medium line-clamp-2 mb-3">
+      <h3 className="text-base lg:text-md font-medium line-clamp-2 mb-3">
         {product.productName}
       </h3>
 
-      {/* Weight Selector */}
-{product.pricePerGram && (
-  <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
-    {product.pricePerGram.split(",").map((p) => {
-      const weight = p.split("=")[0].trim();
-      return (
-        <button
-          key={weight}
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedWeight(weight);
-          }}
-          className={`px-2 sm:px-3 py-1 sm:py-2 border rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
-            selectedWeight === weight
-              ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-gray-300 text-gray-700 hover:border-gray-500 hover:text-gray-900"
-          }`}
-          disabled={product.stock <= 0}
-        >
-          {weight}
-        </button>
-      );
-    })}
-  </div>
-)}
+      {product.pricePerGram && (
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
+          {product.pricePerGram.split(",").map((p) => {
+            const weight = p.split("=")[0].trim();
+            return (
+              <button
+                key={weight}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedWeight(weight);
+                }}
+                className={`px-2 sm:px-3 py-1 sm:py-2 border rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                  selectedWeight === weight
+                    ? "border-blue-600 text-blue-600 bg-blue-50"
+                    : "border-gray-300 text-gray-700 hover:border-gray-500 hover:text-gray-900"
+                }`}
+                disabled={product.stock <= 0}
+              >
+                {weight}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-
-
-      {/* Price */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg font-semibold text-gray-800">
           ₹{selectedPrice}
@@ -125,7 +119,6 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         )}
       </div>
 
-      {/* Add to Cart Button */}
       <button
         onClick={handleAddToCart}
         className="mt-auto w-full flex items-center justify-center gap-2 
@@ -146,11 +139,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
           stroke="currentColor"
           strokeWidth={2}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4v16m8-8H4"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
         </svg>
         {product.stock <= 0 ? "Out of Stock" : "ADD"}
       </button>
@@ -173,7 +162,27 @@ const AcharProductList = () => {
   const [products, setProducts] = useState([]);
   const [selectedWeights, setSelectedWeights] = useState({});
   const [loading, setLoading] = useState(true);
+  const [titleIndex, setTitleIndex] = useState(0);
   const scrollRef = useRef(null);
+
+  // ⭐ Smooth Animated Text List
+  const animatedTitles = ["Achar", "अचार", "Pickles", "achar"];
+
+  // ⭐ Smooth Fade Animation
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+
+      setTimeout(() => {
+        setTitleIndex((prev) => (prev + 1) % animatedTitles.length);
+        setFade(true);
+      }, 500);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -215,12 +224,22 @@ const AcharProductList = () => {
   return (
     <div className="p-6 max-w-7xl lg:ml-36 relative">
       <Toaster position="top-right" />
+
+      {/* ⭐ SMOOTH ANIMATED TITLE */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Achar & Pickles</h2>
+        <h2
+          className={`text-2xl font-bold transition-all duration-500 ease-in-out transform ${
+            fade ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+          }`}
+        >
+          <span className="font-[cursive] text-green-600">
+            {animatedTitles[titleIndex]}
+          </span>{" "}
+          & Pickles
+        </h2>
       </div>
 
       <div className="relative">
-        {/* Left Button */}
         <button
           onClick={scrollLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/50 backdrop-blur-sm p-2 rounded-full shadow hover:bg-white transition"
@@ -228,7 +247,6 @@ const AcharProductList = () => {
           &#10094;
         </button>
 
-        {/* Right Button */}
         <button
           onClick={scrollRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/50 backdrop-blur-sm p-2 rounded-full shadow hover:bg-white transition"
@@ -236,7 +254,6 @@ const AcharProductList = () => {
           &#10095;
         </button>
 
-        {/* Scrollable Product Cards */}
         <div
           ref={scrollRef}
           className="flex overflow-x-auto gap-4 py-2 scrollbar-hide"

@@ -8,7 +8,6 @@ import toast, { Toaster } from "react-hot-toast";
 const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   const { addToCart } = useContext(CartContext);
 
-  // ✅ Price by selected weight
   const getPriceByWeight = (product, weight) => {
     if (!weight) return parseFloat(product.currentPrice) || 0;
 
@@ -49,75 +48,59 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   };
 
   return (
-<div className="relative border rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-3 sm:p-4 flex flex-col 
-  w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0 
- h-[350px] sm:h-[450px] md:h-[480px] lg:h-[480px]">
-
-
-      {/* ✅ Offer Badge (original UI unchanged) */}
+    <div
+      className="relative border rounded-xl h-[350px] sm:h-[380px] md:h-[420px] lg:h-[420px] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 transform cursor-pointer bg-white p-4 flex flex-col w-1/2 md:w-1/3 lg:w-1/4 flex-shrink-0"
+    >
       {discount > 0 && (
-        <div className="absolute top-2 left-2">
-          <div className="relative bg-blue-500 text-white text-[10px] font-bold px-2 py-1 shadow-md">
+        <div className="absolute top-2 left-2 z-50">
+          <div className="relative bg-yellow-600 text-white text-[10px] font-bold px-2 py-1 shadow-md">
             {discount}% OFF
-            <div className="absolute -bottom-1 left-0 w-full h-1 flex">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="w-2 h-2 bg-white rotate-45 -ml-[2px]"></div>
-              ))}
-            </div>
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-yellow-600 rotate-45"></div>
           </div>
         </div>
       )}
 
-      {/* Image */}
-   <div className="w-full h-40 sm:h-48 lg:h-56 mb-4 flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden">
+      <div className="w-full h-48 lg:h-56 mb-4 flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden">
+        <Link to={`/ghee-product/${product.slug}/${product._id}`}>
+          <img
+            src={product.images?.[0]}
+            alt={product.title}
+            className="max-h-48 lg:max-h-56 object-contain transition-transform duration-300 hover:scale-105"
+          />
+        </Link>
+      </div>
 
-  <Link to={`/ghee-product/${product.slug}/${product._id}`}>
-    <img
-      src={product.images?.[0]}
-      alt={product.title}
-      className="max-h-40 sm:max-h-48 lg:max-h-56 object-contain cursor-pointer transition-transform duration-300 hover:scale-105"
-    />
-  </Link>
-</div>
-
-
-      {/* Title */}
-  <h3 className="text-base sm:text-lg lg:text-lg font-semibold line-clamp-2 mb-3">
-  <Link
-    to={`/ghee-product/${product.slug}/${product._id}`}
-    className="hover:text-blue-600 transition-colors duration-200"
-  >
-    {product.title}
-  </Link>
-</h3>
-
-
-      {/* Weight/Volume Selector */}
-{product.pricePerGram && (
-  <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
-    {product.pricePerGram.split(",").map((p) => {
-      const weight = p.split("=")[0].trim();
-      return (
-        <button
-          key={weight}
-          onClick={() => setSelectedWeight(weight)}
-          className={`px-2 sm:px-3 py-1 sm:py-2 border rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
-            selectedWeight === weight
-              ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-gray-300 text-gray-700 hover:border-gray-500 hover:text-gray-900"
-          }`}
-          disabled={product.stock <= 0}
+      <h3 className="text-base lg:text-md font-medium line-clamp-2 mb-3">
+        <Link
+          to={`/ghee-product/${product.slug}/${product._id}`}
+          className="hover:text-yellow-700 transition-colors duration-200"
         >
-          {weight}
-        </button>
-      );
-    })}
-  </div>
-)}
+          {product.title}
+        </Link>
+      </h3>
 
+      {product.pricePerGram && (
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
+          {product.pricePerGram.split(",").map((p) => {
+            const weight = p.split("=")[0].trim();
+            return (
+              <button
+                key={weight}
+                onClick={() => setSelectedWeight(weight)}
+                className={`px-2 sm:px-3 py-1 sm:py-2 border rounded-md text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                  selectedWeight === weight
+                    ? "border-yellow-700 text-yellow-700 bg-yellow-50"
+                    : "border-gray-300 text-gray-700 hover:border-gray-500 hover:text-gray-900"
+                }`}
+                disabled={product.stock <= 0}
+              >
+                {weight}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
-
-      {/* Price */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg font-semibold text-gray-800">₹{selectedPrice}</span>
         {product.cutPrice && product.cutPrice > selectedPrice && (
@@ -125,17 +108,16 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         )}
       </div>
 
-      {/* Add to Cart */}
       <button
         onClick={handleAddToCart}
         className="mt-auto w-full flex items-center justify-center gap-2 
-        bg-gradient-to-r from-yellow-400 to-yellow-600
-        text-white py-2 px-3 font-semibold text-sm 
-        shadow-md hover:shadow-lg
-        hover:from-yellow-500 hover:to-yellow-700
-        active:scale-95 transform 
-        border border-yellow-600
-        transition-all duration-300 ease-in-out rounded-lg"
+          bg-gradient-to-r from-yellow-400 to-yellow-600
+          text-white py-2 px-3 font-semibold text-sm 
+          shadow-md hover:shadow-lg
+          hover:from-yellow-500 hover:to-yellow-700
+          active:scale-95 transform 
+          border border-yellow-600
+          transition-all duration-300 ease-in-out rounded-lg"
         disabled={product.stock <= 0}
       >
         <svg
@@ -154,7 +136,8 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   );
 };
 
-// Skeleton Loader
+
+// Skeleton
 const GheeProductSkeleton = () => (
   <div className="border rounded-xl shadow-sm p-4 flex flex-col animate-pulse bg-white w-44 flex-shrink-0">
     <div className="h-32 mb-3 bg-gray-200 rounded-md"></div>
@@ -164,12 +147,32 @@ const GheeProductSkeleton = () => (
   </div>
 );
 
-// ---------------- Product List with Slider ----------------
+
+// ---------------- Product List ----------------
 const GheeProductList = () => {
   const [products, setProducts] = useState([]);
   const [selectedWeights, setSelectedWeights] = useState({});
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
+
+  // ⭐ Smooth Animated Title (Achar Jaisa)
+  const animatedTitlesGhee = ["Ghee", "घी", "Desi Ghee", "गाय का घी"];
+  const [titleIndex, setTitleIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+
+      setTimeout(() => {
+        setTitleIndex((prev) => (prev + 1) % animatedTitlesGhee.length);
+        setFade(true);
+      }, 500);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -177,7 +180,6 @@ const GheeProductList = () => {
         const { data } = await axios.get("/api/ghee-products");
         setProducts(data);
 
-        // default weight selection
         const defaults = {};
         data.forEach((product) => {
           if (product.pricePerGram) {
@@ -189,7 +191,6 @@ const GheeProductList = () => {
         });
         setSelectedWeights(defaults);
       } catch (error) {
-        console.error(error);
         toast.error("❌ Failed to load products");
       } finally {
         setLoading(false);
@@ -197,6 +198,7 @@ const GheeProductList = () => {
     };
     fetchProducts();
   }, []);
+
 
   const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -206,15 +208,26 @@ const GheeProductList = () => {
     scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
   };
 
+
   return (
     <div className="p-6 max-w-7xl lg:ml-36 relative">
       <Toaster position="top-right" />
+
+      {/* ⭐ Animated Heading */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Ghee Products</h2>
+        <h2
+          className={`text-2xl font-bold transition-all duration-500 ease-in-out transform ${
+            fade ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+          }`}
+        >
+          <span className="font-[cursive] text-yellow-700">
+            {animatedTitlesGhee[titleIndex]}
+          </span>{" "}
+          Products
+        </h2>
       </div>
 
       <div className="relative">
-        {/* Left Scroll Button */}
         <button
           onClick={scrollLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/50 backdrop-blur-sm p-2 rounded-full shadow hover:bg-white transition"
@@ -222,7 +235,6 @@ const GheeProductList = () => {
           &#10094;
         </button>
 
-        {/* Right Scroll Button */}
         <button
           onClick={scrollRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/50 backdrop-blur-sm p-2 rounded-full shadow hover:bg-white transition"
@@ -230,7 +242,6 @@ const GheeProductList = () => {
           &#10095;
         </button>
 
-        {/* Scrollable Products */}
         <div
           ref={scrollRef}
           className="flex overflow-x-auto gap-4 py-2 scrollbar-hide"

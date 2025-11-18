@@ -163,13 +163,13 @@ const Navbar = () => {
     <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* MAIN NAV ROW */}
-        <div className="flex items-center justify-between h-20 w-full">
+        <div className="flex items-center justify-between h-24 w-full">
           {/* LOGO */}
           <Link to="/" className="flex items-center">
             <img
               src="/GauSamvardhan.png"
               alt="Logo"
-              className="w-20 md:w-28 lg:w-32 object-contain"
+              className="w-20 md:w-28 lg:w-24 object-contain"
             />
           </Link>
 

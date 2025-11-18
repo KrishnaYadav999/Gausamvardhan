@@ -5,6 +5,7 @@ import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
+import AcharAdvertizeBanner from "./AcharAdvertizeBanner";
 
 const CategoryProducts = () => {
   const { slug } = useParams();
@@ -113,6 +114,7 @@ const CategoryProducts = () => {
 
   return (
     <div className="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
+     <AcharAdvertizeBanner />
       <Toaster position="top-right" />
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">

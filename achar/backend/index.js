@@ -16,6 +16,8 @@ import oilProductRoutes from "./routes/oilProductRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import counterRoutes from "./routes/counterRoutes.js";
 import workerAdminRoutes from "./routes/workerAdminRoutes.js";
+import googleauth from "./routes/googleauth.js"
+import videoAdvertiseRoutes from "./routes/videoAdvertiseRoutes.js"
 
 // dotenv config
 dotenv.config();
@@ -42,6 +44,7 @@ app.use(
 app.use(cookieParser());
 
 // Routes
+app.use("/googleauth", googleauth);
 app.use("/api/auth", authRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/smallbanners", smallBannerRoutes);
@@ -54,7 +57,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api", chatRoutes);
 app.use("/api/counter", counterRoutes);
 app.use("/api/workeradmin", workerAdminRoutes);
-
+app.use("/api/videoadvertise", videoAdvertiseRoutes);
 app.get("/", (req, res) => {
   res.send("hello world");
 });
