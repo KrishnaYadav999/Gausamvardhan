@@ -18,6 +18,7 @@ import counterRoutes from "./routes/counterRoutes.js";
 import workerAdminRoutes from "./routes/workerAdminRoutes.js";
 import googleauth from "./routes/googleauth.js"
 import videoAdvertiseRoutes from "./routes/videoAdvertiseRoutes.js"
+import agarbattiRoutes from "./routes/agarbattiRoutes.js"
 
 // dotenv config
 dotenv.config();
@@ -45,6 +46,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/googleauth", googleauth);
+app.use("/api/agarbatti", agarbattiRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/smallbanners", smallBannerRoutes);

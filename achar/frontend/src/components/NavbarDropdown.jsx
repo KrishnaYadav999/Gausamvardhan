@@ -2,57 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-// SVG ICONS ---------------------
-const Icons = {
-  Achar: (
-    <svg
-      className="w-5 h-5 inline-block mr-1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      viewBox="0 0 24 24"
-    >
-      <path d="M5 8h14v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8z" />
-      <path d="M9 3h6v3H9z" />
-    </svg>
-  ),
-  Ghee: (
-    <svg
-      className="w-5 h-5 inline-block mr-1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      viewBox="0 0 24 24"
-    >
-      <path d="M9 2h6l2 4v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6z" />
-    </svg>
-  ),
-  Masala: (
-    <svg
-      className="w-5 h-5 inline-block mr-1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      viewBox="0 0 24 24"
-    >
-      <circle cx="12" cy="12" r="3" />
-      <path d="M3 12h3m12 0h3M12 3v3m0 12v3" />
-    </svg>
-  ),
-  Oil: (
-    <svg
-      className="w-5 h-5 inline-block mr-1"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 2l4 6v10a4 4 0 1 1-8 0V8z" />
-    </svg>
-  ),
-};
-// -----------------------------------
-
 const NavbarDropdown = () => {
   const [acharProducts, setAcharProducts] = useState([]);
   const [gheeProducts, setGheeProducts] = useState([]);
@@ -91,36 +40,57 @@ const NavbarDropdown = () => {
     p.productImage ||
     "https://via.placeholder.com/150";
 
-  // DESKTOP DROPDOWN
+  // ============================
+  // DESKTOP DROPDOWN (Smooth UI)
+  // ============================
   const DesktopDropdown = (title, products, prefix) => (
     <div className="group relative hidden md:block">
-      <button className="font-[cursive] font-semibold text-[15px] text-[#328E6E] hover:text-[#67AE6E] transition">
-        {Icons[title]} {title}
+      <button
+        className="
+          text-[15px] font-normal
+          text-[#1A6F53] tracking-wide 
+          hover:text-[#228C67]
+          transition-all
+        "
+      >
+        {title}
       </button>
 
       <div
         className="
           absolute right-0 top-full 
           hidden group-hover:flex 
-          gap-10 bg-white shadow-xl rounded-lg min-w-[700px] 
+          gap-10 bg-white shadow-xl rounded-2xl min-w-[720px] 
           z-50 p-6
-          opacity-0 scale-95 translate-y-2 
+          opacity-0 scale-95 translate-y-3
           group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0
-          transition-all duration-300
+          transition-all duration-300 ease-out
         "
       >
         <div className="flex-1">
-          <h3 className="font-[cursive] font-bold mb-3 border-b pb-2 text-[#328E6E] flex items-center">
-            {Icons[title]} {title} Products
+          <h3
+            className="
+              text-lg font-medium text-[#1A6F53] mb-3 
+              border-b pb-2 border-gray-200
+            "
+          >
+            {title} Collection
           </h3>
-          <ul className="grid grid-cols-1 gap-2">
+
+          <ul className="grid grid-cols-1 gap-1">
             {products.map((p) => (
               <li key={p._id}>
                 <Link
                   to={`/${prefix}/${p.slug || p.category?.slug}/${p._id}`}
-                  className="block px-2 py-1 rounded-md text-sm font-[cursive] text-[#328E6E] hover:text-[#67AE6E] hover:bg-[#E1EEBC]"
+                  className="
+                    block px-3 py-1 rounded-md 
+                    text-sm font-normal tracking-wide
+                    text-gray-700 
+                    hover:bg-[#E5F6EA] hover:text-[#1A6F53]
+                    transition
+                  "
                 >
-                  {Icons[title]} {p.productName || p.title}
+                  {p.productName || p.title}
                 </Link>
               </li>
             ))}
@@ -134,10 +104,18 @@ const NavbarDropdown = () => {
                 <img
                   src={getImg(p)}
                   alt=""
-                  className="w-full h-32 object-cover rounded-md shadow-md hover:scale-105 transition-transform"
+                  className="
+                    w-full h-32 object-cover rounded-xl shadow 
+                    hover:scale-[1.04] transition
+                  "
                 />
-                <p className="mt-2 text-xs font-[cursive] font-medium text-[#328E6E] hover:text-[#67AE6E] flex justify-center items-center">
-                  {Icons[title]} {p.productName || p.title}
+                <p
+                  className="
+                    mt-2 text-sm font-normal tracking-wide 
+                    text-gray-700 hover:text-[#228C67]
+                  "
+                >
+                  {p.productName || p.title}
                 </p>
               </Link>
             </div>
@@ -147,30 +125,40 @@ const NavbarDropdown = () => {
     </div>
   );
 
-  // MOBILE DROPDOWN
+  // ============================
+  // MOBILE MENU
+  // ============================
   const MobileDropdown = (title, products, prefix, id) => (
     <div className="md:hidden relative flex">
       <button
         onClick={() => setOpenMenu(openMenu === id ? null : id)}
-        className="font-[cursive] font-semibold px-2 py-1 text-[#328E6E] flex items-center"
+        className="
+          font-medium tracking-wide 
+          px-2 py-1 text-[#1A6F53]
+        "
       >
-        {Icons[title]} {title}
+        {title}
       </button>
 
       {openMenu === id && (
         <div
           className="
             absolute right-0 top-[110%]
-            bg-white w-48 shadow-lg rounded-md p-2 z-50 border border-[#90C67C]
+            bg-white w-48 shadow-lg rounded-xl 
+            p-2 z-50 border border-[#C8ECCC]
           "
         >
           {products.map((p) => (
             <Link
               key={p._id}
               to={`/${prefix}/${p.slug || p.category?.slug}/${p._id}`}
-              className="block text-sm font-[cursive] px-2 py-1 rounded text-[#328E6E] hover:bg-[#E1EEBC] flex items-center"
+              className="
+                block text-sm font-normal tracking-wide 
+                px-2 py-1 rounded text-gray-700 
+                hover:bg-[#E5F6EA] hover:text-[#1A6F53]
+              "
             >
-              {Icons[title]} {p.productName || p.title}
+              {p.productName || p.title}
             </Link>
           ))}
         </div>
@@ -181,7 +169,12 @@ const NavbarDropdown = () => {
   return (
     <>
       {/* DESKTOP NAVBAR */}
-      <nav className="hidden md:flex shadow-md px-6 py-3 gap-10 text-[15px] justify-end">
+      <nav
+        className="
+          hidden md:flex shadow-md px-8 py-4 gap-10 
+          text-[15px] justify-end bg-white
+        "
+      >
         {DesktopDropdown("Achar", acharProducts, "products")}
         {DesktopDropdown("Ghee", gheeProducts, "ghee-product")}
         {DesktopDropdown("Masala", masalaProducts, "masala-product")}
@@ -189,7 +182,13 @@ const NavbarDropdown = () => {
       </nav>
 
       {/* MOBILE NAVBAR */}
-      <nav className="md:hidden flex justify-end gap-4 py-3 shadow-md text-[15px] font-[cursive] font-semibold bg-[#E1EEBC]">
+      <nav
+        className="
+          md:hidden flex justify-end gap-4 py-3 shadow-md 
+          text-[15px] font-medium tracking-wide
+          bg-[#E5F6EA]
+        "
+      >
         {MobileDropdown("Achar", acharProducts, "products", "achar")}
         {MobileDropdown("Ghee", gheeProducts, "ghee-product", "ghee")}
         {MobileDropdown("Masala", masalaProducts, "masala-product", "masala")}

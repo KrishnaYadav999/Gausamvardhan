@@ -6,11 +6,9 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String },
   otp: { type: String },
   otpExpires: { type: Date },
-  
-  googleId: { type: String, default: null },
-  picture: { type: String, default: null },
-
-  authType: { type: String, enum: ["local", "google"], default: "local" }
+    // Google login fields
+    googleId: { type: String, default: null },
+    picture: { type: String, default: null },
   
 }, { timestamps: true });
 

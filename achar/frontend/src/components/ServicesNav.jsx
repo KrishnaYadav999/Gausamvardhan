@@ -1,58 +1,65 @@
 import React from "react";
-import { ShieldCheck, Truck, MessageCircle, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 
+// Your 3 images (replace with your actual Cloudinary images)
+const featureImages = [
+  "https://i.pinimg.com/1200x/9f/2d/ee/9f2deefee6fce1178e7a059be64154fd.jpg",
+  "https://i.pinimg.com/736x/d0/e8/a8/d0e8a84b4bb0276879c30532ec986020.jpg",
+  "https://i.pinimg.com/1200x/56/9e/92/569e92bca3653297b0edd6819c455a71.jpg",
+];
+
 const ServicesNav = () => {
-  const brand = {
-    primary: "#328E6E",
-    accent: "#67AE6E",
-    soft: "#90C67C",
-    cream: "#E1EEBC",
-  };
-
-  const backgroundImageUrl = "https://i.pinimg.com/736x/a4/7c/95/a47c95c5fe05cbc046f7436f359547a7.jpg";
-
-  const services = [
-    { icon: <ShieldCheck className="w-5 h-5 md:w-7 md:h-7" />, title: "WELL TRUSTED", subtitle: "100k+ Happy Customers" },
-    { icon: <Truck className="w-5 h-5 md:w-7 md:h-7" />, title: "SUPER FAST", subtitle: "Express Festive Delivery" },
-    { icon: <MessageCircle className="w-5 h-5 md:w-7 md:h-7" />, title: "EXPERT HELP", subtitle: "7 Days a Week" },
-    { icon: <Tag className="w-5 h-5 md:w-7 md:h-7" />, title: "BEST PRICES", subtitle: "Special Offers 🎁" },
+  const features = [
+    {
+      img: featureImages[0],
+      title: "Nutritional Benefits",
+      desc: "Our cow ghee is rich in essential fatty acids and vitamins, contributing to overall health and well-being.",
+    },
+    {
+      img: featureImages[1],
+      title: "Traditional Cooking",
+      desc: "Perfect for traditional Indian cooking, adding a rich flavor to your dishes.",
+    },
+    {
+      img: featureImages[2],
+      title: "Gausamvardhan Brand",
+      desc: "Gausamvardhan stands for enhancing the cow, symbolizing our commitment to quality and purity.",
+    },
   ];
 
   return (
-    <div
-      className="relative py-5 md:py-7 px-2 sm:px-4 md:px-10 overflow-hidden transition-all duration-700 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${backgroundImageUrl})` }}
-    >
-      <div
-        className="absolute inset-0 opacity-90 pointer-events-none"
-        style={{ background: "rgba(0,0,0,0.1)" }}
-      ></div>
+    <div className="w-full px-4 md:px-10 py-10 bg-[#B6743D]">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      <div className="relative flex flex-wrap justify-center gap-2 sm:gap-4 md:gap-6">
-        {services.map((service, idx) => (
+        {features.map((item, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1, duration: 0.5 }}
-            whileHover={{ scale: 1.05, boxShadow: `0 0 15px ${brand.accent}` }}
-            className={`flex flex-col items-center justify-center rounded-xl p-2 sm:p-3 md:p-4 bg-[rgba(255,255,255,0.25)] border border-[${brand.accent}] transition-all duration-300 flex-1 min-w-[50px] sm:min-w-[22%] max-w-[100%] sm:max-w-[24%]`}
+            whileHover={{ scale: 1.03 }}
+            transition={{ duration: 0.4 }}
+            className="bg-[#D99853] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all"
           >
-            <div className="mb-1 text-[22px]" style={{ color: brand.primary }}>
-              {service.icon}
-            </div>
+            {/* IMAGE */}
+            <img
+              src={item.img}
+              className="w-full h-40 md:h-44 object-cover"
+              alt={item.title}
+            />
 
-            <div className="hidden sm:flex flex-col items-center text-center">
-              <h4 className="font-semibold text-[11px] sm:text-xs md:text-sm uppercase tracking-wide" style={{ color: brand.primary }}>
-                {service.title}
-              </h4>
-              <p className="text-[9px] sm:text-[11px] md:text-xs mt-0.5" style={{ color: brand.primary }}>
-                {service.subtitle}
+            {/* TEXT SECTION */}
+            <div className="p-4">
+              <h3 className="text-lg md:text-xl font-semibold text-white mb-2">
+                {item.title}
+              </h3>
+
+              <p className="text-white/90 text-sm leading-relaxed">
+                {item.desc}
               </p>
             </div>
           </motion.div>
         ))}
+
       </div>
     </div>
   );

@@ -2,7 +2,9 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(
+  "305496954434-ueg26cesqeoel50a5ctatrvv9sq0nbki.apps.googleusercontent.com"
+);
 
 export const googleLogin = async (req, res) => {
   try {
@@ -12,10 +14,11 @@ export const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Google token missing" });
     }
 
-    // Verify Google token
+    // Verify token
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+      audience:
+        "305496954434-ueg26cesqeoel50a5ctatrvv9sq0nbki.apps.googleusercontent.com",
     });
 
     const payload = ticket.getPayload();
@@ -25,31 +28,30 @@ export const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Invalid Google token" });
     }
 
-    // STEP 1: Find user by email
+    // ✔ Step 1 — find by email
     let user = await User.findOne({ email });
 
-    // STEP 2: If exists and googleId missing → update
+    // ✔ Step 2 — if exists but googleId not added → update
     if (user && !user.googleId) {
       user.googleId = googleId;
       user.picture = picture;
-      user.authType = "google";
       await user.save();
     }
 
-    // STEP 3: Create new Google user
+    // ✔ Step 3 — if no user, create new
     if (!user) {
-      user = await User.create({
+      user = new User({
         name,
         email,
         picture,
         googleId,
-        authType: "google"
       });
+      await user.save();
     }
 
     // Create JWT
     const jwtToken = jwt.sign(
-      { id: user._id, google: true },
+      { id: user._id, fromGoogle: true },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -61,12 +63,13 @@ export const googleLogin = async (req, res) => {
         name: user.name,
         email: user.email,
         picture: user.picture,
-        google: true,
+        fromGoogle: true,
       },
     });
-
   } catch (err) {
-    console.log("Google Auth Error:", err.message);
-    return res.status(401).json({ message: "Google login failed" });
+    console.error("Google Auth Error:", err);
+    return res
+      .status(401)
+      .json({ message: "Google login failed. Invalid token." });
   }
 };

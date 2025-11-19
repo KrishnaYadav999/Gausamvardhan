@@ -71,6 +71,8 @@ const Category = () => {
     if (nameLower.includes("ghee")) navigate(`/ghee/${cat.slug}`);
     else if (nameLower.includes("masala")) navigate(`/masala-category/${cat.slug}`);
     else if (nameLower.includes("oil")) navigate(`/oil/category/${cat.slug}`);
+    else if (nameLower.includes("agarbatti"))
+  navigate(`/agarbatti-category/${cat.slug}`);
     else navigate(`/achar-category/${cat.slug}`);
   };
 

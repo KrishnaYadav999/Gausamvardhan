@@ -22,7 +22,7 @@ invoiceNumber: {
 
     products: [
       {
-        productType: { type: String, required: true }, // e.g., 'Product', 'OilProduct', 'MasalaProduct', 'GheeProduct'
+        productType: { type: String, required: true }, // e.g., 'Product', 'OilProduct', 'MasalaProduct', 'GheeProduct,'AgarbattiProduct''
         product: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
@@ -33,7 +33,8 @@ invoiceNumber: {
         image: String, // optional fallback
         name: String,  // optional fallback
           weight: String, // ✅ must be here
-    volume: String
+    volume: String,
+    pack: String, 
       },
     ],
 

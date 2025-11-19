@@ -65,7 +65,9 @@ const ProceedToCheckout = () => {
 
     try {
       // Map products properly for backend
+       console.log("Cart Items at Checkout:", cartItems);
       const products = cartItems.map((item) => ({
+        
         productType:
           item.productType ||
           (item.category === "Oil"
@@ -74,14 +76,17 @@ const ProceedToCheckout = () => {
             ? "MasalaProduct"
             : item.category === "Ghee"
             ? "GheeProduct"
+              : item.category === "Agarbatti"
+      ? "AgarbattiProduct"
             : "Product"),
         product: item._id,
         quantity: item.quantity || 1,
         price: item.currentPrice || 0,
-        name: item.productName,
+       name: item.category === "Agarbatti" ? item.title : item.productName || item.title || item.name,
         image: item.productImages?.[0],
         weight: item.selectedWeight || null,
         volume: item.selectedVolume || null,
+        pack: item.selectedPack || null, 
       }));
 
       // ✅ Create order with GST included
@@ -177,6 +182,7 @@ const ProceedToCheckout = () => {
               key={`${item._id}-${item.selectedWeight}-${item.selectedVolume}`}
               className="flex justify-between items-center border p-4 rounded-xl shadow-sm bg-white hover:shadow-md transition"
             >
+              
               <div className="flex items-center space-x-4">
                 <img
                   src={item.productImages?.[0]}
@@ -184,7 +190,12 @@ const ProceedToCheckout = () => {
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div>
-                  <h2 className="font-semibold text-lg">{item.productName}</h2>
+                  
+                  <h2 className="font-semibold text-lg">
+  {item.productName || item.title || item.name}{" "}
+  {item.category === "Agarbatti" && item.selectedPack ? `(${item.selectedPack})` : ""}
+</h2>
+                  
                   {item.selectedWeight && (
                     <p className="text-gray-500 text-sm">
                       Weight: {item.selectedWeight}
@@ -195,6 +206,11 @@ const ProceedToCheckout = () => {
                       Volume: {item.selectedVolume}
                     </p>
                   )}
+                    {item.selectedPack && (
+    <p className="text-gray-500 text-sm">
+      Pack: {item.selectedPack}
+    </p>
+  )}
                   <p className="text-green-600 font-bold mt-1">
                     ₹{(item.currentPrice || 0) * (item.quantity || 1)}
                   </p>

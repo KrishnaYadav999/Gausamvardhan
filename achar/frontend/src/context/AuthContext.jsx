@@ -4,42 +4,33 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Load user + token from localStorage on app start
+  // 🔹 Load saved user from localStorage on app start
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("token");
-
-      if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
-        setToken(storedToken);
-      }
-    } catch (err) {
-      console.error("Auth load error:", err);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-
     setLoading(false);
   }, []);
 
-  // 🔹 Login User (Google login OR normal login)
-  const loginUser = (userData, jwtToken) => {
+  // 🔹 Normal Login + Google Login both use this
+  const loginUser = (userData, token = null) => {
     setUser(userData);
-    setToken(jwtToken);
 
+    // save user
     localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", jwtToken);
+
+    // save token if available
+    if (token) {
+      localStorage.setItem("token", token);
+    }
   };
 
-  // 🔹 Logout User
+  // 🔹 Logout user
   const logoutUser = () => {
     setUser(null);
-    setToken(null);
-
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   };
@@ -48,10 +39,8 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        token,
         loginUser,
         logoutUser,
-        isLoggedIn: !!user, // 🔹 helper
         loading,
       }}
     >

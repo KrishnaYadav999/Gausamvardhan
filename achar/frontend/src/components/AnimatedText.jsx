@@ -3,23 +3,26 @@ import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 const texts = [
-  "Achar – Taste of home in every bite. | अचार घर का स्वाद, हर कौर में।",
-  "Achar – That perfect tangy twist! | अचार  खाने में वो खट्टा-मीठा जादू!",
-  "Ghee – Purity you can trust. | घी  शुद्धता का भरोसा, हर चम्मच में।",
-  "Ghee – Authentic desi richness. | घी देसी स्वाद, सीधी परंपरा से।",
-  "Masala – The real hero of every dish. | मसाला हर डिश का असली हीरो।",
-  "Masala – Aroma that awakens hunger. | मसाला  खुशबू ऐसी कि भूख बढ़ जाए।",
-  "Oil – Light, healthy & pure. | तेल  हल्का, सेहतमंद और शुद्ध।",
-  "Oil – Make every meal healthier. | तेल  हर भोजन को और पौष्टिक बनाएं।"
+  "Gausamvardhan – Premium Achar crafted with traditional recipes.",
+  "Taste the purity of homemade-style Achar, made from natural ingredients.",
+  "Gausamvardhan Ghee – Authentic, rich, and 100% pure for your family.",
+  "Experience real Indian goodness with our traditionally churned Ghee.",
+  "Our Masala blends – Fresh, aromatic, and crafted to enhance every dish.",
+  "Bring home spices that add real flavor and fragrance to your cooking.",
+  "Gausamvardhan Oils – Light, healthy, and naturally refined.",
+  "Cook healthier meals with our pure and balanced cooking oils.",
+  "Agarbatti – Natural fragrance for peace, purity, and a calm home.",
+  "Handmade Agarbatti crafted with pure natural extracts.",
+  "Ganpati Bappa Idols – Beautifully crafted from natural materials.",
+  "Bring home divine blessings with eco-friendly Ganpati idols."
 ];
-
 
 const AnimatedText = () => {
   const textRefs = useRef([]);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Background breathing animation
+    // Smooth animated gradient background
     gsap.to(containerRef.current, {
       background: "linear-gradient(90deg, #2F8F68, #4DB47F, #2F8F68)",
       backgroundSize: "300% 300%",
@@ -28,7 +31,7 @@ const AnimatedText = () => {
       ease: "power1.inOut",
     });
 
-    // Text animation timeline
+    // Text animation
     const tl = gsap.timeline({ repeat: -1 });
 
     textRefs.current.forEach((el) => {
@@ -53,25 +56,23 @@ const AnimatedText = () => {
           duration: 0.25,
           ease: "power2.out",
         }
-      )
-        .to(el, {
-          opacity: 0,
-          y: -6,
-          filter: "blur(3px)",
-          duration: 0.5,
-          delay: 1.2,
-          ease: "power1.inOut",
-        });
+      ).to(el, {
+        opacity: 0,
+        y: -6,
+        filter: "blur(3px)",
+        duration: 0.5,
+        delay: 1.2,
+        ease: "power1.inOut",
+      });
     });
   }, []);
 
   return (
     <div
       ref={containerRef}
-      className="relative p-2 shadow-md overflow-hidden h-12 flex items-center justify-center rounded-md"
+      className="relative p-3 border border-green-700 shadow-md overflow-hidden h-14 flex items-center justify-center"
       style={{
-        background:
-          "linear-gradient(90deg, #328E6E, #67AE6E, #328E6E)",
+        background: "linear-gradient(90deg, #328E6E, #67AE6E, #328E6E)",
         backgroundSize: "300% 300%",
       }}
     >
@@ -79,7 +80,7 @@ const AnimatedText = () => {
         <p
           key={index}
           ref={(el) => (textRefs.current[index] = el)}
-          className="absolute text-white text-sm font-semibold tracking-wide text-center drop-shadow-lg"
+          className="absolute text-white text-[14px] font-semibold tracking-wide text-center drop-shadow-lg px-2"
         >
           {text}
         </p>

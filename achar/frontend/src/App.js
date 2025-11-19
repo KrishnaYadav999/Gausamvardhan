@@ -45,6 +45,9 @@ import ContactUs from "./components/ContactUs";
 // ✅ ThemeProvider
 import { ThemeProvider } from "./context/ThemeContext";
 import VideoAdvertiseList from "./components/VideoAdvertiseList";
+import AgarbattiCategoryProduct from "./components/AgarbattiCategoryProduct";
+import AgarbattiDetail from "./components/AgarbattiDetail";
+import AgarbattiProductList from "./components/AgarbattiProductList";
 
 function App() {
   return (
@@ -71,6 +74,7 @@ function App() {
                 <AcharProductList />
               </div>
               <AcharBannerTwo />
+              <AgarbattiProductList/>
               <GheeProductList />
               <ServicesNav />
               <MasalaProductList />
@@ -105,6 +109,8 @@ function App() {
 
         <Route path="/oil/category/:slug" element={<OilCategoryProduct />} />
         <Route path="/oil-product/:slug/:id" element={<OilProductDetail />} />
+<Route path="/agarbatti-category/:slug" element={<AgarbattiCategoryProduct />} />
+<Route path="/agarbatti-product/:slug/:id" element={<AgarbattiDetail />} />
 
         {/* Orders & Invoices */}
         <Route path="/order/:id" element={<OrderTracking />} />

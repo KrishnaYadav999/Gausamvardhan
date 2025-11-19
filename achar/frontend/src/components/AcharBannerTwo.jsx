@@ -12,44 +12,30 @@ const AcharBannerTwo = () => {
     const fetchBanners = async () => {
       try {
         const res = await axios.get("/api/smallbanners");
-        console.log("Fetched banners:", res.data);
-
-        // Map backend response to frontend-friendly structure
         const mapped = res.data.map((b) => ({
           _id: b._id,
-          img: b.image,            // backend field
-          links: b.link,           // backend field
-          title: b.title || "",    // fallback empty
-          btnText: b.btnText || "Shop Now", // fallback default
+          img: b.image,
+          links: b.link,
+          title: b.title || "",
+          btnText: b.btnText || "Shop Now",
         }));
-
         setBanners(mapped);
       } catch (error) {
-        console.error(
-          "Error fetching banners:",
-          error.response?.data || error.message
-        );
+        console.error("Error fetching banners:", error.response?.data || error.message);
       }
     };
     fetchBanners();
   }, []);
 
   if (banners.length === 0) {
-    return (
-      <div className="text-center py-10 text-gray-500">
-        Loading banners...
-      </div>
-    );
+    return <div className="text-center py-10 text-gray-500">Loading banners...</div>;
   }
 
-  // Separate main banners for desktop hero grid
   const mainBanners = banners.slice(0, 2);
   const extraBanners = banners.slice(2);
 
-  const handlePrev = () =>
-    setCurrent((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
-  const handleNext = () =>
-    setCurrent((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+  const handlePrev = () => setCurrent((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
+  const handleNext = () => setCurrent((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
 
   return (
     <div className="px-4 md:px-16 py-8">
@@ -69,7 +55,11 @@ const AcharBannerTwo = () => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 flex flex-col justify-center px-8">
-                <h2 className={`text-white font-extrabold mb-4 drop-shadow-lg ${index === 0 ? "text-4xl" : "text-3xl"}`}>
+                <h2
+                  className={`text-white font-extrabold mb-4 drop-shadow-lg ${
+                    index === 0 ? "text-4xl" : "text-3xl"
+                  }`}
+                >
                   {banner.title || ""}
                 </h2>
                 <a href={banner.links || "#"}>
@@ -85,7 +75,7 @@ const AcharBannerTwo = () => {
 
       {/* Extra Banners Desktop */}
       {extraBanners.length > 0 && (
-        <div className="hidden md:grid grid-cols-3 gap-6 h-[320px]">
+        <div className="hidden md:grid grid-cols-3 gap-6 h-[320px] mb-8">
           {extraBanners.map((banner) => (
             <div
               key={banner._id}
@@ -138,15 +128,16 @@ const AcharBannerTwo = () => {
           ))}
         </motion.div>
 
+        {/* Navigation Buttons */}
         <button
           onClick={handlePrev}
-          className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+          className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full z-10"
         >
           <ChevronLeft size={24} />
         </button>
         <button
           onClick={handleNext}
-          className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+          className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full z-10"
         >
           <ChevronRight size={24} />
         </button>

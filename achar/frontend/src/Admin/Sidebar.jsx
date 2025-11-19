@@ -39,8 +39,10 @@ const Sidebar = ({ setActive }) => {
     "MASALA PRODUCT UPDATE DELETE",
     "OIL PRODUCT CREATE",
     "OIL PRODUCT UPDATE DELETE",
-    "VIDEO ADVERTIZE CREATE", // new menu item
-    "videoadvertizeupdatedelete",
+    "ADMINAGARBATICREATE",
+    "ADMINAGARBATTIUPDATEDELETE",
+    "ADMINCREATEADVERTIZE",
+    "VIDEOADVERTIZEUPDATEDELETE",
     "DASHBOARD",
     "USERS",
   ];

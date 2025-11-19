@@ -7,7 +7,7 @@ const AddToCart = () => {
     useContext(CartContext);
   const navigate = useNavigate();
 
-  // Calculate GST (12%)
+  // GST (12%)
   const gstRate = 0.12;
   const gstAmount = totalPrice * gstRate;
   const finalAmount = totalPrice + gstAmount;
@@ -25,78 +25,89 @@ const AddToCart = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
-            <div
-              key={`${item._id}-${item.selectedWeight}-${item.selectedVolume}`}
-              className="flex justify-between items-center border p-4 rounded-lg shadow-sm"
-            >
-              <div className="flex items-center space-x-4">
-                <img
-                  src={item.productImages?.[0] || "/no-image.png"} // fallback image
-                  alt={item.productName}
-                  className="w-20 h-20 rounded object-cover"
-                />
-                <div>
-                  <h2 className="font-semibold">{item.productName}</h2>
-                  {item.selectedWeight && (
-                    <p className="text-gray-500 text-sm">{item.selectedWeight}</p>
-                  )}
-                  {item.selectedVolume && (
-                    <p className="text-gray-500 text-sm">{item.selectedVolume}</p>
-                  )}
-                  <p className="text-green-600 font-bold">
-                    ₹{(item.currentPrice || 0) * (item.quantity || 1)}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    (₹{item.currentPrice} × {item.quantity})
-                  </p>
+          {cartItems.map((item) => {
+            // Determine the image: use productImages (other categories) or images (Agarbatti)
+            const imgSrc =
+              item.productImages?.length > 0
+                ? item.productImages[0]
+                : item.images?.length > 0
+                ? item.images[0]
+                : "/no-image.png";
+
+            return (
+              <div
+                key={`${item._id}-${item.selectedWeight}-${item.selectedVolume}-${item.selectedPack}`} 
+                className="flex justify-between items-center border p-4 rounded-lg shadow-sm"
+              >
+                
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={imgSrc}
+                    alt={item.productName || item.title}
+                    className="w-20 h-20 rounded object-cover"
+                  />
+                  <div>
+                    <h2 className="font-semibold">{item.productName || item.title}</h2>
+                    {item.selectedWeight && <p className="text-gray-500 text-sm">{item.selectedWeight}</p>}
+                    {item.selectedVolume && <p className="text-gray-500 text-sm">{item.selectedVolume}</p>}
+                    {item.selectedPack && <p className="text-gray-500 text-sm">Pack: {item.selectedPack}</p>}
+                    <p className="text-green-600 font-bold">
+                      ₹{(item.currentPrice || 0) * (item.quantity || 1)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      (₹{item.currentPrice} × {item.quantity})
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quantity Controls */}
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() =>
+                      updateQuantity(
+                        item._id,
+                        item.selectedWeight,
+                        item.selectedVolume,
+                        -1,
+                        item.selectedPack
+                      )
+                    }
+                    className="px-3 py-1 border rounded hover:bg-gray-100 transition"
+                  >
+                    -
+                  </button>
+                  <span>{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      updateQuantity(
+                        item._id,
+                        item.selectedWeight,
+                        item.selectedVolume,
+                        1,
+                        item.selectedPack
+                      )
+                    }
+                    className="px-3 py-1 border rounded hover:bg-gray-100 transition"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() =>
+                      removeFromCart(
+                        item._id,
+                        item.selectedWeight,
+                        item.selectedVolume,
+                        item.selectedPack
+                      )
+                    }
+                    className="text-red-500 font-bold hover:text-red-700 transition"
+                  >
+                    X
+                  </button>
                 </div>
               </div>
-
-              {/* Quantity Controls */}
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() =>
-                    updateQuantity(
-                      item._id,
-                      item.selectedWeight,
-                      item.selectedVolume,
-                      -1
-                    )
-                  }
-                  className="px-3 py-1 border rounded hover:bg-gray-100 transition"
-                >
-                  -
-                </button>
-                <span>{item.quantity}</span>
-                <button
-                  onClick={() =>
-                    updateQuantity(
-                      item._id,
-                      item.selectedWeight,
-                      item.selectedVolume,
-                      1
-                    )
-                  }
-                  className="px-3 py-1 border rounded hover:bg-gray-100 transition"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() =>
-                    removeFromCart(
-                      item._id,
-                      item.selectedWeight,
-                      item.selectedVolume
-                    )
-                  }
-                  className="text-red-500 font-bold hover:text-red-700 transition"
-                >
-                  X
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Order Summary */}

@@ -8,7 +8,7 @@ import Product from "../models/Product.js";
 import OilProduct from "../models/oilProductModel.js";
 import MasalaProduct from "../models/MasalaProduct.js";
 import GheeProduct from "../models/GheeProduct.js";
-
+import AgarbattiProduct from "./../models/agarbattiModel.js"
 dotenv.config();
 
 // ✅ Razorpay Instance
@@ -63,16 +63,18 @@ export const createOrder = async (req, res) => {
     for (let i = 0; i < products.length; i++) {
       const p = products[i];
       if (!p.productType) {
-        const [masala, ghee, oil, normal] = await Promise.all([
-          MasalaProduct.findById(p.product),
-          GheeProduct.findById(p.product),
-          OilProduct.findById(p.product),
-          Product.findById(p.product),
-        ]);
-        if (masala) p.productType = "MasalaProduct";
-        else if (ghee) p.productType = "GheeProduct";
-        else if (oil) p.productType = "OilProduct";
-        else if (normal) p.productType = "Product";
+      const [masala, ghee, oil, normal, agarbatti] = await Promise.all([
+  MasalaProduct.findById(p.product),
+  GheeProduct.findById(p.product),
+  OilProduct.findById(p.product),
+  Product.findById(p.product),
+  AgarbattiProduct.findById(p.product), // added agarbatti
+]);
+if (masala) p.productType = "MasalaProduct";
+else if (ghee) p.productType = "GheeProduct";
+else if (oil) p.productType = "OilProduct";
+else if (normal) p.productType = "Product";
+else if (agarbatti) p.productType = "AgarbattiProduct"; 
       }
     }
 
@@ -95,17 +97,22 @@ export const createOrder = async (req, res) => {
         case "GheeProduct":
           prodData = await GheeProduct.findById(product).select("title images");
           break;
+          case "AgarbattiProduct":
+  prodData = await AgarbattiProduct.findById(product).select("title images");
+  break;
       }
 
-      products[i] = {
-        ...products[i],
-        name: name || prodData?.productName || prodData?.title || "Unnamed Product",
-        image:
-          image ||
-          prodData?.productImages?.[0] ||
-          prodData?.images?.[0] ||
-          "/no-image.png",
-      };
+ products[i] = {
+  ...products[i],
+  name: name || prodData?.productName || prodData?.title || "Unnamed Product",
+  image:
+    image ||
+    prodData?.productImages?.[0] ||
+    prodData?.images?.[0] ||
+    "/no-image.png",
+  pack: products[i].pack || products[i].selectedPack || null, // add this line
+};
+
     }
 
     // 🧾 Generate Invoice & Serial Numbers
@@ -208,6 +215,9 @@ export const verifyPayment = async (req, res) => {
         case "GheeProduct":
           prodModel = GheeProduct;
           break;
+          case "AgarbattiProduct":
+        prodModel = AgarbattiProduct;
+  break;
       }
       if (prodModel) {
         const prod = await prodModel.findById(item.product);

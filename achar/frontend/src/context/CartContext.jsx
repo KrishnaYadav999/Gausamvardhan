@@ -62,14 +62,16 @@ export const CartProvider = ({ children }) => {
         (item) =>
           item._id === product._id &&
           item.selectedWeight === product.selectedWeight &&
-          item.selectedVolume === product.selectedVolume
+          item.selectedVolume === product.selectedVolume &&
+           item.selectedPack === product.selectedPack
       );
 
       if (existingItem) {
         return prev.map((item) =>
           item._id === product._id &&
           item.selectedWeight === product.selectedWeight &&
-          item.selectedVolume === product.selectedVolume
+          item.selectedVolume === product.selectedVolume&&
+           item.selectedPack === product.selectedPack
             ? {
                 ...item,
                 quantity: Math.min(99, item.quantity + (product.quantity || 1)), // max 99
@@ -83,9 +85,12 @@ export const CartProvider = ({ children }) => {
             ...product,
             quantity: product.quantity || 1,
             currentPrice: price,
-            productImages: product.productImages?.length
-              ? product.productImages
-              : ["/no-image.png"], // fallback image
+          productImages: product.productImages?.length
+  ? product.productImages
+  : product.images?.length
+    ? product.images
+    : ["/no-image.png"], // fallbac// fallback image
+              selectedPack: product.selectedPack || null, 
           },
         ];
       }
@@ -93,12 +98,13 @@ export const CartProvider = ({ children }) => {
   };
 
   // Update quantity
-  const updateQuantity = (id, weight, volume, change) => {
+  const updateQuantity = (id, weight, volume, change, pack) => {
     setCartItems((prev) =>
       prev.map((item) =>
         item._id === id &&
         item.selectedWeight === weight &&
-        item.selectedVolume === volume
+        item.selectedVolume === volume &&
+         item.selectedPack === pack
           ? {
               ...item,
               quantity: Math.min(99, Math.max(1, item.quantity + change)), // min 1, max 99

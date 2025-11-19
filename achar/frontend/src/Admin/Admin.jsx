@@ -19,6 +19,8 @@ import AdminStockAlert from "./AdminStockAlert";
 import ProAdminDashboard from "./ProAdminDashboard";
 import AdminVideoAdvertiseCreate from "./AdminVideoAdvertiseCreate";
 import AdminAdvertiseDeleteUpdate from "./AdminAdvertiseDeleteUpdate";
+import AdminAgarbatiCreate from "./AdminAgarbatiCreate";
+import AdminAgarbattiUpdateDelete from "./AdminAgarbattiUpdateDelete";
 
 const Admin = () => {
   const [activeComponent, setActiveComponent] = useState("dashboard");
@@ -51,7 +53,7 @@ const Admin = () => {
         return <AdminCategoryCreate />;
       case "acharproduct":
         return <AdminProductCreate />;
-      case "acharproductdelete-update":
+      case "acharproductdeleteupdate":
         return <AdminGetDeleteProduct />;
       case "gheeproductcreate":
         return <AdminGheeProductCreate />;
@@ -65,10 +67,14 @@ const Admin = () => {
         return <AdminOilProductCreate />;
       case "oilproductupdatedelete":
         return <AdminOilUpdateDelete />;
-        case "videoadvertizecreate":
-  return <AdminVideoAdvertiseCreate />;
+      case "adminagarbaticreate":
+        return <AdminAgarbatiCreate />;
+      case "adminagarbattiupdatedelete":
+        return <AdminAgarbattiUpdateDelete />;
+      case "admincreateadvertize":
+        return <AdminVideoAdvertiseCreate />;
       case "videoadvertizeupdatedelete":
-  return <AdminAdvertiseDeleteUpdate />;
+        return <AdminAdvertiseDeleteUpdate />;
       case "dashboard":
         return (
           <div className="p-6">
