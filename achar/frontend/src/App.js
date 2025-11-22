@@ -51,9 +51,9 @@ import AgarbattiProductList from "./components/AgarbattiProductList";
 import GanpatiCategoryProduct from "./components/GanpatiCategoryProduct";
 import GanpatiDetail from "./components/GanpatiDetail";
 import GanpatiProductList from "./components/GanpatiProductList";
-import CupCategoryProduct from "./components/CupCategoryProduct";
-import CupDetail from "./components/CupDetail";
-import CupProductList from "./components/CupProductList";
+// import CupCategoryProduct from "./components/CupCategoryProduct";
+// import CupDetail from "./components/CupDetail";
+// import CupProductList from "./components/CupProductList";
 
 function App() {
   return (
@@ -81,7 +81,7 @@ function App() {
               </div>
               <AcharBannerTwo />
               <GanpatiProductList />
-              <CupProductList />
+              {/* <CupProductList /> */}
               <AgarbattiProductList />
               <GheeProductList />
               <ServicesNav />
@@ -123,8 +123,8 @@ function App() {
 
         <Route path="/oil/category/:slug" element={<OilCategoryProduct />} />
         <Route path="/oil-product/:slug/:id" element={<OilProductDetail />} />
-        <Route path="/cup-category/:slug" element={<CupCategoryProduct />} />
-        <Route path="/cup-product/:slug/:id" element={<CupDetail />} />
+        {/* <Route path="/cup-category/:slug" element={<CupCategoryProduct />} /> */}
+        {/* <Route path="/cup-product/:slug/:id" element={<CupDetail />} /> */}
         <Route
           path="/agarbatti-category/:slug"
           element={<AgarbattiCategoryProduct />}
