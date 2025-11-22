@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function AdminAgarbatiCreate() {
+export default function AdminGanpatiCreate() {
   const [categories, setCategories] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -12,18 +12,18 @@ export default function AdminAgarbatiCreate() {
     quantity: "",
     stockQuantity: "",
     stock: true,
-      cutPrice: "",  
-  currentPrice: "",  
-  rating: "",  
+    rating: "", 
     category: "",
-    images: [""], // Array for multiple main images
+    images: [], // FIXED: no blank default
     videoUrl: "",
+ cut_price: "",
+        current_price: "",
     packs: [{ name: "", price: "" }],
-    reviews: [{ name: "", rating: "", comment: "", images: [""] }],
-    moreAboutProduct: { name: "", description: "", images: [""] },
+    reviews: [{ name: "", rating: "", comment: "", images: [] }], // FIXED
+    moreAboutProduct: { name: "", description: "", images: [] }, // FIXED
   });
 
-  // Fetch categories
+  // ---------------- Fetch Categories ----------------
   useEffect(() => {
     const fetchCats = async () => {
       try {
@@ -36,69 +36,65 @@ export default function AdminAgarbatiCreate() {
     fetchCats();
   }, []);
 
-  // Main field change
-  const handleChange = (e) => {
+  // ---------------- Handlers ----------------
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
-  // Pack change
   const handlePackChange = (index, field, value) => {
     const newPacks = [...formData.packs];
     newPacks[index][field] = value;
     setFormData({ ...formData, packs: newPacks });
   };
 
-  const addPack = () => {
+  const addPack = () =>
     setFormData({
       ...formData,
       packs: [...formData.packs, { name: "", price: "" }],
     });
-  };
 
-  const removePack = (index) => {
-    const newPacks = formData.packs.filter((_, i) => i !== index);
-    setFormData({ ...formData, packs: newPacks });
-  };
-
-  // Review change
-  const handleReviewChange = (index, field, value) => {
-    const newReviews = [...formData.reviews];
-    newReviews[index][field] = value;
-    setFormData({ ...formData, reviews: newReviews });
-  };
-
-  const addReview = () => {
+  const removePack = (index) =>
     setFormData({
       ...formData,
-      reviews: [
-        ...formData.reviews,
-        { name: "", rating: "", comment: "", images: [""] },
-      ],
+      packs: formData.packs.filter((_, i) => i !== index),
     });
-  };
 
-  const removeReview = (index) => {
-    const newReviews = formData.reviews.filter((_, i) => i !== index);
-    setFormData({ ...formData, reviews: newReviews });
-  };
-
-  // Image field handlers
   const handleImageChange = (index, value) => {
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData({ ...formData, images: newImages });
   };
 
-  const addImage = () => {
+  const addImage = () =>
     setFormData({ ...formData, images: [...formData.images, ""] });
+
+  const removeImage = (index) =>
+    setFormData({
+      ...formData,
+      images: formData.images.filter((_, i) => i !== index),
+    });
+
+  // ---------------- Review Handlers ----------------
+  const handleReviewChange = (index, field, value) => {
+    const newReviews = [...formData.reviews];
+    newReviews[index][field] = value;
+    setFormData({ ...formData, reviews: newReviews });
   };
 
-  const removeImage = (index) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
-    setFormData({ ...formData, images: newImages });
-  };
+  const addReview = () =>
+    setFormData({
+      ...formData,
+      reviews: [
+        ...formData.reviews,
+        { name: "", rating: "", comment: "", images: [] },
+      ],
+    });
 
-  // Review image change
+  const removeReview = (index) =>
+    setFormData({
+      ...formData,
+      reviews: formData.reviews.filter((_, i) => i !== index),
+    });
+
   const handleReviewImageChange = (reviewIndex, imageIndex, value) => {
     const newReviews = [...formData.reviews];
     newReviews[reviewIndex].images[imageIndex] = value;
@@ -119,17 +115,20 @@ export default function AdminAgarbatiCreate() {
     setFormData({ ...formData, reviews: newReviews });
   };
 
-  // More about product image change
+  // ---------------- More About Product ----------------
   const handleMoreAboutImageChange = (index, value) => {
     const newImages = [...formData.moreAboutProduct.images];
     newImages[index] = value;
     setFormData({
       ...formData,
-      moreAboutProduct: { ...formData.moreAboutProduct, images: newImages },
+      moreAboutProduct: {
+        ...formData.moreAboutProduct,
+        images: newImages,
+      },
     });
   };
 
-  const addMoreAboutImage = () => {
+  const addMoreAboutImage = () =>
     setFormData({
       ...formData,
       moreAboutProduct: {
@@ -137,50 +136,56 @@ export default function AdminAgarbatiCreate() {
         images: [...formData.moreAboutProduct.images, ""],
       },
     });
-  };
 
-  const removeMoreAboutImage = (index) => {
-    const newImages = formData.moreAboutProduct.images.filter(
-      (_, i) => i !== index
-    );
+  const removeMoreAboutImage = (index) =>
     setFormData({
       ...formData,
-      moreAboutProduct: { ...formData.moreAboutProduct, images: newImages },
+      moreAboutProduct: {
+        ...formData.moreAboutProduct,
+        images: formData.moreAboutProduct.images.filter(
+          (_, i) => i !== index
+        ),
+      },
     });
-  };
 
-  // Submit form
+  // ---------------- Submit Form ----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const payload = {
-      title: formData.title,
-      description: formData.description,
-      keyBenefits: formData.keyBenefits.split(","),
-      ingredients: formData.ingredients.split(","),
-      quantity: formData.quantity,
-      stockQuantity: formData.stockQuantity,
-      stock: formData.stock,
-      category: formData.category,
-      images: formData.images.filter((img) => img),
-      videoUrl: formData.videoUrl,
-cut_price: formData.cutPrice ? Number(formData.cutPrice) : null,
-current_price: formData.currentPrice ? Number(formData.currentPrice) : null,
-rating: Number(formData.rating),  
+      ...formData,
+       rating: formData.rating ? Number(formData.rating) : 0,
+      keyBenefits: formData.keyBenefits
+        .split(",")
+        .map((k) => k.trim())
+        .filter((k) => k),
+ cutPrice: Number(formData.cut_price) || 0,
+  currentPrice: Number(formData.current_price) || 0,
+  ingredients: formData.ingredients
+        .split(",")
+        .map((i) => i.trim())
+        .filter((i) => i),
+      images: formData.images.filter((i) => i.trim() !== ""),
       packs: formData.packs.filter((p) => p.name && p.price),
-      reviews: formData.reviews
-        .filter((r) => r.name && r.rating && r.comment)
-        .map((r) => ({ ...r, images: r.images.filter((img) => img) })),
+      reviews: formData.reviews.map((r) => ({
+        ...r,
+        images: r.images.filter((img) => img.trim() !== ""),
+      })),
       moreAboutProduct: {
-        ...formData.moreAboutProduct,
-        images: formData.moreAboutProduct.images.filter((img) => img),
+        name: formData.moreAboutProduct.name,
+        description: formData.moreAboutProduct.description,
+        images: formData.moreAboutProduct.images.filter(
+          (i) => i.trim() !== ""
+        ), // FIXED GOOD FILTER
+        
       },
     };
 
     try {
-      await axios.post("/api/agarbatti/create", payload);
-      alert("Agarbatti Created Successfully!");
-      // Reset form
+      await axios.post("/api/ganpati/create", payload);
+      alert("Ganpati Product Created Successfully!");
+
+      // RESET FIXED STATE
       setFormData({
         title: "",
         description: "",
@@ -190,55 +195,54 @@ rating: Number(formData.rating),
         stockQuantity: "",
         stock: true,
         category: "",
-        images: [""],
+        images: [],
         videoUrl: "",
-        cutPrice: "",
-currentPrice: "",
-rating: "",  
+        cut_price: "",
+current_price: "",
         packs: [{ name: "", price: "" }],
-        reviews: [{ name: "", rating: "", comment: "", images: [""] }],
-        moreAboutProduct: { name: "", description: "", images: [""] },
+        reviews: [{ name: "", rating: "", comment: "", images: [] }],
+        moreAboutProduct: { name: "", description: "", images: [] },
       });
     } catch (err) {
       console.error(err);
-      alert("Error creating agarbatti");
+      alert("Error creating Ganpati product");
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-white shadow-lg rounded-xl p-6 border border-gray-200">
       <h2 className="text-2xl font-bold mb-6 text-center">
-        Create New Agarbatti Product
+        Create New Ganpati Product
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Basic Fields */}
+        {/* BASIC FIELDS */}
         {[
           {
             label: "Title",
             name: "title",
-            placeholder: "Premium Sandalwood Agarbatti",
+            placeholder: "Ganpati Idol - 12 inch",
           },
           {
             label: "Description",
             name: "description",
-            placeholder: "This sandalwood agarbatti gives calming fragrance...",
+            placeholder: "Eco-friendly Ganpati idol...",
             type: "textarea",
           },
           {
             label: "Key Benefits (comma-separated)",
             name: "keyBenefits",
-            placeholder: "Stress relief, Pleasant aroma, Long lasting",
+            placeholder: "Eco-friendly, Handcrafted",
           },
           {
             label: "Ingredients (comma-separated)",
             name: "ingredients",
-            placeholder: "Sandalwood, Natural Oils, Charcoal",
+            placeholder: "Clay, Color, Decoration",
           },
           {
             label: "Quantity",
             name: "quantity",
-            placeholder: "e.g., 10 sticks",
+            placeholder: "e.g., 1 piece",
           },
           {
             label: "Stock Quantity",
@@ -247,19 +251,10 @@ rating: "",
             type: "number",
           },
           {
-  label: "Rating",
-  name: "rating",
-  placeholder: "1 to 5",
-  type: "number",
-},
-
-          {
             label: "Video URL",
             name: "videoUrl",
             placeholder: "https://youtube.com/xyz",
           },
-          { label: "Cut Price", name: "cutPrice", placeholder: "e.g., 499", type: "number" },
-{ label: "Current Price", name: "currentPrice", placeholder: "e.g., 299", type: "number" },
         ].map((field) => (
           <div key={field.name}>
             <label className="block font-medium mb-1">{field.label}</label>
@@ -283,8 +278,23 @@ rating: "",
             )}
           </div>
         ))}
+{/* PRODUCT RATING */}
+<div>
+  <label className="block font-medium mb-1">Rating (1 - 5)</label>
+  <input
+    type="number"
+    name="rating"
+    value={formData.rating}
+    onChange={handleChange}
+    placeholder="4.5"
+    min="1"
+    max="5"
+    step="0.1"
+    className="w-full p-2 border rounded-lg"
+  />
+</div>
 
-        {/* Category */}
+        {/* CATEGORY */}
         <div>
           <label className="block font-medium mb-1">Select Category</label>
           <select
@@ -302,19 +312,22 @@ rating: "",
           </select>
         </div>
 
-        {/* Main Images */}
+        {/* MAIN IMAGES */}
         <div>
           <label className="block font-medium mb-2">Main Images</label>
+
           {formData.images.map((img, index) => (
             <div key={index} className="flex gap-2 mb-2">
               <input
                 type="text"
-                placeholder="Image URL (e.g., https://img1.jpg)"
                 value={img}
-                onChange={(e) => handleImageChange(index, e.target.value)}
+                onChange={(e) =>
+                  handleImageChange(index, e.target.value)
+                }
+                placeholder="Image URL"
                 className="flex-1 p-2 border rounded-lg"
               />
-              {formData.images.length > 1 && (
+              {formData.images.length > 0 && (
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
@@ -325,6 +338,7 @@ rating: "",
               )}
             </div>
           ))}
+
           <button
             type="button"
             onClick={addImage}
@@ -333,49 +347,34 @@ rating: "",
             Add More
           </button>
         </div>
-{/* Cut Price */}
-<div>
-  <div>
-  <label className="block font-medium mb-1">Rating (1–5)</label>
-  <input
-    type="number"
-    name="rating"
-    value={formData.rating}
-    onChange={handleChange}
-    placeholder="Enter rating"
-    min="1"
-    max="5"
-    className="w-full p-2 border rounded-lg"
-  />
-</div>
+{/* PRICE FIELDS */}
+<input
+  type="number"
+  name="cut_price"
+  value={formData.cut_price}
+  onChange={(e) =>
+    setFormData({ ...formData, cut_price: Number(e.target.value) })
+  }
+  placeholder="999"
+  className="w-full p-2 border rounded-lg"
+/>
 
-  <label className="block font-medium mb-1">Cut Price</label>
-  <input
-    type="number"
-    name="cutPrice"
-    value={formData.cutPrice}
-    onChange={handleChange}
-    placeholder="e.g., 499"
-    className="w-full p-2 border rounded-lg"
-  />
-</div>
+<input
+  type="number"
+  name="current_price"
+  value={formData.current_price}
+  onChange={(e) =>
+    setFormData({ ...formData, current_price: Number(e.target.value) })
+  }
+  placeholder="799"
+  className="w-full p-2 border rounded-lg"
+/>
 
-{/* Current Price */}
-<div>
-  <label className="block font-medium mb-1">Current Price</label>
-  <input
-    type="number"
-    name="currentPrice"
-    value={formData.currentPrice}
-    onChange={handleChange}
-    placeholder="e.g., 299"
-    className="w-full p-2 border rounded-lg"
-  />
-</div>
 
-        {/* Packs */}
+        {/* PACKS */}
         <div>
           <label className="block font-medium mb-2">Packs</label>
+
           {formData.packs.map((pack, index) => (
             <div key={index} className="flex gap-2 mb-2">
               <input
@@ -396,6 +395,7 @@ rating: "",
                 }
                 className="w-32 p-2 border rounded-lg"
               />
+
               {formData.packs.length > 1 && (
                 <button
                   type="button"
@@ -407,6 +407,7 @@ rating: "",
               )}
             </div>
           ))}
+
           <button
             type="button"
             onClick={addPack}
@@ -416,9 +417,10 @@ rating: "",
           </button>
         </div>
 
-        {/* Reviews */}
+        {/* REVIEWS */}
         <div>
           <label className="block font-medium mb-2">Reviews</label>
+
           {formData.reviews.map((review, index) => (
             <div key={index} className="mb-2 border p-2 rounded-lg">
               <input
@@ -430,6 +432,7 @@ rating: "",
                 }
                 className="w-full p-2 border rounded-lg mb-1"
               />
+
               <input
                 type="number"
                 placeholder="Rating (1-5)"
@@ -439,6 +442,7 @@ rating: "",
                 }
                 className="w-full p-2 border rounded-lg mb-1"
               />
+
               <textarea
                 placeholder="Comment"
                 value={review.comment}
@@ -447,29 +451,35 @@ rating: "",
                 }
                 className="w-full p-2 border rounded-lg mb-1"
               />
-              {/* Review Images */}
-              {review.images.map((img, i) => (
-                <div key={i} className="flex gap-2 mb-1">
+
+              {review.images.map((img, imgIndex) => (
+                <div key={imgIndex} className="flex gap-2 mb-1">
                   <input
                     type="text"
-                    placeholder="Image URL (e.g., https://img1.jpg)"
+                    placeholder="Image URL"
                     value={img}
                     onChange={(e) =>
-                      handleReviewImageChange(index, i, e.target.value)
+                      handleReviewImageChange(
+                        index,
+                        imgIndex,
+                        e.target.value
+                      )
                     }
                     className="flex-1 p-2 border rounded-lg"
                   />
-                  {review.images.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeReviewImage(index, i)}
-                      className="bg-red-500 text-white px-2 rounded-lg"
-                    >
-                      Remove
-                    </button>
-                  )}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeReviewImage(index, imgIndex)
+                    }
+                    className="bg-red-500 text-white px-2 rounded-lg"
+                  >
+                    Remove
+                  </button>
                 </div>
               ))}
+
               <button
                 type="button"
                 onClick={() => addReviewImage(index)}
@@ -489,6 +499,7 @@ rating: "",
               )}
             </div>
           ))}
+
           <button
             type="button"
             onClick={addReview}
@@ -498,12 +509,15 @@ rating: "",
           </button>
         </div>
 
-        {/* More About Product */}
+        {/* MORE ABOUT PRODUCT */}
         <div>
-          <label className="block font-medium mb-1">More About Product</label>
+          <label className="block font-medium mb-1">
+            More About Product
+          </label>
+
           <input
             type="text"
-            placeholder="Name (e.g., Sandalwood Benefits)"
+            placeholder="Name"
             value={formData.moreAboutProduct.name}
             onChange={(e) =>
               setFormData({
@@ -516,6 +530,7 @@ rating: "",
             }
             className="w-full p-2 border rounded-lg mb-1"
           />
+
           <textarea
             placeholder="Description"
             value={formData.moreAboutProduct.description}
@@ -530,29 +545,29 @@ rating: "",
             }
             className="w-full p-2 border rounded-lg mb-1"
           />
-          {/* More About Images */}
+
           {formData.moreAboutProduct.images.map((img, index) => (
             <div key={index} className="flex gap-2 mb-1">
               <input
                 type="text"
-                placeholder="Image URL (e.g., https://img1.jpg)"
+                placeholder="Image URL"
                 value={img}
                 onChange={(e) =>
                   handleMoreAboutImageChange(index, e.target.value)
                 }
                 className="flex-1 p-2 border rounded-lg"
               />
-              {formData.moreAboutProduct.images.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeMoreAboutImage(index)}
-                  className="bg-red-500 text-white px-2 rounded-lg"
-                >
-                  Remove
-                </button>
-              )}
+
+              <button
+                type="button"
+                onClick={() => removeMoreAboutImage(index)}
+                className="bg-red-500 text-white px-2 rounded-lg"
+              >
+                Remove
+              </button>
             </div>
           ))}
+
           <button
             type="button"
             onClick={addMoreAboutImage}
@@ -562,17 +577,24 @@ rating: "",
           </button>
         </div>
 
-        <div className="flex items-center gap-2 mb-4">
+        {/* STOCK */}
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
+            id="stock"
             name="stock"
             checked={formData.stock}
             onChange={(e) =>
-              setFormData({ ...formData, stock: e.target.checked })
+              setFormData({
+                ...formData,
+                stock: e.target.checked,
+              })
             }
-            className="w-5 h-5"
+            className="w-4 h-4"
           />
-          <label className="font-medium">In Stock</label>
+          <label htmlFor="stock" className="font-medium">
+            In Stock
+          </label>
         </div>
 
         <button

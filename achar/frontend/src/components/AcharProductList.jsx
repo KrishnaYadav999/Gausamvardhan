@@ -14,7 +14,6 @@ import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
-
   const [hovered, setHovered] = useState(false);
 
   if (!product) return null;
@@ -102,7 +101,6 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
           />
         )}
 
-        {/* OUT OF STOCK BADGE */}
         {isOutOfStock && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <span className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow">
@@ -130,33 +128,29 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       {/* DETAILS */}
       <div className="px-4 py-4 flex flex-col h-full">
         <div className="flex justify-between items-start mb-3">
-          <h3
-            className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2"
-            style={{ fontFamily: "Inter" }}
-          >
+          <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2">
             {product.productName}
           </h3>
-          <p
-            className="text-[20px] font-bold text-gray-900"
-            style={{ fontFamily: "Inter" }}
-          >
-            ₹{selectedPrice}
-          </p>
+
+          {/* ⭐ UPDATED PRICE BLOCK */}
+          <div className="flex flex-col items-end -mt-1">
+            <p className="text-[20px] font-bold text-gray-900 leading-none">
+              ₹{selectedPrice}
+            </p>
+
+            {product.cutPrice && (
+              <p className="text-sm text-gray-400 line-through leading-none mt-[2px]">
+                ₹{product.cutPrice}
+              </p>
+            )}
+          </div>
         </div>
 
-        <p
-          className="text-sm text-gray-500 mb-3"
-          style={{ fontFamily: "Inter" }}
-        >
-          Bilona-made • Small batches
-        </p>
+        <p className="text-sm text-gray-500 mb-3">Bilona-made • Small batches</p>
 
         <div className="flex items-center gap-1 mb-4">
           <span className="text-yellow-500 text-lg">★</span>
-          <span
-            className="text-sm font-semibold text-gray-800"
-            style={{ fontFamily: "Inter" }}
-          >
+          <span className="text-sm font-semibold text-gray-800">
             {avgRating}
           </span>
           <span className="text-xs text-gray-500">
@@ -170,7 +164,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
             disabled={isOutOfStock}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => setSelectedWeight(e.target.value)}
-            className={`w-full border rounded-xl px-4 py-2 text-sm font-medium ${
+            className={`w-full border px-4 py-2 text-sm font-medium ${
               isOutOfStock
                 ? "bg-gray-200 cursor-not-allowed text-gray-500"
                 : "border-gray-300 text-gray-700"
@@ -190,7 +184,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`w-full py-3 rounded-xl font-semibold text-sm tracking-wide mt-4 ${
+          className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
             isOutOfStock
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-green-700 hover:bg-green-800 text-white"
@@ -218,7 +212,7 @@ const AcharProductSkeleton = () => (
 );
 
 /* ---------------------------------------------------
-    MAIN + SLIDER
+    MAIN + SLIDER + HERO
 ----------------------------------------------------*/
 const AcharProductList = () => {
   const [products, setProducts] = useState([]);
@@ -237,7 +231,8 @@ const AcharProductList = () => {
         const defaults = {};
         items.forEach((p) => {
           if (p.pricePerGram) {
-            defaults[p._id] = p.pricePerGram.split(",")[0].split("=")[0].trim();
+            defaults[p._id] =
+              p.pricePerGram.split(",")[0].split("=")[0].trim();
           }
         });
 
@@ -261,36 +256,52 @@ const AcharProductList = () => {
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
       <Toaster />
 
-      {/* HERO SECTION */}
+      {/* HERO + WAVE */}
       <div className="relative w-full mb-10">
-        <div className="w-full h-[150px] overflow-hidden relative">
+        <div className="relative w-full h-[130px] sm:h-[80px] overflow-hidden">
           <svg
             viewBox="0 0 1440 320"
-            className="w-full h-full absolute top-0 left-0"
+            className="absolute inset-0 w-full h-full"
             preserveAspectRatio="none"
+            style={{ opacity: 0.35 }}
           >
             <path
-              fill="#F8D6D6"
-              fillOpacity="1"
-              d="M0,96L60,101.3C120,107,240,117,360,138.7C480,160,600,192,720,202.7C840,213,960,203,1080,165.3C1200,128,1320,64,1380,32L1440,0L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
+              fill="#F7E1E1"
+              d="M0,256L48,229.3C96,203,192,149,288,149.3C384,149,480,203,576,224C672,245,768,235,864,218.7C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             ></path>
           </svg>
+
+          <div
+            className="absolute bottom-0 w-full h-[90px]"
+            style={{
+              backgroundImage:
+                "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1763637527/coe_achar_ysmiwo.jpg')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right bottom",
+            }}
+          ></div>
         </div>
 
         <div className="absolute inset-0 flex items-center justify-between px-6">
           <h2
-            className="text-4xl font-bold text-[#B04A4A]"
-            style={{
-              fontFamily: "Playfair Display",
-              letterSpacing: "0.5px",
-            }}
+            className="
+              text-3xl font-extrabold 
+              text-[#A74B4B]
+              sm:text-lg
+            "
+            style={{ fontFamily: "Playfair Display" }}
           >
-            Achar & Pickles
+            Achar
           </h2>
 
           <button
-            className="bg-[#BF5757] hover:bg-[#A94848] text-white px-6 py-3 rounded-lg text-lg font-semibold shadow"
-            style={{ fontFamily: "Inter" }}
+            className="
+              bg-[#BF5757] hover:bg-[#A94848]
+              text-white px-6 py-2 rounded-md
+              font-semibold shadow-md
+              sm:px-3 sm:py-1 sm:text-[11px]
+            "
           >
             Shop More
           </button>

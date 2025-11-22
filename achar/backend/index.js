@@ -13,12 +13,14 @@ import gheeProductRoutes from "./routes/gheeProductRoutes.js";
 import masalaProductRoutes from "./routes/masalaProductRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import oilProductRoutes from "./routes/oilProductRoutes.js";
+import cupRoutes from "./routes/cupRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js";
 import counterRoutes from "./routes/counterRoutes.js";
 import workerAdminRoutes from "./routes/workerAdminRoutes.js";
 import googleauth from "./routes/googleauth.js"
 import videoAdvertiseRoutes from "./routes/videoAdvertiseRoutes.js"
 import agarbattiRoutes from "./routes/agarbattiRoutes.js"
+import ganpatiRoutes from "./routes/ganpatiRoutes.js"
 
 // dotenv config
 dotenv.config();
@@ -55,6 +57,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/ghee-products", gheeProductRoutes);
 app.use("/api/masala-products", masalaProductRoutes);
 app.use("/api/oils", oilProductRoutes);
+app.use("/api/ganpati", ganpatiRoutes);
+app.use("/api/cup", cupRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api", chatRoutes);
 app.use("/api/counter", counterRoutes);

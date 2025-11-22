@@ -1,148 +1,184 @@
-// AgarbattiProductList.jsx
+/* ---------------------------------------------------
+   IMPORTS
+----------------------------------------------------*/
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
-import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import {
+  FaHeart,
+  FaChevronLeft,
+  FaChevronRight,
+  FaStar,
+} from "react-icons/fa";
 
 /* ---------------------------------------------------
-    CARD COMPONENT
+    ACHAR STYLE CARD (WITH PRICE & RATING)
 ----------------------------------------------------*/
-const AgarbattiCard = ({ product, selectedPack, setSelectedPack }) => {
+const AgarbattiCard = ({ product, selectedPack, updatePack }) => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
-
   const [hovered, setHovered] = useState(false);
-  const isOutOfStock = !product.stock;
 
-  const currentPackName = selectedPack[product._id];
-  const currentPack = product.packs?.find((p) => p.name === currentPackName);
-  const currentPrice = currentPack?.price || 0;
+  if (!product) return null;
 
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
-    if (isOutOfStock) return toast.error("Out of stock");
-    if (!currentPackName) return toast.error("Select a pack");
+  const isOutOfStock =
+    product.stock === false || product.stockQuantity <= 0;
 
-    addToCart({
-      ...product,
-      selectedPack: currentPackName,
-      selectedPrice: currentPrice,
-      quantity: 1,
-    });
+  const currentPack =
+    product.packs?.find((x) => x.name === selectedPack) || product.packs?.[0];
 
-    toast.success(`${product.title} (${currentPackName}) added to cart`);
-  };
+  const currentPrice = currentPack?.price || product.current_price || 0;
+  const oldPrice = product.cut_price || currentPack?.oldPrice || null;
 
-  const navigateToProduct = () => {
+  const goToDetail = () => {
     if (!isOutOfStock)
       navigate(`/agarbatti-product/${product.slug}/${product._id}`);
   };
 
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (isOutOfStock) return toast.error("Out of stock");
+
+    addToCart({
+      _id: product._id,
+      productName: product.title,
+      quantity: 1,
+      selectedPrice: currentPrice,
+      cutPrice: oldPrice,
+      selectedPack,
+      productImages: product.images,
+    });
+
+    toast.success(`${product.title} added to cart`);
+  };
+
   return (
     <div
-      onClick={navigateToProduct}
-      className={`min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-lg transition-all cursor-pointer h-full flex flex-col relative ${
-        isOutOfStock ? "opacity-70 cursor-not-allowed" : ""
+      onClick={goToDetail}
+      className={`min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer h-full flex flex-col relative ${
+        isOutOfStock ? "opacity-60 cursor-not-allowed" : ""
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ fontFamily: "Inter" }}
     >
-      {/* IMAGE SECTION */}
+      {/* IMAGE BOX */}
       <div className="relative h-[260px] overflow-hidden rounded-t-2xl bg-gray-50">
         <img
           src={product.images?.[0]}
-          alt=""
-          className={`w-full h-full object-contain absolute inset-0 transition duration-500 ${
+          className={`w-full h-full object-cover absolute inset-0 transition duration-500 z-10 ${
             hovered && product.images?.[1] ? "opacity-0" : "opacity-100"
           }`}
+          alt=""
         />
 
         {product.images?.[1] && (
           <img
             src={product.images[1]}
-            alt=""
-            className={`w-full h-full object-contain absolute inset-0 transition duration-500 ${
+            className={`w-full h-full object-cover absolute inset-0 transition duration-500 z-20 ${
               hovered ? "opacity-100" : "opacity-0"
             }`}
+            alt=""
           />
-        )}
-
-        {/* OUT OF STOCK BANNER */}
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow">
-              OUT OF STOCK
-            </span>
-          </div>
-        )}
-
-        {/* TAG */}
-        {product.tag && !isOutOfStock && (
-          <span className="absolute top-4 left-4 bg-green-700 text-white px-3 py-1 text-xs rounded-md shadow font-medium">
-            {product.tag}
-          </span>
-        )}
-
-        {/* HEART ICON */}
-        {!isOutOfStock && (
-          <span
-            onClick={(e) => e.stopPropagation()}
-            className="absolute top-4 right-4 bg-white p-2 rounded-full shadow cursor-pointer"
-          >
-            <FaHeart size={16} className="text-gray-700" />
-          </span>
         )}
       </div>
 
-      {/* DETAILS SECTION */}
+      {/* OUT OF STOCK */}
+      {isOutOfStock && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <span className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow">
+            OUT OF STOCK
+          </span>
+        </div>
+      )}
+
+      {/* TAG */}
+      {product.tag && !isOutOfStock && (
+        <span className="absolute top-4 left-4 bg-[#A54B4B] text-white px-3 py-1 text-xs rounded-md shadow font-medium">
+          {product.tag}
+        </span>
+      )}
+
+      {/* WISHLIST */}
+      {!isOutOfStock && (
+        <span
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-4 right-4 bg-white p-2 rounded-full shadow cursor-pointer"
+        >
+          <FaHeart size={16} className="text-gray-700" />
+        </span>
+      )}
+
+      {/* DETAILS */}
       <div className="px-4 py-4 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-3">
+
+        {/* Title + Price */}
+        <div className="flex justify-between items-start mb-2">
           <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2">
             {product.title}
           </h3>
 
-          <p className="text-[20px] font-bold text-gray-900">₹{currentPrice}</p>
+          <div className="text-right">
+            <p className="text-[20px] font-bold text-gray-900">₹{currentPrice}</p>
+            {oldPrice && (
+              <p className="text-[13px] text-gray-500 line-through -mt-1">
+                ₹{oldPrice}
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* ⭐ Rating */}
+        {product.rating > 0 && (
+          <div className="flex items-center gap-1 mb-2 text-yellow-500 text-sm">
+            {Array.from({ length: 5 }, (_, i) => (
+              <FaStar
+                key={i}
+                size={12}
+                className={
+                  i < product.rating ? "text-yellow-500" : "text-gray-300"
+                }
+              />
+            ))}
+            <span className="text-gray-600 ml-1 text-xs">
+              ({product.rating})
+            </span>
+          </div>
+        )}
 
         <p className="text-sm text-gray-500 mb-3">Premium Fragrance</p>
 
-        {/* PACK SELECTION DROPDOWN */}
+        {/* PACK SELECTOR */}
         {product.packs && (
           <select
-            value={currentPackName}
+            value={selectedPack}
             disabled={isOutOfStock}
             onClick={(e) => e.stopPropagation()}
-            onChange={(e) =>
-              setSelectedPack((prev) => ({
-                ...prev,
-                [product._id]: e.target.value,
-              }))
-            }
-            className={`w-full border rounded-xl px-4 py-2 text-sm font-medium ${
+            onChange={(e) => updatePack(e.target.value)}
+            className={`w-full border px-4 py-2 text-sm font-medium ${
               isOutOfStock
                 ? "bg-gray-200 cursor-not-allowed text-gray-500"
                 : "border-gray-300 text-gray-700"
             }`}
           >
-            {product.packs.map((p) => (
-              <option key={p.name} value={p.name}>
-                {p.name}
+            {product.packs.map((pack) => (
+              <option key={pack.name} value={pack.name}>
+                {pack.name}
               </option>
             ))}
           </select>
         )}
 
-        {/* ADD BUTTON */}
+        {/* ADD TO CART */}
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`w-full py-3 rounded-xl font-semibold text-sm tracking-wide mt-4 ${
+          className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
             isOutOfStock
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-[#A54B4B] hover:bg-[#903E3E] text-white"
           }`}
         >
           {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
@@ -153,55 +189,56 @@ const AgarbattiCard = ({ product, selectedPack, setSelectedPack }) => {
 };
 
 /* ---------------------------------------------------
-    SKELETON
+   SKELETON
 ----------------------------------------------------*/
 const AgarbattiSkeleton = () => (
   <div className="min-w-[280px] bg-white rounded-2xl border shadow-sm animate-pulse">
     <div className="h-[260px] bg-gray-200 rounded-t-2xl"></div>
     <div className="p-4 space-y-3">
-      <div className="h-4 bg-gray-200 w-3/4"></div>
-      <div className="h-3 bg-gray-200 w-1/2"></div>
-      <div className="h-10 bg-gray-200 rounded-lg"></div>
+      <div className="h-4 bg-gray-300 w-3/4"></div>
+      <div className="h-3 bg-gray-300 w-1/2"></div>
+      <div className="h-10 bg-gray-300 rounded-lg"></div>
     </div>
   </div>
 );
 
 /* ---------------------------------------------------
-    MAIN LIST + SLIDER
+   MAIN LIST
 ----------------------------------------------------*/
-const AgarbattiProductList = () => {
+const AgarbattiProductList = ({ limit }) => {
   const [products, setProducts] = useState([]);
   const [selectedPack, setSelectedPack] = useState({});
   const [loading, setLoading] = useState(true);
+
   const sliderRef = useRef(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadProducts = async () => {
       try {
         const { data } = await axios.get("/api/agarbatti/all");
 
-        setProducts(data);
+        const items = Array.isArray(data) ? data : [];
+        setProducts(limit ? items.slice(0, limit) : items);
 
         const defaults = {};
-        data.forEach((p) => {
-          if (p.packs && p.packs.length > 0) {
-            defaults[p._id] = p.packs[0].name;
-          }
+        items.forEach((p) => {
+          if (p.packs?.length > 0) defaults[p._id] = p.packs[0].name;
         });
 
         setSelectedPack(defaults);
       } catch {
-        toast.error("Failed to load products");
+        toast.error("Failed to load Agarbatti products");
       } finally {
         setLoading(false);
       }
     };
 
-    load();
-  }, []);
+    loadProducts();
+  }, [limit]);
 
   const scrollLeft = () =>
     sliderRef.current.scrollBy({ left: -300, behavior: "smooth" });
+
   const scrollRight = () =>
     sliderRef.current.scrollBy({ left: 300, behavior: "smooth" });
 
@@ -209,32 +246,47 @@ const AgarbattiProductList = () => {
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
       <Toaster />
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <div className="relative w-full mb-10">
-        <div className="w-full h-[150px] overflow-hidden relative">
+        <div className="relative w-full h-[130px] overflow-hidden">
           <svg
             viewBox="0 0 1440 320"
-            className="w-full h-full absolute top-0 left-0"
+            className="absolute inset-0 w-full h-full"
             preserveAspectRatio="none"
+            style={{ opacity: 0.35 }}
           >
             <path
-              fill="#D6E3F8"
-              d="M0,96L60,101.3C120,107,240,117,360,138.7C480,160,600,192,720,202.7C840,213,960,203,1080,165.3C1200,128,1320,64,1380,32L1440,0L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
+              fill="#F7E1E1"
+              d="M0,256L48,229.3C96,203,192,149,288,149.3C384,149,480,203,576,224C672,245,768,235,864,218.7C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32V320H0Z"
             ></path>
           </svg>
+
+          <div
+            className="absolute bottom-0 w-full h-[100px]"
+            style={{
+              backgroundImage:
+                "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1763637527/coe_achar_ysmiwo.jpg')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right bottom",
+            }}
+          ></div>
         </div>
 
         <div className="absolute inset-0 flex items-center justify-between px-6">
           <h2
-            className="text-4xl font-bold text-blue-800"
+            className="text-3xl font-extrabold text-[#A74B4B]"
             style={{ fontFamily: "Playfair Display" }}
           >
             Premium Agarbatti
           </h2>
 
-          <button className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow">
+          <Link
+            to="/agarbatti-products"
+            className="bg-[#BF5757] hover:bg-[#A94848] text-white px-6 py-2 rounded-md font-semibold shadow-md"
+          >
             Shop More
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -266,8 +318,10 @@ const AgarbattiProductList = () => {
             <div key={item._id} className="snap-start w-[280px] h-full">
               <AgarbattiCard
                 product={item}
-                selectedPack={selectedPack}
-                setSelectedPack={setSelectedPack}
+                selectedPack={selectedPack[item._id]}
+                updatePack={(p) =>
+                  setSelectedPack((prev) => ({ ...prev, [item._id]: p }))
+                }
               />
             </div>
           )

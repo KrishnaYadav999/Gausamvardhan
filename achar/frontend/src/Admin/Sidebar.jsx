@@ -43,6 +43,9 @@ const Sidebar = ({ setActive }) => {
     "ADMINAGARBATTIUPDATEDELETE",
     "ADMINCREATEADVERTIZE",
     "VIDEOADVERTIZEUPDATEDELETE",
+    "adminganpaticreate",
+    "adminganpatimanage",
+    "cupcreate",
     "DASHBOARD",
     "USERS",
   ];

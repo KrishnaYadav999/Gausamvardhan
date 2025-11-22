@@ -23,16 +23,19 @@ const packSchema = new mongoose.Schema(
 );
 
 // ---------------- More About Product Schema ----------------
+// ---------------- More About Product Schema ----------------
 const moreAboutProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    images: [{ type: String }], // multiple images
+    images: [{ type: String, default: [] }], 
   },
   { _id: false }
 );
 
-const agarbattiProductSchema = new mongoose.Schema(
+
+// ---------------- Cup Product Schema ----------------
+const cupProductSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     slug: { type: String, unique: true, lowercase: true },
@@ -45,8 +48,8 @@ const agarbattiProductSchema = new mongoose.Schema(
     packs: { type: [packSchema], default: [] },
 
     rating: { type: Number, default: 0 },
-  cut_price: { type: Number, required: false },
-current_price: { type: Number, required: false },
+    cut_price: { type: String, default: null },
+    current_price: { type: String, default: null },
 
     stock: { type: Boolean, default: true },
     stockQuantity: { type: Number, default: 0 },
@@ -62,23 +65,20 @@ current_price: { type: Number, required: false },
 
     videoUrl: { type: String, default: "" },
 
-    // ⭐ Your NEW FIELD added here
+    // ⭐ NEW FIELD
     moreAboutProduct: moreAboutProductSchema,
   },
   { timestamps: true }
 );
 
 // Auto-generate slug
-agarbattiProductSchema.pre("save", function (next) {
+cupProductSchema.pre("save", function (next) {
   if (this.isModified("title")) {
     this.slug = slugify(this.title, { lower: true, strict: true });
   }
   next();
 });
 
-const AgarbattiProduct = mongoose.model(
-  "AgarbattiProduct",
-  agarbattiProductSchema
-);
+const CupProduct = mongoose.model("CupProduct", cupProductSchema);
 
-export default AgarbattiProduct;
+export default CupProduct;

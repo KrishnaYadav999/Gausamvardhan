@@ -1,436 +1,523 @@
+// GheeProductDetail.jsx
 import React, { useEffect, useState, useContext, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CartContext } from "../context/CartContext";
-import toast, { Toaster } from "react-hot-toast";
+import ProductVideo from "../components/ProductVideo"; // same component used in Achar UI
+import toast from "react-hot-toast";
+import Features from "./Features";
+import { Star } from "lucide-react";
 import ImageZoom from "./ImageZoom";
-import { Play, Maximize, Minimize, ChevronDown, ChevronUp } from "lucide-react";
 
-// ---------------- ProductVideo Component ----------------
-const ProductVideo = ({ videoUrl, thumbnail }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const videoRef = useRef(null);
+const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png"; // use same hero or change
 
-  const handlePlay = () => {
-    setIsPlaying(true);
-    videoRef.current?.play();
-  };
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      videoRef.current.requestFullscreen?.();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen?.();
-      setIsFullscreen(false);
-    }
-  };
-
-  return (
-    <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg bg-black">
-      <video
-        ref={videoRef}
-        src={videoUrl}
-        controls={isPlaying}
-        className="w-full h-full object-cover"
-        poster={thumbnail || "/placeholder.png"}
-        onEnded={() => setIsPlaying(false)}
-      />
-      {!isPlaying && (
-        <button
-          onClick={handlePlay}
-          className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition"
-        >
-          <Play className="w-16 h-16 text-white drop-shadow-lg" />
-        </button>
-      )}
-      {isPlaying && (
-        <button
-          onClick={toggleFullscreen}
-          className="absolute top-3 right-3 bg-black/50 p-2 rounded-full hover:bg-black/70 transition"
-        >
-          {isFullscreen ? <Minimize className="w-5 h-5 text-white" /> : <Maximize className="w-5 h-5 text-white" />}
-        </button>
-      )}
-    </div>
-  );
-};
-
-// ---------------- Ghee Product Detail ----------------
 const GheeProductDetail = () => {
   const { slug, id } = useParams();
+  const navigate = useNavigate();
+  const { addToCart, setCartItems } = useContext(CartContext);
+
   const [product, setProduct] = useState(null);
-  const [similarProducts, setSimilarProducts] = useState([]);
   const [selectedWeight, setSelectedWeight] = useState("");
   const [weightQuantities, setWeightQuantities] = useState({});
   const [mainImage, setMainImage] = useState("");
-  const { addToCart , setCartItems } = useContext(CartContext);
-   const navigate = useNavigate();
-  // Dropdown states
-  const [descOpen, setDescOpen] = useState(false);
-  const [specOpen, setSpecOpen] = useState(false);
-  const descRef = useRef(null);
-  const specRef = useRef(null);
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const zoomRef = useRef();
+  const [zoomStyle, setZoomStyle] = useState({});
 
-  const specs =
-    product?.specifications
-      ?.split(" | ")
-      .reduce((rows, key, idx, arr) => {
-        if (idx % 2 === 0) rows.push({ key, value: arr[idx + 1] || "" });
-        return rows;
-      }, []) || [];
+  // Helper to compute price from pricePerGram or currentPrice
+  const getPrice = (prod, weight) => {
+    if (!prod) return 0;
+    // If pricePerGram exists, parse into map
+    if (prod.pricePerGram) {
+      const priceMap = {};
+      prod.pricePerGram.split(",").forEach((p) => {
+        const [w, v] = p.split("=");
+        if (w && v) priceMap[w.trim()] = Number(v.trim());
+      });
+      if (weight) return priceMap[weight] || Number(prod.currentPrice || prod.current_price || 0);
+      const firstWeight = Object.keys(priceMap)[0];
+      return priceMap[firstWeight] || Number(prod.currentPrice || prod.current_price || 0);
+    }
 
-  // ---------------- Fetch Product ----------------
+    // Fallback to weightVolume logic (comma separated) -> cannot map price, return currentPrice
+    return Number(prod.currentPrice || prod.current_price || 0);
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(
-          `/api/ghee-products/category/${slug}/${id}`
-        );
+        // Using your Ghee API route
+        const { data } = await axios.get(`/api/ghee-products/category/${slug}/${id}`);
 
+        // compute avg rating from reviews
         const avgRating =
           data.reviews && data.reviews.length > 0
-            ? data.reviews.reduce((sum, r) => sum + r.rating, 0) / data.reviews.length
+            ? data.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / data.reviews.length
             : 0;
 
-        setProduct({ ...data, rating: avgRating });
+        // keep rating field
+        const normalized = { ...data, rating: avgRating };
 
-        // default weight
-        const firstWeight = data.pricePerGram
-          ? data.pricePerGram.split(",")[0].split("=")[0].trim()
-          : data.weightVolume?.split(",")[0] || "";
-        setSelectedWeight(firstWeight);
-        setWeightQuantities({ [firstWeight]: 1 });
+        setProduct(normalized);
 
-        setMainImage(data.images?.[0] || "/placeholder.png");
+        // default selected weight
+        if (data.pricePerGram) {
+          const firstWeight = data.pricePerGram.split(",")[0].split("=")[0].trim();
+          setSelectedWeight(firstWeight);
+          setWeightQuantities({ [firstWeight]: 1 });
+        } else if (data.weightVolume) {
+          const firstWeight = data.weightVolume.split(",")[0].trim();
+          setSelectedWeight(firstWeight);
+          setWeightQuantities({ [firstWeight]: 1 });
+        }
+
+        // main image - using product.images (assumed)
+        setMainImage(data.images?.[0] || HERO_IMAGE_URL);
       } catch (error) {
-        console.error(error);
-        toast.error("❌ Failed to load product details");
+        console.error("Error fetching ghee product:", error);
+        toast.error("Failed to load product details!");
       }
     };
 
     fetchProduct();
   }, [slug, id]);
 
-  // ---------------- Fetch Similar Products ----------------
+  // fetch similar when product loaded
   useEffect(() => {
-    const fetchSimilarProducts = async () => {
+    const fetchSimilar = async () => {
       try {
-        const { data } = await axios.get(
-          `/api/ghee-products/${id}/similar`
-        );
-        setSimilarProducts(data);
-      } catch (error) {
-        console.error(error);
+        const { data } = await axios.get(`/api/ghee-products/${id}/similar`);
+        setSimilarProducts(data || []);
+      } catch (err) {
+        console.error("Error fetching similar ghee products:", err);
       }
     };
-    if (product) fetchSimilarProducts();
+    if (product) fetchSimilar();
   }, [product, id]);
 
-  if (!product) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500 text-lg">
+        Loading ghee product...
+      </div>
+    );
+  }
 
-  // ---------------- Price and Quantity Logic ----------------
-  const getPriceByWeight = (weight) => {
-    if (!weight) return parseFloat(product.currentPrice) || 0;
-    if (product.pricePerGram) {
-      const map = {};
-      product.pricePerGram.split(",").forEach((p) => {
-        const [w, v] = p.split("=");
-        map[w.trim()] = parseFloat(v.trim());
-      });
-      return map[weight] || parseFloat(product.currentPrice) || 0;
-    }
-    return parseFloat(product.currentPrice) || 0;
-  };
+  const isOutOfStock = !product.stock;
 
   const updateWeightQuantity = (weight, change) => {
     setWeightQuantities((prev) => {
-      const current = prev[weight] || 1;
-      const newQty = Math.max(1, current + change);
+      const currentQty = prev[weight] || 1;
+      const newQty = Math.max(1, currentQty + change);
       return { ...prev, [weight]: newQty };
     });
   };
 
-  const selectedPrice = getPriceByWeight(selectedWeight);
-  const weights = product.pricePerGram
-    ? product.pricePerGram.split(",").map((p) => p.split("=")[0].trim())
-    : product.weightVolume?.split(",") || [];
-
   const handleAddToCart = () => {
-    if (!selectedWeight) return toast.error("❌ Please select a weight");
-    if (!product.stock) return toast.error("❌ Out of stock!");
+    if (!selectedWeight) {
+      toast.error("⚠️ Please select a weight before adding to cart!");
+      return;
+    }
+    if (isOutOfStock) {
+      toast.error("❌ This product/weight is out of stock!");
+      return;
+    }
 
     const qty = weightQuantities[selectedWeight] || 1;
+    const price = getPrice(product, selectedWeight);
 
     addToCart({
       _id: product._id,
-      productName: product.title,
+      productName: product.title || product.productName,
       selectedWeight,
+      selectedPrice: price,
       quantity: qty,
-      selectedPrice,
-      totalPrice: selectedPrice * qty,
+      totalPrice: price * qty,
       cutPrice: parseFloat(product.cutPrice) || 0,
       productImages: product.images || [],
     });
 
-    toast.success(`✅ ${product.title} (${selectedWeight}) x${qty} added to cart!`);
+    toast.success(`${product.title || product.productName} (${selectedWeight}) x${qty} added to cart!`);
   };
 
+  const handleBuyNow = () => {
+    if (!selectedWeight) {
+      toast.error("⚠️ Please select a weight!");
+      return;
+    }
+    if (isOutOfStock) {
+      toast.error("❌ This product/weight is out of stock!");
+      return;
+    }
 
-const handleBuyNow = () => {
-  if (!selectedWeight) return toast.error("❌ Please select a weight");
-  if (!product.stock) return toast.error("❌ Out of stock!");
+    const qty = weightQuantities[selectedWeight] || 1;
+    const price = getPrice(product, selectedWeight);
 
-  const qty = weightQuantities[selectedWeight] || 1;
+    const singleItemCart = [
+      {
+        _id: product._id,
+        productName: product.title || product.productName,
+        selectedWeight,
+        currentPrice: price,
+        quantity: qty,
+        totalPrice: price * qty,
+        productImages: product.images || [],
+      },
+    ];
 
-  const singleItemCart = [
-   {
-    _id: product._id,
-    productName: product.title,
-    selectedWeight,
-    quantity: qty,
-    selectedPrice,
-    currentPrice: selectedPrice, // ✅ important for checkout
-    totalPrice: selectedPrice * qty,
-    cutPrice: parseFloat(product.cutPrice) || 0,
-    productImages: product.images || [],
-  },
+    setCartItems(singleItemCart);
+    navigate("/checkout");
+  };
 
+  // zoom handlers (same UX as Achar)
+  const handleMouseMove = (e) => {
+    if (!zoomRef.current) return;
+    const { left, top, width, height } = zoomRef.current.getBoundingClientRect();
+    const x = ((e.pageX - left) / width) * 100;
+    const y = ((e.pageY - top) / height) * 100;
+
+    setZoomStyle({
+      backgroundImage: `url(${mainImage})`,
+      backgroundPosition: `${x}% ${y}%`,
+      backgroundSize: "200%",
+      backgroundRepeat: "no-repeat",
+    });
+  };
+
+  const handleMouseLeave = () => setZoomStyle({});
+
+  const totalReviews = product.reviews?.length || 0;
+  const averageRating = product.rating ? product.rating.toFixed(1) : "0.0";
+
+  // product-specific details to show in product details list (adapted)
+  const productDetails = [
+    { key: "origin", label: "Origin", value: product.origin },
+    { key: "madeFrom", label: "Made From", value: product.madeFrom || "A2 Gir Cow Milk" },
+    { key: "shelfLife", label: "Shelf Life", value: product.shelfLife },
+    { key: "storage", label: "Storage", value: product.storageInstructions },
+    { key: "packInfo", label: "Pack Info", value: product.moreAboutProduct?.[0]?.description },
   ];
 
-setCartItems(singleItemCart);
-  navigate("/checkout"); // Redirect to checkout
-};
-
+  // weights array (from pricePerGram or weightVolume)
+  const weights = product.pricePerGram
+    ? product.pricePerGram.split(",").map((p) => p.split("=")[0].trim())
+    : product.weightVolume?.split(",").map((w) => w.trim()) || [];
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Toaster position="top-right" />
-
-        {/* ---------------- Left Section ---------------- */}
-        <div>
-          <div className="border rounded-lg p-4 flex justify-center bg-white shadow relative">
-            <ImageZoom src={mainImage} alt={product.title} />
-          </div>
-
-          <div className="flex mt-4 space-x-3">
-            {product.images?.map((img, idx) => (
-              <img
-                key={idx}
-                src={img}
-                alt={`thumbnail-${idx}`}
-                onClick={() => setMainImage(img)}
-                className={`h-20 w-20 border rounded-lg object-cover cursor-pointer hover:scale-105 transition ${
-                  mainImage === img ? "border-blue-600" : "border-gray-300"
-                }`}
-              />
-            ))}
-          </div>
-
-          {product.videoUrl && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-2">Product Video</h3>
-              <ProductVideo videoUrl={product.videoUrl} thumbnail={product.images?.[0]} />
-            </div>
-          )}
-        </div>
-
-        {/* ---------------- Right Section ---------------- */}
-        <div className="space-y-6">
-          <h1 className="text-2xl font-semibold">{product.title}</h1>
-          <div className="text-gray-500">
-            ({product.rating.toFixed(1)} ★ {product.reviews?.length || 0} Reviews)
-          </div>
-
-          {/* ---------------- Main Price & Cut Price ---------------- */}
-          <div className="flex items-center gap-4 text-xl font-bold mt-2">
-            <span className="text-blue-600">
-              ₹{selectedPrice * (weightQuantities[selectedWeight] || 1)}
-            </span>
-            {product.cutPrice && (
-              <span className="line-through text-gray-400 text-lg">
-                ₹{product.cutPrice * (weightQuantities[selectedWeight] || 1)}
-              </span>
-            )}
-          </div>
-
-          {/* ---------------- Weight Selection with Quantity ---------------- */}
-          <div className="flex flex-col gap-2 mt-2">
-            {weights.map((weight) => (
+      <div className="text-[0.9rem] bg-gray-50 min-h-screen">
+        <div className="max-w-screen-xl mx-auto p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {/* LEFT: Hero + Images */}
+            <div>
               <div
-                key={weight}
-                onClick={() => setSelectedWeight(weight)}
-                className={`flex items-center justify-between border p-2 rounded cursor-pointer ${
-                  selectedWeight === weight ? "border-blue-600 bg-blue-50" : "border-gray-300"
-                }`}
+                ref={zoomRef}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className="relative bg-white rounded-3xl p-6 shadow-2xl overflow-hidden"
               >
-                <span className="text-sm font-medium">
-                  {weight} ₹{getPriceByWeight(weight) * (weightQuantities[weight] || 1)}
-                </span>
-                <div className="flex items-center gap-2">
+                <div className="w-full h-[420px] md:h-[580px] flex items-center justify-center">
+                  <img src={HERO_IMAGE_URL} alt="hero" className="object-cover w-full h-full rounded-xl" />
+                </div>
+
+                <div className="absolute left-6 top-10 md:left-10 md:top-16 w-[70%] md:w-[65%] transform -translate-y-6 md:-translate-y-12">
+                  {/* main product image */}
+                  <img
+                    src={mainImage}
+                    alt={product.title || product.productName}
+                    className="w-full h-[360px] md:h-[460px] object-contain rounded-xl border-2 border-white shadow-lg bg-white"
+                  />
+                </div>
+
+                <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
+                  <div className="font-semibold">{product.brand || "Our Ghee"}</div>
+                  <div className="text-xs text-gray-600">{product.tagline || "Pure A2 Ghee"}</div>
+                </div>
+
+                {zoomStyle.backgroundImage && (
+                  <div className="absolute inset-0 pointer-events-none" style={{ ...zoomStyle }} />
+                )}
+              </div>
+
+              {/* THUMBNAILS */}
+              <div className="mt-4 flex items-center gap-3 overflow-x-auto py-2">
+                {(product.images || []).map((img, index) => (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateWeightQuantity(weight, -1);
-                    }}
-                    className="px-2 py-1 border rounded"
+                    key={index}
+                    onClick={() => setMainImage(img)}
+                    className={`flex-shrink-0 border rounded-lg overflow-hidden p-1 transition-transform hover:scale-105 ${
+                      mainImage === img ? "ring-2 ring-green-400" : "border-gray-200"
+                    }`}
                   >
-                    -
+                    <img src={img} alt={`thumb-${index}`} className="w-20 h-20 object-cover" />
                   </button>
-                  <span>{weightQuantities[weight] || 1}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateWeightQuantity(weight, 1);
-                    }}
-                    className="px-2 py-1 border rounded"
-                  >
-                    +
-                  </button>
+                ))}
+              </div>
+
+              {/* MORE ABOUT - left column */}
+              <div className="mt-6 bg-white p-6 rounded-2xl shadow">
+                <h3 className="text-lg md:text-xl font-semibold mb-3">More About</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {product.moreAboutProduct?.[0]?.description ||
+                    product.description ||
+                    "Rich, traditional ghee made from A2 Gir cow milk."}
+                </p>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center font-semibold text-green-700">
+                      A
+                    </div>
+                    <div>
+                      <div className="font-medium">Authentic</div>
+                      <div className="text-xs text-gray-600">Small-batch, traditional process</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center font-semibold text-yellow-700">
+                      G
+                    </div>
+                    <div>
+                      <div className="font-medium">Ghee Rich</div>
+                      <div className="text-xs text-gray-600">Made with pure A2 milk</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center font-semibold text-indigo-700">
+                      N
+                    </div>
+                    <div>
+                      <div className="font-medium">No Additives</div>
+                      <div className="text-xs text-gray-600">No preservatives</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center font-semibold text-pink-700">
+                      T
+                    </div>
+                    <div>
+                      <div className="font-medium">Taste</div>
+                      <div className="text-xs text-gray-600">{product.tasteDescription || "Pure, buttery & nutty"}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
+
+              {/* OPTIONAL: moreAboutProduct images block */}
+              {product.moreAboutProduct?.length > 0 && (
+                <div className="mt-6 bg-white p-6 rounded-2xl shadow">
+                  <h3 className="text-lg md:text-xl font-semibold mb-3">More About This Pack</h3>
+                  {product.moreAboutProduct.map((m, idx) => (
+                    <div key={idx} className="mb-4">
+                      {m.image && <img src={m.image} alt={`more-${idx}`} className="w-full rounded-xl mb-2 object-cover" />}
+                      {m.description && <p className="text-gray-700">{m.description}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT: Sticky purchase card */}
+            <div className="sticky top-6 self-start">
+              <div className="bg-white rounded-3xl p-6 shadow-lg">
+                <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">
+                  {product.title || product.productName}
+                </h1>
+
+                <div className="flex items-center mt-3 space-x-3">
+                  <div className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={18}
+                        className={i < Math.round(Number(averageRating) || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
+                </div>
+
+                <p className="mt-4 text-gray-700 text-[0.95rem]">
+                  {product.shortDescription || product.tagline || "Handcrafted, fresh & delicious ghee."}
+                </p>
+
+                <div className="mt-6 flex items-end gap-4">
+                  <div>
+                    <div className="text-3xl md:text-4xl font-bold text-green-600">
+                      ₹{getPrice(product, selectedWeight) * (weightQuantities[selectedWeight] || 1)}
+                    </div>
+                    {product.cutPrice && <div className="line-through text-gray-400">₹{product.cutPrice}</div>}
+                  </div>
+                </div>
+
+                {/* WEIGHT OPTIONS */}
+                {(product.pricePerGram || product.weightVolume) && (
+                  <div className="mt-6">
+                    <p className="font-medium text-gray-700 mb-2">Select Weight</p>
+
+                    <div className="flex flex-col gap-3">
+                      {(product.pricePerGram
+                        ? product.pricePerGram.split(",").map((p) => p.split("=")[0].trim())
+                        : product.weightVolume.split(",")
+                      )?.map((weight, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedWeight(weight)}
+                          className={`flex items-center justify-between border p-3 rounded-lg cursor-pointer transition-all duration-300 ${
+                            selectedWeight === weight ? "border-green-600 bg-green-50 shadow-sm" : "border-gray-200 bg-white hover:border-green-400"
+                          }`}
+                        >
+                          <span className="text-sm font-medium">
+                            {weight} - ₹{getPrice(product, weight) * (weightQuantities[weight] || 1)}
+                          </span>
+
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateWeightQuantity(weight, -1);
+                              }}
+                              className="px-3 py-1 border rounded"
+                            >
+                              -
+                            </button>
+
+                            <span>{weightQuantities[weight] || 1}</span>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateWeightQuantity(weight, 1);
+                              }}
+                              className="px-3 py-1 border rounded"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA BUTTONS */}
+                <div className="mt-6 grid grid-cols-1 gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                    className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
+                      isOutOfStock ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
+                  </button>
+
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={isOutOfStock}
+                    className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
+                      isOutOfStock ? "bg-gray-300 cursor-not-allowed" : "bg-yellow-400 hover:bg-yellow-500"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
+                  </button>
+                </div>
+
+                <Features />
+
+                {/* PRODUCT DETAILS */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-2">Product Details</h3>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    {productDetails.map(
+                      (item) =>
+                        item.value && (
+                          <li key={item.key}>
+                            <span className="font-medium text-gray-900">{item.label}:</span> {item.value}
+                          </li>
+                        )
+                    )}
+                  </ul>
+                </div>
+              </div>
+
+              {/* PRODUCT VIDEO */}
+              {product.videoUrl && (
+                <div className="mt-6">
+                  <div className="bg-white p-4 rounded-2xl shadow">
+                    <h4 className="font-semibold mb-2">Product Video</h4>
+                    <ProductVideo videoUrl={product.videoUrl} thumbnail={product.images?.[0]} />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            className={`w-full py-3 rounded-lg shadow-lg transition text-white ${
-              !product.stock ? "bg-gray-400 cursor-not-allowed" : "bg-yellow-600 hover:bg-yellow-700"
-            }`}
-            disabled={!product.stock}
-          >
-            {product.stock ? "Add to Cart" : "Out of Stock"}
-          </button>
-           <button
-    onClick={handleBuyNow}
-    className={`w-full py-3 rounded-lg shadow-lg text-white transition ${
-      !product.stock ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-    }`}
-    disabled={!product.stock}
-  >
-    {product.stock ? "Buy Now" : "Out of Stock"}
-  </button>
-          {/* ---------------- Description & Specifications ---------------- */}
-          {product.description && (
-            <div className="w-full border rounded-2xl shadow-sm bg-white p-4">
-              <button
-                onClick={() => setDescOpen(!descOpen)}
-                className="flex items-center justify-between w-full text-left"
-              >
-                <h3 className="text-lg font-semibold">Description</h3>
-                {descOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
-              </button>
+          {/* REVIEWS */}
+          {product.reviews?.length > 0 && (
+            <div className="mt-10">
+              <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
 
-              <div
-                ref={descRef}
-                style={{ maxHeight: descOpen ? `${descRef.current.scrollHeight}px` : "0px" }}
-                className="overflow-hidden transition-all duration-500 mt-3"
-              >
-                <p className="text-gray-600 leading-relaxed">{product?.description}</p>
-              </div>
-            </div>
-          )}
+              <div className="space-y-4">
+                {product.reviews.map((rev, i) => (
+                  <div key={i} className="bg-white p-4 rounded-xl shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                        {rev.name?.charAt(0)?.toUpperCase() || "U"}
+                      </div>
 
-          {product.specifications && (
-            <div className="w-full border rounded-2xl shadow-sm bg-white p-4 mt-4">
-              <button
-                onClick={() => setSpecOpen(!specOpen)}
-                className="flex items-center justify-between w-full text-left"
-              >
-                <h3 className="text-lg font-semibold mb-2">Specifications</h3>
-                {specOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
-              </button>
+                      <div>
+                        <div className="font-medium text-gray-900 text-sm">{rev.name}</div>
 
-              <div
-                ref={specRef}
-                style={{ maxHeight: specRef.current ? `${specRef.current.scrollHeight}px` : "0px" }}
-                className="overflow-hidden transition-all duration-500 mt-3"
-              >
-                <table className="w-full border border-gray-300 rounded-lg">
-                  <tbody>
-                    {specs.map((spec, idx) => (
-                      <tr key={idx} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                        <td className="border px-4 py-2 font-medium">{spec.key}</td>
-                        <td className="border px-4 py-2">{spec.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+                        <div className="flex mt-1">
+                          {Array.from({ length: Number(rev.rating) || 0 }).map((_, idx) => (
+                            <Star key={idx} size={14} className="text-yellow-400 fill-yellow-400" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
-          {product.moreAboutProduct?.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mt-6 mb-3">More About Product</h3>
-              <div className="grid gap-4">
-                {product.moreAboutProduct.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-4 border p-3 rounded-lg">
-                    {item.image && (
-                      <img src={item.image} alt={`more-about-${idx}`} className="w-24 h-24 object-cover rounded" />
+                    <p className="text-gray-700 leading-snug">{rev.comment}</p>
+
+                    {rev.images?.length > 0 && (
+                      <div className="flex mt-3 gap-2 flex-wrap">
+                        {rev.images.map((img, idx) => (
+                          <img key={idx} src={img} alt={`review-${idx}`} className="w-20 h-20 rounded-lg object-cover" />
+                        ))}
+                      </div>
                     )}
-                    <p className="text-gray-700">{item.description}</p>
+
+                    <p className="text-gray-400 text-xs mt-2">{new Date(rev.createdAt).toLocaleDateString()}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ---------------- Reviews ---------------- */}
-          <div>
-            <h3 className="text-lg font-semibold mt-6 mb-3">Customer Reviews</h3>
-            {product.reviews && product.reviews.length > 0 ? (
-              product.reviews.map((review, idx) => (
-                <div key={idx} className="border-b border-gray-200 py-4">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-medium">{review.name}</span>
-                    <span className="text-yellow-500">
-                      {"★".repeat(review.rating)}
-                      {"☆".repeat(5 - review.rating)}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mb-2">{review.comment}</p>
-                  {review.images?.length > 0 && (
-                    <div className="flex gap-2 flex-wrap">
-                      {review.images.map((img, i) => (
-                        <img key={i} src={img} alt={`review-${i}`} className="h-16 w-16 object-cover rounded-lg border" />
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-gray-400 text-xs mt-1">{new Date(review.createdAt).toLocaleDateString()}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No reviews yet.</p>
-            )}
-          </div>
-        </div>
+          {/* SIMILAR PRODUCTS */}
+          {similarProducts.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-xl font-semibold mb-6">Similar Products</h3>
 
-        {/* ---------------- Similar Products ---------------- */}
-        {similarProducts.length > 0 && (
-          <div className="col-span-2 mt-10">
-            <h2 className="text-xl font-semibold mb-4">Similar Products</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {similarProducts.map((sp) => (
-                <Link
-                  key={sp._id}
-                  to={`/ghee-product/${sp.slug}/${sp._id}`}
-                  className="border p-3 rounded-lg hover:shadow-md transition flex flex-col items-center"
-                >
-                  <img
-                    src={sp.images?.[0] || "/placeholder.png"}
-                    alt={sp.title}
-                    className="w-full h-32 object-cover rounded"
-                  />
-                  <p className="mt-2 text-center font-medium">{sp.title}</p>
-                  <p className="text-blue-600 font-bold mt-1">₹{sp.currentPrice}</p>
-                </Link>
-              ))}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                {similarProducts.map((item) => (
+                  <div
+                    key={item._id}
+                    className="group border rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer"
+                    onClick={() => navigate(`/ghee-product/${item.slug || item._id}/${item._id}`)}
+                  >
+                    <img src={item.images?.[0] || HERO_IMAGE_URL} alt={item.title || item.productName} className="w-full h-40 object-contain mb-2 rounded-lg" />
+                    <h4 className="text-gray-900 font-medium text-sm">{item.title || item.productName}</h4>
+                    <p className="text-green-600 font-semibold mt-1">₹{getPrice(item)}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );

@@ -48,6 +48,12 @@ import VideoAdvertiseList from "./components/VideoAdvertiseList";
 import AgarbattiCategoryProduct from "./components/AgarbattiCategoryProduct";
 import AgarbattiDetail from "./components/AgarbattiDetail";
 import AgarbattiProductList from "./components/AgarbattiProductList";
+import GanpatiCategoryProduct from "./components/GanpatiCategoryProduct";
+import GanpatiDetail from "./components/GanpatiDetail";
+import GanpatiProductList from "./components/GanpatiProductList";
+import CupCategoryProduct from "./components/CupCategoryProduct";
+import CupDetail from "./components/CupDetail";
+import CupProductList from "./components/CupProductList";
 
 function App() {
   return (
@@ -74,7 +80,9 @@ function App() {
                 <AcharProductList />
               </div>
               <AcharBannerTwo />
-              <AgarbattiProductList/>
+              <GanpatiProductList />
+              <CupProductList />
+              <AgarbattiProductList />
               <GheeProductList />
               <ServicesNav />
               <MasalaProductList />
@@ -104,13 +112,32 @@ function App() {
         <Route path="/ghee/:slug" element={<GheeCategoryProduct />} />
         <Route path="/ghee-product/:slug/:id" element={<GheeProductDetail />} />
 
-        <Route path="/masala-category/:slug" element={<MasalaCategoryProduct />} />
-        <Route path="/masala-product/:slug/:id" element={<MasalaProductDetail />} />
+        <Route
+          path="/masala-category/:slug"
+          element={<MasalaCategoryProduct />}
+        />
+        <Route
+          path="/masala-product/:slug/:id"
+          element={<MasalaProductDetail />}
+        />
 
         <Route path="/oil/category/:slug" element={<OilCategoryProduct />} />
         <Route path="/oil-product/:slug/:id" element={<OilProductDetail />} />
-<Route path="/agarbatti-category/:slug" element={<AgarbattiCategoryProduct />} />
-<Route path="/agarbatti-product/:slug/:id" element={<AgarbattiDetail />} />
+        <Route path="/cup-category/:slug" element={<CupCategoryProduct />} />
+        <Route path="/cup-product/:slug/:id" element={<CupDetail />} />
+        <Route
+          path="/agarbatti-category/:slug"
+          element={<AgarbattiCategoryProduct />}
+        />
+        <Route
+          path="/agarbatti-product/:slug/:id"
+          element={<AgarbattiDetail />}
+        />
+        <Route
+          path="/ganpati-category/:slug"
+          element={<GanpatiCategoryProduct />}
+        />
+        <Route path="/ganpati-product/:slug/:id" element={<GanpatiDetail />} />
 
         {/* Orders & Invoices */}
         <Route path="/order/:id" element={<OrderTracking />} />

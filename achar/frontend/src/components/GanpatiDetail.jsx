@@ -1,4 +1,4 @@
-// AgarbattiProductDetail.jsx
+// GanpatiDetail.jsx
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,7 +10,7 @@ import { Star } from "lucide-react";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
-const AgarbattiProductDetail = () => {
+const GanpatiDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, setCartItems } = useContext(CartContext);
@@ -33,11 +33,12 @@ const AgarbattiProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`/api/agarbatti/${id}`);
+        const { data } = await axios.get(`/api/ganpati/${id}`);
 
         const avgRating =
           data.reviews && data.reviews.length > 0
-            ? data.reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / data.reviews.length
+            ? data.reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) /
+              data.reviews.length
             : 0;
 
         setProduct({ ...data, rating: avgRating });
@@ -62,7 +63,7 @@ const AgarbattiProductDetail = () => {
     if (!product) return;
     const fetchSimilarProducts = async () => {
       try {
-        const { data } = await axios.get(`/api/agarbatti/${product._id}/similar`);
+        const { data } = await axios.get(`/api/ganpati/${product._id}/similar`);
         setSimilarProducts(data || []);
       } catch (error) {
         console.error("Error fetching similar products:", error);
@@ -134,7 +135,8 @@ const AgarbattiProductDetail = () => {
 
   const handleMouseMove = (e) => {
     if (!zoomRef.current) return;
-    const { left, top, width, height } = zoomRef.current.getBoundingClientRect();
+    const { left, top, width, height } =
+      zoomRef.current.getBoundingClientRect();
     const x = ((e.pageX - left) / width) * 100;
     const y = ((e.pageY - top) / height) * 100;
     setZoomStyle({
@@ -148,13 +150,23 @@ const AgarbattiProductDetail = () => {
   const handleMouseLeave = () => setZoomStyle({});
 
   const totalReviews = product.reviews?.length || 0;
-  const averageRating = product.rating ? product.rating.toFixed(1) : "0.0";
+  const averageRating = product.rating
+    ? product.rating.toFixed(1)
+    : "0.0";
 
   const productDetails = [
     { key: "description", label: "Description", value: product.description },
     { key: "quantity", label: "Quantity", value: product.quantity },
-    { key: "keyBenefits", label: "Key Benefits", value: product.keyBenefits?.join(", ") },
-    { key: "ingredients", label: "Ingredients", value: product.ingredients?.join(", ") },
+    {
+      key: "keyBenefits",
+      label: "Key Benefits",
+      value: product.keyBenefits?.join(", "),
+    },
+    {
+      key: "ingredients",
+      label: "Ingredients",
+      value: product.ingredients?.join(", "),
+    },
   ];
 
   return (
@@ -186,13 +198,11 @@ const AgarbattiProductDetail = () => {
                 />
               </div>
 
-              <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
-                <div className="font-semibold">{product.brand || "Agarbatti"}</div>
-                <div className="text-xs text-gray-600">{product.quantity || ""}</div>
-              </div>
-
               {zoomStyle.backgroundImage && (
-                <div className="absolute inset-0 pointer-events-none" style={{ ...zoomStyle }} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ ...zoomStyle }}
+                />
               )}
             </div>
 
@@ -203,26 +213,50 @@ const AgarbattiProductDetail = () => {
                   key={idx}
                   onClick={() => setMainImage(img)}
                   className={`flex-shrink-0 border rounded-lg overflow-hidden p-1 transition-transform hover:scale-105 ${
-                    mainImage === img ? "ring-2 ring-green-400" : "border-gray-200"
+                    mainImage === img
+                      ? "ring-2 ring-green-400"
+                      : "border-gray-200"
                   }`}
                 >
-                  <img src={img} alt={`thumb-${idx}`} className="w-20 h-20 object-cover" />
+                  <img
+                    src={img}
+                    alt={`thumb-${idx}`}
+                    className="w-20 h-20 object-cover"
+                  />
                 </button>
               ))}
             </div>
 
             {/* MORE ABOUT */}
             <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-              <h3 className="text-lg md:text-xl font-semibold mb-3">More About</h3>
+              <h3 className="text-lg md:text-xl font-semibold mb-3">
+                More About
+              </h3>
               <p className="text-gray-700 leading-relaxed">
-                {product.moreAboutProduct?.description || product.description || "Premium handcrafted agarbatti."}
+                {product.moreAboutProduct?.description ||
+                  product.description ||
+                  "Premium handcrafted product."}
               </p>
+
+              {/* FEATURES ICON GRID */}
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {[
-                  { label: "Natural", desc: "Made from natural ingredients", color: "green" },
-                  { label: "Long Burning", desc: "Long-lasting fragrance", color: "yellow" },
-                  { label: "Smooth Smoke", desc: "Pleasant low smoke", color: "indigo" },
-                  { label: "Aromatic", desc: product.title, color: "pink" },
+                  {
+                    label: "Premium",
+                    desc: "Excellent build quality",
+                    color: "green",
+                  },
+                  {
+                    label: "Handmade",
+                    desc: "Crafted carefully",
+                    color: "yellow",
+                  },
+                  {
+                    label: "Divine",
+                    desc: "Positive spiritual energy",
+                    color: "indigo",
+                  },
+                  { label: "Aesthetic", desc: product.title, color: "pink" },
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start space-x-3">
                     <div
@@ -243,7 +277,9 @@ const AgarbattiProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">{item.label}</div>
-                      <div className="text-xs text-gray-600">{item.desc}</div>
+                      <div className="text-xs text-gray-600">
+                        {item.desc}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -254,7 +290,8 @@ const AgarbattiProductDetail = () => {
             {product.moreAboutProduct?.images?.length > 0 && (
               <div className="mt-6 bg-white p-6 rounded-2xl shadow">
                 <h3 className="text-lg md:text-xl font-semibold">
-                  {product.moreAboutProduct.name || "More About This Pack"}
+                  {product.moreAboutProduct.name ||
+                    "More About This Pack"}
                 </h3>
 
                 {product.moreAboutProduct.description && (
@@ -280,7 +317,9 @@ const AgarbattiProductDetail = () => {
           {/* RIGHT SIDE */}
           <div className="sticky top-6 self-start">
             <div className="bg-white rounded-3xl p-6 shadow-lg">
-              <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">{product.title}</h1>
+              <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">
+                {product.title}
+              </h1>
 
               <div className="flex items-center mt-3 space-x-3">
                 <div className="flex items-center">
@@ -288,28 +327,46 @@ const AgarbattiProductDetail = () => {
                     <Star
                       key={i}
                       size={18}
-                      className={i < Math.round(Number(averageRating) || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                      className={
+                        i <
+                        Math.round(Number(averageRating) || 0)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }
                     />
                   ))}
                 </div>
-                <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
+                <span className="text-gray-600 text-sm">
+                  ({totalReviews} reviews)
+                </span>
               </div>
 
-              <p className="mt-4 text-gray-700 text-[0.95rem]">{product.description || "Premium handcrafted agarbatti."}</p>
+              <p className="mt-4 text-gray-700 text-[0.95rem]">
+                {product.description ||
+                  "Beautiful premium Ganpati idol."}
+              </p>
 
               <div className="mt-6 flex items-end gap-4">
                 <div>
                   <div className="text-3xl md:text-4xl font-bold text-green-600">
-                    ₹{getPrice(product, selectedPack) * (packQuantities[selectedPack] || 1)}
+                    ₹
+                    {getPrice(product, selectedPack) *
+                      (packQuantities[selectedPack] || 1)}
                   </div>
-                  {product.cut_price && <div className="line-through text-gray-400">₹{product.cut_price}</div>}
+                  {product.cut_price && (
+                    <div className="line-through text-gray-400">
+                      ₹{product.cut_price}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* PACK OPTIONS */}
               {product.packs?.length > 0 && (
                 <div className="mt-6">
-                  <p className="font-medium text-gray-700 mb-2">Select Pack</p>
+                  <p className="font-medium text-gray-700 mb-2">
+                    Select Pack
+                  </p>
                   <div className="flex flex-col gap-3">
                     {product.packs.map((pack, idx) => (
                       <div
@@ -322,8 +379,11 @@ const AgarbattiProductDetail = () => {
                         }`}
                       >
                         <span className="text-sm font-medium">
-                          {pack.name} - ₹{getPrice(product, pack.name) * (packQuantities[pack.name] || 1)}
+                          {pack.name} – ₹
+                          {getPrice(product, pack.name) *
+                            (packQuantities[pack.name] || 1)}
                         </span>
+
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={(e) => {
@@ -364,11 +424,14 @@ const AgarbattiProductDetail = () => {
                 >
                   {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
                 </button>
+
                 <button
                   onClick={handleBuyNow}
                   disabled={isOutOfStock}
                   className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
-                    isOutOfStock ? "bg-gray-300 cursor-not-allowed" : "bg-yellow-400 hover:bg-yellow-500"
+                    isOutOfStock
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-yellow-400 hover:bg-yellow-500"
                   }`}
                 >
                   {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
@@ -379,13 +442,18 @@ const AgarbattiProductDetail = () => {
 
               {/* PRODUCT DETAILS */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Product Details</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Product Details
+                </h3>
                 <ul className="list-disc list-inside space-y-2 text-gray-700">
                   {productDetails.map(
                     (item) =>
                       item.value && (
                         <li key={item.key}>
-                          <span className="font-medium text-gray-900">{item.label}:</span> {item.value}
+                          <span className="font-medium text-gray-900">
+                            {item.label}:
+                          </span>{" "}
+                          {item.value}
                         </li>
                       )
                   )}
@@ -397,7 +465,10 @@ const AgarbattiProductDetail = () => {
                 <div className="mt-6">
                   <div className="bg-white p-4 rounded-2xl shadow">
                     <h4 className="font-semibold mb-2">Product Video</h4>
-                    <ProductVideo videoUrl={product.videoUrl} thumbnail={product.images?.[0]} />
+                    <ProductVideo
+                      videoUrl={product.videoUrl}
+                      thumbnail={product.images?.[0]}
+                    />
                   </div>
                 </div>
               )}
@@ -408,33 +479,57 @@ const AgarbattiProductDetail = () => {
         {/* REVIEWS */}
         {product.reviews?.length > 0 && (
           <div className="mt-10">
-            <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              Customer Reviews
+            </h3>
             <div className="space-y-4">
               {product.reviews.map((rev, i) => (
-                <div key={i} className="bg-white p-4 rounded-xl shadow-sm">
+                <div
+                  key={i}
+                  className="bg-white p-4 rounded-xl shadow-sm"
+                >
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
                       {rev.name?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <div>
-                      <div className="font-medium text-gray-900 text-sm">{rev.name}</div>
+                      <div className="font-medium text-gray-900 text-sm">
+                        {rev.name}
+                      </div>
                       <div className="flex mt-1">
-                        {Array.from({ length: Number(rev.rating) || 0 }).map((_, idx) => (
-                          <Star key={idx} size={14} className="text-yellow-400 fill-yellow-400" />
+                        {Array.from({
+                          length: Number(rev.rating) || 0,
+                        }).map((_, idx) => (
+                          <Star
+                            key={idx}
+                            size={14}
+                            className="text-yellow-400 fill-yellow-400"
+                          />
                         ))}
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-700 leading-snug">{rev.comment}</p>
+                  <p className="text-gray-700 leading-snug">
+                    {rev.comment}
+                  </p>
+
                   {rev.images?.length > 0 && (
                     <div className="flex mt-3 gap-2 flex-wrap">
                       {rev.images.map((img, idx) => (
-                        <img key={idx} src={img} alt={`review-${idx}`} className="w-20 h-20 rounded-lg object-cover" />
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`review-${idx}`}
+                          className="w-20 h-20 rounded-lg object-cover"
+                        />
                       ))}
                     </div>
                   )}
+
                   <p className="text-gray-400 text-xs mt-2">
-                    {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : ""}
+                    {rev.createdAt
+                      ? new Date(rev.createdAt).toLocaleDateString()
+                      : ""}
                   </p>
                 </div>
               ))}
@@ -445,14 +540,27 @@ const AgarbattiProductDetail = () => {
         {/* SIMILAR PRODUCTS */}
         {similarProducts.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold mb-4">You May Also Like</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              You May Also Like
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {similarProducts.map((sp, idx) => (
-                <div key={idx} className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-                  <img src={sp.images?.[0]} alt={sp.title} className="w-full h-40 object-cover" />
+                <div
+                  key={idx}
+                  className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition cursor-pointer"
+                >
+                  <img
+                    src={sp.images?.[0]}
+                    alt={sp.title}
+                    className="w-full h-40 object-cover"
+                  />
                   <div className="p-3">
-                    <h4 className="font-medium text-gray-900 text-sm">{sp.title}</h4>
-                    <p className="text-green-600 font-semibold text-sm mt-1">₹{sp.current_price}</p>
+                    <h4 className="font-medium text-gray-900 text-sm">
+                      {sp.title}
+                    </h4>
+                    <p className="text-green-600 font-semibold text-sm mt-1">
+                      ₹{sp.current_price}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -464,4 +572,4 @@ const AgarbattiProductDetail = () => {
   );
 };
 
-export default AgarbattiProductDetail;
+export default GanpatiDetail;

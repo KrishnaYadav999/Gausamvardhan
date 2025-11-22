@@ -1,296 +1,267 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useContext } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "../components/Filter";
+import { FaHeart } from "react-icons/fa";
 
-const GheeCategoryProduct = () => {
-  const { slug } = useParams();
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedWeights, setSelectedWeights] = useState({});
-  const [mainImages, setMainImages] = useState({});
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    category: "",
-    price: [0, 5000],
-    rating: 0,
-    stock: false,
-  });
-
+/* ---------------------------------------------------
+    PRODUCT CARD
+----------------------------------------------------*/
+const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   const { addToCart } = useContext(CartContext);
+  const [hovered, setHovered] = useState(false);
 
-  // Fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data } = await axios.get(
-          `/api/ghee-products/category/${slug}`
-        );
-        setProducts(data);
-        setFilteredProducts(data);
+  if (!product) return null;
+  const isOutOfStock = !product.stock;
 
-        // Initialize weights & main images per product
-        const defaults = {};
-        const images = {};
-        data.forEach((product) => {
-          // Default weight: first weight from pricePerGram or weightVolume
-          const firstWeight = product.pricePerGram
-            ? product.pricePerGram.split(",")[0].split("=")[0].trim()
-            : product.weightVolume?.split(",")[0] || "";
-          defaults[product._id] = firstWeight;
-
-          images[product._id] = product.images?.[0]
-            ? product.images[0].startsWith("http")
-              ? product.images[0]
-              : `/${product.images[0]}`
-            : "https://via.placeholder.com/300";
-        });
-        setSelectedWeights(defaults);
-        setMainImages(images);
-      } catch (error) {
-        console.error(error);
-        setProducts([]);
-        setFilteredProducts([]);
-        toast.error("❌ Failed to load products");
-      }
-    };
-    fetchProducts();
-  }, [slug]);
-
-  // Get price based on selected weight
   const getPriceByWeight = (product, weight) => {
     if (!weight) return parseFloat(product.currentPrice) || 0;
-
     if (product.pricePerGram) {
       const priceMap = {};
       product.pricePerGram.split(",").forEach((p) => {
         const [w, v] = p.split("=");
         priceMap[w.trim()] = parseFloat(v.trim());
       });
-      return priceMap[weight] || parseFloat(product.currentPrice) || 0;
+      return priceMap[weight] || parseFloat(product.currentPrice);
     }
-
-    return parseFloat(product.currentPrice) || 0;
+    return parseFloat(product.currentPrice);
   };
 
-  // Discount %
-  const calculateDiscount = (cutPrice, selectedPrice) => {
-    const cp = parseFloat(cutPrice);
-    const curr = parseFloat(selectedPrice);
-    if (!cp || !curr) return null;
-    return Math.round(((cp - curr) / cp) * 100);
-  };
+  const selectedPrice = getPriceByWeight(product, selectedWeight);
 
-  // Add to cart
-  const handleAddToCart = (product) => {
-    const weight = selectedWeights[product._id];
-    if (!weight) return toast.error("❌ Please select a weight");
-    if (!product.stock) return toast.error("❌ This product is out of stock!");
+  const avgRating =
+    product?.reviews?.length > 0
+      ? (
+          product.reviews.reduce((acc, r) => acc + (r.rating || 0), 0) /
+          product.reviews.length
+        ).toFixed(1)
+      : "0.0";
 
-    const selectedPrice = getPriceByWeight(product, weight);
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (isOutOfStock) return toast.error("❌ Out of stock");
+    if (!selectedWeight) return toast.error("❌ Select weight");
 
     addToCart({
       _id: product._id,
       productName: product.title,
-      selectedWeight: weight,
+      selectedWeight,
       quantity: 1,
       selectedPrice,
-      cutPrice: parseFloat(product.cutPrice) || 0,
+      cutPrice: product.cutPrice || 0,
       productImages: product.images || [],
     });
-
-    toast.success(`🛒 ${product.title} (${weight}) added to cart!`);
+    toast.success(`🛒 ${product.title} (${selectedWeight}) added!`);
   };
 
-  // Filter products
-  const handleFilterChange = useCallback(
-    (newFilters) => {
-      setFilters(newFilters);
-      let temp = [...products];
-
-      temp = temp.filter((product) => {
-        const selectedWeight = selectedWeights[product._id];
-        const price = getPriceByWeight(product, selectedWeight);
-
-        const inPriceRange =
-          price >= newFilters.price[0] && price <= newFilters.price[1];
-        const inStock = newFilters.stock ? product.stock : true;
-        const meetsRating = newFilters.rating
-          ? (product.rating || 0) >= newFilters.rating
-          : true;
-
-        return inPriceRange && inStock && meetsRating;
-      });
-
-      setFilteredProducts(temp);
-    },
-    [products, selectedWeights]
-  );
-
-  if (products.length === 0)
-    return <p className="text-center py-10">No products found.</p>;
+  const weights = product.pricePerGram
+    ? product.pricePerGram.split(",").map((p) => p.split("=")[0].trim())
+    : [];
 
   return (
-    <div className="px-4 sm:px-6 py-8 bg-gray-50 min-h-screen">
-      <Toaster position="top-right" />
-
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">
-          {slug} Ghee Products
-        </h2>
-
-        {/* Mobile Filter */}
-        <button
-          className="md:hidden flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg shadow hover:bg-yellow-700"
-          onClick={() => setFilterOpen(true)}
-        >
-          <FiFilter /> Filters
-        </button>
-      </div>
-
-      <div className="flex gap-6">
-        {/* Sidebar Filter */}
-        <div className="hidden md:block md:w-72">
-          <Filter
-            categories={[]}
-            minPrice={0}
-            maxPrice={5000}
-            onFilterChange={handleFilterChange}
+    <div
+      className={`bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* IMAGE */}
+      <div className="relative h-48 rounded-t-2xl overflow-hidden bg-gray-50">
+        <img
+          src={product.images?.[0]}
+          alt={product.title}
+          className={`w-full h-full object-cover absolute inset-0 transition-all duration-500 ${
+            hovered && product.images?.[1] ? "opacity-0" : "opacity-100"
+          }`}
+        />
+        {product.images?.[1] && (
+          <img
+            src={product.images[1]}
+            alt={product.title}
+            className={`w-full h-full object-cover absolute inset-0 transition-all duration-500 ${
+              hovered ? "opacity-100" : "opacity-0"
+            }`}
           />
-        </div>
+        )}
 
-        {/* Mobile Drawer Filter */}
-        {filterOpen && (
-          <div className="fixed inset-0 z-50 flex">
-            <div
-              className="flex-1 bg-black bg-opacity-50"
-              onClick={() => setFilterOpen(false)}
-            ></div>
-            <div className="w-72 max-w-sm bg-white dark:bg-gray-900 h-full shadow-lg p-4 overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Filters</h3>
-                <button
-                  className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
-                  onClick={() => setFilterOpen(false)}
-                >
-                  <FiX size={20} />
-                </button>
-              </div>
-              <Filter
-                categories={[]}
-                minPrice={0}
-                maxPrice={5000}
-                onFilterChange={handleFilterChange}
-              />
-            </div>
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+            <span className="bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold">
+              OUT OF STOCK
+            </span>
           </div>
         )}
 
-        {/* Product Grid */}
-        <div className="flex-1 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => {
-            const isOutOfStock = !product.stock;
-            const weights = product.pricePerGram
-              ? product.pricePerGram.split(",").map((p) => p.split("=")[0].trim())
-              : product.weightVolume?.split(",") || [];
-            const selectedWeight = selectedWeights[product._id] || weights[0] || "";
-            const selectedPrice = getPriceByWeight(product, selectedWeight);
+        {!isOutOfStock && (
+          <span className="absolute top-3 right-3 bg-white p-2 rounded-full shadow">
+            <FaHeart size={16} className="text-gray-700" />
+          </span>
+        )}
+      </div>
 
-            return (
-              <div
-                key={product._id}
-                className={`relative bg-white rounded-lg shadow hover:shadow-lg transition flex flex-col ${
-                  isOutOfStock ? "opacity-50" : ""
-                }`}
-              >
-                {/* Discount */}
-                {product.cutPrice && (
-                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
-                    {calculateDiscount(product.cutPrice, selectedPrice)}% OFF
-                  </span>
-                )}
-
-                {/* Image */}
-                <Link
-                  to={`/ghee-product/${product.slug}/${product._id}`}
-                  className="overflow-hidden"
-                >
-                  <img
-                    src={mainImages[product._id]}
-                    alt={product.title}
-                    className="w-full h-44 object-contain transition-transform duration-300 hover:scale-105"
-                  />
-                </Link>
-
-                {/* Info */}
-                <div className="p-3 flex flex-col flex-grow">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-800 line-clamp-2">
-                    {product.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mt-1">
-                    {product.description}
-                  </p>
-
-                  {/* Weights */}
-                  {weights.length > 0 && (
-                    <div className="flex space-x-2 mt-2 flex-wrap">
-                      {weights.map((weight) => (
-                        <button
-                          key={weight}
-                          onClick={() =>
-                            setSelectedWeights((prev) => ({
-                              ...prev,
-                              [product._id]: weight,
-                            }))
-                          }
-                          className={`px-2 py-1 border rounded text-xs ${
-                            selectedWeight === weight
-                              ? "border-yellow-600 text-yellow-600"
-                              : "border-gray-300 text-gray-700"
-                          }`}
-                          disabled={isOutOfStock}
-                        >
-                          {weight} ₹{getPriceByWeight(product, weight)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Price + Add */}
-                  <div className="mt-auto flex items-center justify-between">
-                    <div>
-                      <p className="text-yellow-600 font-bold text-sm sm:text-base">
-                        {selectedPrice}₹
-                      </p>
-                      {product.cutPrice && (
-                        <p className="text-xs text-gray-400 line-through">
-                          {product.cutPrice}₹
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md text-xs sm:text-sm transition ${
-                        isOutOfStock
-                          ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                          : "bg-yellow-600 text-white hover:bg-yellow-700"
-                      }`}
-                      disabled={isOutOfStock}
-                    >
-                      {isOutOfStock ? "Out of Stock" : "Add"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+      {/* DETAILS */}
+      <div className="px-4 py-3 flex flex-col flex-1">
+        <div className="flex justify-between items-start mb-1">
+          <h3 className="font-semibold text-sm sm:text-base text-gray-900 w-[70%] line-clamp-2">
+            {product.title}
+          </h3>
+          <p className="text-sm sm:text-base font-bold text-gray-900">
+            ₹{selectedPrice}
+          </p>
         </div>
+
+        <p className="text-xs text-gray-500 mb-2">Pure & Natural Ghee</p>
+
+        <div className="flex items-center gap-1 mb-2">
+          <span className="text-yellow-500 text-sm sm:text-base">★</span>
+          <span className="text-xs sm:text-sm font-semibold text-gray-800">
+            {avgRating}
+          </span>
+          <span className="text-xs text-gray-400">
+            ({product.reviews?.length || 0}+)
+          </span>
+        </div>
+
+        {/* WEIGHT SELECTOR */}
+        {weights.length > 0 && (
+          <select
+            value={selectedWeight}
+            disabled={isOutOfStock}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setSelectedWeight(e.target.value)}
+            className={`w-full border px-3 py-1.5 text-sm rounded-lg mb-2 ${
+              isOutOfStock
+                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                : "border-gray-300 text-gray-700"
+            }`}
+          >
+            {weights.map((w) => (
+              <option key={w} value={w}>
+                {w} ₹{getPriceByWeight(product, w)}
+              </option>
+            ))}
+          </select>
+        )}
+
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className={`w-full py-2 font-semibold text-sm tracking-wide rounded-lg ${
+            isOutOfStock
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-yellow-600 text-white hover:bg-yellow-700"
+          }`}
+        >
+          {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+        </button>
       </div>
     </div>
   );
 };
 
-export default GheeCategoryProduct;
+/* ---------------------------------------------------
+    MAIN CATEGORY PAGE
+----------------------------------------------------*/
+export default function GheeCategoryProduct() {
+  const { slug } = useParams();
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [selectedWeights, setSelectedWeights] = useState({});
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  // FETCH PRODUCTS
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data } = await axios.get(`/api/ghee-products/category/${slug}`);
+        setProducts(data);
+        setFilteredProducts(data);
+
+        const defaults = {};
+        data.forEach((p) => {
+          if (p.pricePerGram)
+            defaults[p._id] = p.pricePerGram.split(",")[0].split("=")[0].trim();
+        });
+        setSelectedWeights(defaults);
+      } catch {
+        toast.error("Failed to load products");
+      }
+    };
+    load();
+  }, [slug]);
+
+  const handleFilter = useCallback(
+    (filters) => {
+      let temp = [...products];
+      if (filters.rating > 0)
+        temp = temp.filter((p) => (p.rating || 0) >= filters.rating);
+      setFilteredProducts(temp);
+    },
+    [products]
+  );
+
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <Toaster />
+      <div className="px-4 sm:px-6 py-8">
+        {/* HEADER */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">
+            {slug} Ghee Products
+          </h2>
+          <button
+            className="md:hidden flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg shadow hover:bg-yellow-700"
+            onClick={() => setFilterOpen(true)}
+          >
+            <FiFilter /> Filter
+          </button>
+        </div>
+
+        <div className="flex gap-6">
+          {/* SIDEBAR FILTER */}
+          <div className="hidden md:block w-64 shrink-0 sticky top-24 mr-4">
+            <Filter minPrice={0} maxPrice={5000} categories={[]} onFilterChange={handleFilter} />
+          </div>
+
+          {/* MOBILE FILTER DRAWER */}
+          {filterOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
+              <div className="flex-1" onClick={() => setFilterOpen(false)}></div>
+              <div className="w-72 bg-white h-full shadow-lg p-4 mr-4 overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <button onClick={() => setFilterOpen(false)}>
+                    <FiX size={22} />
+                  </button>
+                </div>
+                <Filter minPrice={0} maxPrice={5000} categories={[]} onFilterChange={handleFilter} />
+              </div>
+            </div>
+          )}
+
+          {/* PRODUCT GRID */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
+            {filteredProducts.length === 0 ? (
+              <p className="text-gray-600 col-span-full text-center py-20">
+                No products found.
+              </p>
+            ) : (
+              filteredProducts.map((p) => (
+                <GheeProductCard
+                  key={p._id}
+                  product={p}
+                  selectedWeight={selectedWeights[p._id]}
+                  setSelectedWeight={(w) =>
+                    setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
+                  }
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

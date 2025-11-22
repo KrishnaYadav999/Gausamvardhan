@@ -21,6 +21,10 @@ import AdminVideoAdvertiseCreate from "./AdminVideoAdvertiseCreate";
 import AdminAdvertiseDeleteUpdate from "./AdminAdvertiseDeleteUpdate";
 import AdminAgarbatiCreate from "./AdminAgarbatiCreate";
 import AdminAgarbattiUpdateDelete from "./AdminAgarbattiUpdateDelete";
+import AdminGanpatiCreate from "./AdminGanpatiCreate";
+import AdminCupCreate from "./AdminCupCreate";
+import AdminGanpatiManage from "./AdminGanpatiManage";
+
 
 const Admin = () => {
   const [activeComponent, setActiveComponent] = useState("dashboard");
@@ -75,6 +79,12 @@ const Admin = () => {
         return <AdminVideoAdvertiseCreate />;
       case "videoadvertizeupdatedelete":
         return <AdminAdvertiseDeleteUpdate />;
+     case "adminganpaticreate":
+  return <AdminGanpatiCreate />;
+       case "adminganpatimanage":
+  return <AdminGanpatiManage />;
+       case "cupcreate":
+  return <AdminCupCreate />;
       case "dashboard":
         return (
           <div className="p-6">

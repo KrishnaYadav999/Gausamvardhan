@@ -44,9 +44,13 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
     toast.success("Added to cart");
   };
 
+  // Use main rating from model
+  const mainRating = product.rating?.toFixed(1) || "0.0";
+  const numberOfReviews = product.numberOfReviews || 0;
+
   return (
     <div
-      className="min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-lg transition-all cursor-pointer h-full flex flex-col"
+      className="min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-lg transition-all cursor-pointer h-full flex flex-col relative"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{ fontFamily: "Inter" }}
@@ -54,7 +58,7 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
       {/* IMAGE */}
       <Link to={`/oil-product/${product.slug}/${product._id}`}>
         <div className="relative h-[260px] rounded-t-2xl overflow-hidden bg-gray-50">
-          {/* Primary Image */}
+          {/* Main Image */}
           <img
             src={product.productImages?.[0]}
             alt=""
@@ -81,15 +85,28 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
       </Link>
 
       {/* DETAILS */}
-      <div className="p-4 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] line-clamp-2">
+      <div className="px-4 py-4 flex flex-col h-full">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2">
             {product.productName}
           </h3>
-          <p className="text-lg font-bold text-gray-900">₹{selectedPrice}</p>
+          <div className="flex flex-col items-end">
+            {product.cutPrice && (
+              <p className="text-[16px] text-gray-500 line-through">
+                ₹{parseFloat(product.cutPrice)}
+              </p>
+            )}
+            <p className="text-[20px] font-bold text-gray-900">₹{selectedPrice}</p>
+          </div>
         </div>
 
-        <p className="text-sm text-gray-500 mb-3">Cold-pressed • Pure Oils</p>
+        <p className="text-sm text-gray-500 mb-3">Cold-pressed • Fresh Oils</p>
+
+        <div className="flex items-center gap-1 mb-4">
+          <span className="text-yellow-500 text-lg">★</span>
+          <span className="text-sm font-semibold text-gray-800">{mainRating}</span>
+          <span className="text-xs text-gray-500">({numberOfReviews}+)</span>
+        </div>
 
         {/* VOLUME SELECTOR */}
         {product.perPriceLiter?.length > 0 && (
@@ -97,7 +114,7 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
             value={selectedVolume}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => setSelectedVolume(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm font-medium text-gray-700"
+            className="w-full border px-4 py-2 text-sm font-medium border-gray-300 rounded-xl text-gray-700"
           >
             {product.perPriceLiter.map((item) => (
               <option key={item.volume} value={item.volume}>
@@ -107,10 +124,9 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
           </select>
         )}
 
-        {/* ADD BUTTON */}
         <button
           onClick={handleAddToCart}
-          className="w-full bg-yellow-600 text-white py-3 rounded-xl font-semibold text-sm tracking-wide hover:bg-yellow-700 mt-4"
+          className="w-full py-3 font-semibold text-sm tracking-wide mt-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl"
         >
           ADD TO CART
         </button>
@@ -134,7 +150,7 @@ const OilProductSkeleton = () => (
 );
 
 /* ---------------------------------------------------
-    MAIN + SLIDER
+    MAIN + SLIDER + HERO
 ----------------------------------------------------*/
 const OilProductList = () => {
   const { slug } = useParams();
@@ -152,21 +168,20 @@ const OilProductList = () => {
 
         setProducts(data);
 
+        // Set default selected volume for each product
         const defaults = {};
         data.forEach((p) => {
           if (p.perPriceLiter) {
             defaults[p._id] = p.perPriceLiter[0].volume;
           }
         });
-
         setSelectedVolumes(defaults);
       } catch {
-        toast.error("Failed to load products");
+        toast.error("Failed to load oil products");
       } finally {
         setLoading(false);
       }
     };
-
     load();
   }, [slug]);
 
@@ -180,30 +195,49 @@ const OilProductList = () => {
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
       <Toaster />
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <div className="relative w-full mb-10">
-        <div className="w-full h-[150px] overflow-hidden relative">
+        <div className="relative w-full h-[130px] sm:h-[80px] overflow-hidden">
           <svg
             viewBox="0 0 1440 320"
-            className="w-full h-full absolute"
+            className="absolute inset-0 w-full h-full"
             preserveAspectRatio="none"
+            style={{ opacity: 0.35 }}
           >
             <path
-              fill="#FDE9B0"
-              d="M0,96L80,122.7C160,149,320,203,480,202.7C640,203,800,149,960,122.7C1120,96,1280,96,1360,96L1440,96V320H1360C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320H0Z"
-            />
+              fill="#FFF3C9"
+              d="M0,256L48,229.3C96,203,192,149,288,149.3C384,149,480,203,576,224C672,245,768,235,864,218.7C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
           </svg>
+
+          <div
+            className="absolute bottom-0 w-full h-[90px]"
+            style={{
+              backgroundImage:
+                "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1763637527/coe_achar_ysmiwo.jpg')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right bottom",
+            }}
+          ></div>
         </div>
 
         <div className="absolute inset-0 flex items-center justify-between px-6">
           <h2
-            className="text-4xl font-bold text-yellow-700"
+            className="text-3xl font-extrabold text-yellow-700 sm:text-lg"
             style={{ fontFamily: "Playfair Display" }}
           >
             Pure Cold-Pressed Oils
           </h2>
 
-          <button className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow">
+          <button
+            className="
+              bg-yellow-600 hover:bg-yellow-700
+              text-white px-6 py-2 rounded-md
+              font-semibold shadow-md
+              sm:px-3 sm:py-1 sm:text-[11px]
+            "
+          >
             Shop More
           </button>
         </div>
@@ -230,11 +264,11 @@ const OilProductList = () => {
         className="flex gap-6 overflow-x-auto scrollbar-hide py-4 px-4 snap-x snap-mandatory whitespace-nowrap"
         style={{ scrollBehavior: "smooth" }}
       >
-        {(loading ? [...Array(6)] : products).map((item, i) =>
+        {(loading ? [...Array(6)] : products).map((item, index) =>
           loading ? (
-            <OilProductSkeleton key={i} />
+            <OilProductSkeleton key={index} />
           ) : (
-            <div key={item._id} className="snap-start w-[280px]">
+            <div key={item._id} className="snap-start w-[280px] h-full">
               <OilProductCard
                 product={item}
                 selectedVolume={selectedVolumes[item._id]}

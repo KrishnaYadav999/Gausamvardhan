@@ -1,17 +1,34 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { FaSearch, FaShoppingBag, FaUserCircle } from "react-icons/fa";
+import {
+  FaSearch,
+  FaShoppingBag,
+  FaUserCircle,
+  FaBars,
+  FaTimes,
+} from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 
-// 🔹 Animated placeholder values
 const searchItems = [
   "Aam ka Achar",
   "Nimbu ka Achar",
   "Mixed Vegetable Pickle",
   "Mirchi ka Achar",
+];
+
+const menuItems = [
+  { title: "Ghee", icon: "/icons/ghee.png" },
+  { title: "Oil", icon: "/icons/oil.png" },
+  { title: "Atta", icon: "/icons/atta.png" },
+  { title: "Jaggery", icon: "/icons/jaggery.png" },
+  { title: "Immunity", icon: "/icons/immunity.png" },
+  { title: "Rice", icon: "/icons/rice.png" },
+  { title: "Breakfast & Snacks", icon: "/icons/snacks.png" },
+  { title: "Grain & Pulses", icon: "/icons/grains.png" },
+  { title: "Spices", icon: "/icons/spices.png" },
 ];
 
 const Navbar = () => {
@@ -23,12 +40,25 @@ const Navbar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
 
+  const drawerRef = useRef(null);
   const desktopInputRef = useRef(null);
   const mobileInputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // MOBILE SEARCH DROPDOWN ANIMATION
+  /** Drawer Animation */
+  useEffect(() => {
+    if (!drawerRef.current) return;
+
+    gsap.to(drawerRef.current, {
+      x: mobileMenu ? 0 : "-100%",
+      duration: 0.4,
+      ease: "power3.out",
+    });
+  }, [mobileMenu]);
+
+  /** Mobile Search Animation */
   useEffect(() => {
     if (!dropdownRef.current) return;
 
@@ -40,34 +70,30 @@ const Navbar = () => {
     });
   }, [showSearch]);
 
-  // PLACEHOLDER TYPING ANIMATION
+  /** Placeholder animation */
   useEffect(() => {
     if (!desktopInputRef.current) return;
 
     const timeline = gsap.timeline({ repeat: -1 });
 
     searchItems.forEach((text) => {
-      // Typing
       for (let i = 0; i <= text.length; i++) {
         timeline.call(() => {
           desktopInputRef.current.placeholder = text.slice(0, i);
         }, null, "+=0.06");
       }
-
       timeline.to({}, { duration: 1 });
 
-      // Deleting
       for (let i = text.length; i >= 0; i--) {
         timeline.call(() => {
           desktopInputRef.current.placeholder = text.slice(0, i);
         }, null, "+=0.04");
       }
-
       timeline.to({}, { duration: 0.4 });
     });
   }, []);
 
-  // API SEARCH LOGIC
+  /** SEARCH WORKING */
   useEffect(() => {
     if (!searchQuery) {
       setSearchResults([]);
@@ -104,28 +130,25 @@ const Navbar = () => {
     return () => clearTimeout(delay);
   }, [searchQuery]);
 
-  // Redirect on click
+  /** Redirect */
   const handleRedirect = (item) => {
     setSearchQuery("");
+    setShowSearch(false);
+    setMobileMenu(false);
 
     if (item.type === "Ghee") navigate(`/ghee-product/${item.slug}/${item._id}`);
     if (item.type === "Masala") navigate(`/masala-product/${item.slug}/${item._id}`);
     if (item.type === "Oil") navigate(`/oil-product/${item.slug}/${item._id}`);
-    if (item.type === "Product") {
+    if (item.type === "Product")
       navigate(`/products/${item.category?.slug || "default"}/${item._id}`);
-    }
-
-    setShowSearch(false);
   };
 
-  // Enter key selects first result
   const handleSearchEnter = (e) => {
     if (e.key === "Enter" && searchResults.length > 0) {
       handleRedirect(searchResults[0]);
     }
   };
 
-  // Search results UI
   const renderSearchResults = () =>
     loading ? (
       <div className="p-3 text-gray-500">Loading...</div>
@@ -138,123 +161,144 @@ const Navbar = () => {
           onClick={() => handleRedirect(item)}
           className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-none"
         >
-          <p className="font-medium">
-            {item.title || item.productName}
-          </p>
-          <p className="text-gray-400 text-xs">
-            ({item.category?.name || item.type})
-          </p>
+          <p className="font-medium">{item.title || item.productName}</p>
+          <p className="text-gray-400 text-xs">({item.category?.name || item.type})</p>
         </div>
       ))
     );
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50 w-full border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* NAVBAR CONTAINER */}
-        <div className="flex items-center justify-between h-24">
-        
-          {/* LOGO */}
-          <Link to="/" className="flex items-center">
-            <img
-              src="/GauSamvardhan.png"
-              alt="Logo"
-              className="w-20 md:w-28 lg:w-32 object-contain"
-            />
-          </Link>
+    <>
+      {/* NAVBAR */}
+      <nav className="bg-white shadow-md sticky top-0 z-[999] w-full border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* DESKTOP SEARCH */}
-          <div className="hidden md:flex flex-1 justify-center px-4">
-            <div className="w-full max-w-xl relative">
-              <input
-                ref={desktopInputRef}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchEnter}
-                className="w-full border border-gray-300 rounded-full px-5 py-2 text-sm shadow-sm focus:outline-none"
-              />
+          <div className="flex items-center justify-between h-24">
 
-              <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-[#008031] text-lg" />
-
-              {searchQuery && (
-                <div className="absolute top-full mt-1 w-full bg-white shadow-lg rounded-md border max-h-72 overflow-y-auto z-50">
-                  {renderSearchResults()}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT — LOGIN + CART */}
-          <div className="flex items-center space-x-6">
-
-            {/* Mobile Search */}
+            {/* Mobile Hamburger */}
             <button
-              onClick={() => setShowSearch(!showSearch)}
-              className="md:hidden text-gray-800 text-xl"
+              className="text-2xl text-gray-400 md:hidden"
+              onClick={() => setMobileMenu(true)}
             >
-              <FaSearch />
+              <FaBars />
             </button>
 
-            {/* LOGIN */}
-            {!user ? (
-              <Link
-                to="/signin"
-                className="text-[#008031] text-3xl hover:scale-110 transition"
-              >
-                <FaUserCircle />
-              </Link>
-            ) : (
-              <button
-                onClick={() => navigate("/profile")}
-                className="flex items-center gap-2 text-gray-800 font-semibold hover:text-[#008031] transition"
-              >
-                <FaUserCircle className="text-3xl text-[#008031]" />
-                <span className="hidden md:block">{user.name}</span>
-              </button>
-            )}
-
-            {/* CART */}
-            <Link
-              to="/cart"
-              className="flex items-center gap-3 text-[#008031] text-2xl relative hover:scale-105 transition"
-            >
-              <div className="relative">
-                <FaShoppingBag />
-                <span className="absolute -top-2 -right-2 bg-[#008031] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              </div>
-              <span className="hidden sm:block text-gray-800 text-sm font-semibold">
-                ₹{totalPrice.toFixed(2)}
-              </span>
+            {/* LOGO */}
+            <Link to="/">
+              <img src="/GauSamvardhan.png" alt="Logo" className="w-20 md:w-28 lg:w-32" />
             </Link>
+
+            {/* DESKTOP SEARCH */}
+            <div className="hidden md:flex flex-1 justify-center px-4">
+              <div className="w-full max-w-xl relative">
+                <input
+                  ref={desktopInputRef}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchEnter}
+                  className="w-full border border-gray-300 rounded-full px-5 py-2 text-sm shadow-sm"
+                />
+                <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-[#008031]" />
+
+                {searchQuery && (
+                  <div className="absolute top-full mt-1 w-full bg-white shadow-lg rounded-md border max-h-72 overflow-y-auto z-50">
+                    {renderSearchResults()}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT SIDE ICONS */}
+            <div className="flex items-center space-x-6">
+
+              {/* Mobile Search */}
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="md:hidden text-xl text-gray-400"
+              >
+                <FaSearch />
+              </button>
+
+              {/* SIGN IN — ALWAYS SHOW */}
+              {!user ? (
+                <Link to="/signin" className="text-gray-400 text-2xl flex items-center">
+                  <FaUserCircle />
+                </Link>
+              ) : (
+                <Link to="/profile" className="text-gray-400 text-2xl flex items-center">
+                  <FaUserCircle />
+                </Link>
+              )}
+
+              {/* CART */}
+              <Link to="/cart" className="flex items-center gap-3 text-gray-400 text-2xl relative">
+                <div className="relative">
+                  <FaShoppingBag />
+                  <span className="absolute -top-2 -right-2 bg-[#008031] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                </div>
+                <span className="hidden sm:block text-gray-700 text-sm font-semibold">
+                  ₹{totalPrice.toFixed(2)}
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          {/* MOBILE SEARCH */}
+          <div ref={dropdownRef} className="md:hidden overflow-hidden">
+            {showSearch && (
+              <div className="py-3">
+                <input
+                  ref={mobileInputRef}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full border border-gray-300 rounded-full px-4 py-2 shadow-sm"
+                  placeholder="Search..."
+                  onKeyDown={handleSearchEnter}
+                />
+
+                {searchQuery && (
+                  <div className="bg-white shadow-md rounded-md mt-1 border max-h-60 overflow-y-auto">
+                    {renderSearchResults()}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
+      </nav>
 
-        {/* MOBILE SEARCH DROPDOWN */}
-        <div ref={dropdownRef} className="md:hidden overflow-hidden">
-          {showSearch && (
-            <div className="py-3">
-              <input
-                ref={mobileInputRef}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchEnter}
-                placeholder="Search..."
-                className="w-full border border-gray-300 rounded-full px-4 py-2 shadow-sm"
-              />
+      {/* MOBILE DRAWER */}
+      <div
+        ref={drawerRef}
+        className="fixed top-0 left-0 w-[80%] h-full bg-white shadow-xl z-[9999] p-6 -translate-x-full"
+      >
+        <button
+          onClick={() => setMobileMenu(false)}
+          className="absolute top-4 right-4 text-xl text-gray-400"
+        >
+          <FaTimes />
+        </button>
 
-              {searchQuery && (
-                <div className="bg-white shadow-md rounded-md mt-1 border max-h-60 overflow-y-auto">
-                  {renderSearchResults()}
-                </div>
-              )}
+        <h2 className="text-lg font-bold mb-6 text-[#008031]">All Categories</h2>
+
+        <div className="grid grid-cols-2 gap-6">
+          {menuItems.map((item, index) => (
+            <div key={index} className="flex flex-col items-center cursor-pointer">
+              <img src={item.icon} className="w-12 mb-2" alt={item.title} />
+              <p className="text-sm font-medium text-gray-700 text-center">{item.title}</p>
             </div>
-          )}
+          ))}
+        </div>
+
+        {/* SIGN IN REMOVED COMPLETELY FROM DRAWER */}
+
+        <div className="mt-6 text-[#008031] font-semibold cursor-pointer">
+          SHOP ALL →
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 

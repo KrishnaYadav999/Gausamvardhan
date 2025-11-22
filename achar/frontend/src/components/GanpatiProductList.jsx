@@ -1,82 +1,57 @@
-/* ---------------------------------------------------
-    IMPORTS
-----------------------------------------------------*/
+// GanpatiProductList.jsx
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
-import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaHeart, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 
 /* ---------------------------------------------------
-    PRODUCT CARD
+   GANPATI CARD
 ----------------------------------------------------*/
-const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
+const GanpatiCard = ({ product, selectedPack, updatePack }) => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
   const [hovered, setHovered] = useState(false);
 
   if (!product) return null;
 
-  const isOutOfStock = product.stock === false || product.stockQuantity <= 0;
+  const isOutOfStock = !product.stock;
 
-  /* PRICE LOGIC */
-  const getPriceByWeight = (product, weight) => {
-    if (!product) return 0;
-
-    const basePrice = parseFloat(product?.current_price || 0);
-    if (!weight) return basePrice;
-
-    if (product?.pricepergram) {
-      const map = {};
-      product.pricepergram.split(",").forEach((p) => {
-        const [w, v] = p.split("=");
-        if (w && v) map[w.trim()] = parseFloat(v.trim());
-      });
-      return map[weight] || basePrice;
+  const getCurrentPrice = () => {
+    if (product.packs && selectedPack) {
+      const pack = product.packs.find((p) => p.name === selectedPack);
+      return pack ? Number(pack.price) : Number(product.current_price);
     }
-    return basePrice;
+    return Number(product.current_price);
   };
 
-  const selectedPrice = getPriceByWeight(product, selectedWeight);
+  const currentPrice = getCurrentPrice();
+  const cutPrice = Number(product.cut_price);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     if (isOutOfStock) return toast.error("Product is out of stock");
-    if (!selectedWeight) return toast.error("Please select weight");
 
     addToCart({
-      _id: product._id,
-      productName: product.title,
-      selectedWeight,
-      quantity: 1,
-      selectedPrice,
-      cutPrice: product.cut_price || 0,
-      productImages: product.images || [],
+      ...product,
+      selectedPack,
+      selectedPrice: currentPrice,
     });
 
     toast.success(`${product.title} added to cart`);
   };
 
-  const avgRating =
-    product?.reviews?.length > 0
-      ? (
-          product.reviews.reduce((acc, r) => acc + (r.rating || 0), 0) /
-          product.reviews.length
-        ).toFixed(1)
-      : "0.0";
-
-  const navigateToProduct = () => {
+  const goToDetail = () => {
     if (isOutOfStock) return;
-    const slug = product.slug || "masala";
-    navigate(`/masala-product/${slug}/${product._id}`);
+    navigate(`/ganpati-product/${product.slug}/${product._id}`);
   };
 
   return (
     <div
-      onClick={navigateToProduct}
-      className={`min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-lg transition-all cursor-pointer h-full flex flex-col relative ${
-        isOutOfStock ? "opacity-70 cursor-not-allowed" : ""
+      onClick={goToDetail}
+      className={`min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer h-full flex flex-col relative ${
+        isOutOfStock ? "opacity-60 cursor-not-allowed" : ""
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -101,7 +76,7 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
         {/* OUT OF STOCK */}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <span className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow">
               OUT OF STOCK
             </span>
@@ -110,11 +85,12 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
         {/* TAG */}
         {product.tag && !isOutOfStock && (
-          <span className="absolute top-4 left-4 bg-green-700 text-white px-3 py-1 text-xs rounded-md shadow font-medium">
+          <span className="absolute top-4 left-4 bg-[#A54B4B] text-white px-3 py-1 text-xs rounded-md shadow font-medium">
             {product.tag}
           </span>
         )}
 
+        {/* HEART */}
         {!isOutOfStock && (
           <span
             onClick={(e) => e.stopPropagation()}
@@ -127,64 +103,57 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
       {/* DETAILS */}
       <div className="px-4 py-4 flex flex-col h-full">
-        {/* PRICE WITH CUT PRICE */}
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2">
             {product.title}
           </h3>
 
+          {/* PRICE + CUT PRICE */}
           <div className="text-right">
-            {product.cut_price && (
-              <p className="text-xs text-gray-500 line-through">
-                ₹{product.cut_price}
-              </p>
+            <p className="text-[20px] font-bold text-gray-900">₹{currentPrice}</p>
+            {cutPrice > 0 && (
+              <p className="text-sm text-gray-500 line-through">₹{cutPrice}</p>
             )}
-            <p className="text-[20px] font-bold text-gray-900">₹{selectedPrice}</p>
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mb-3">Premium spices • Freshly ground</p>
-
-        <div className="flex items-center gap-1 mb-4">
-          <span className="text-yellow-500 text-lg">★</span>
-          <span className="text-sm font-semibold text-gray-800">{avgRating}</span>
-          <span className="text-xs text-gray-500">
-            ({product?.reviews?.length || 0}+)
+        {/* RATING */}
+        <div className="flex items-center gap-1 mb-3">
+          <FaStar className="text-yellow-500 text-sm" />
+          <span className="text-sm font-medium text-gray-700">
+            {product.rating ? product.rating.toFixed(1) : "0.0"}
           </span>
         </div>
 
-        {/* WEIGHT DROPDOWN */}
-        {product.pricepergram && (
+        <p className="text-sm text-gray-500 mb-3">Ganpati Decoration • Premium</p>
+
+        {product.packs && (
           <select
-            value={selectedWeight}
+            value={selectedPack}
             disabled={isOutOfStock}
             onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setSelectedWeight(e.target.value)}
+            onChange={(e) => updatePack(e.target.value)}
             className={`w-full border px-4 py-2 text-sm font-medium ${
               isOutOfStock
                 ? "bg-gray-200 cursor-not-allowed text-gray-500"
                 : "border-gray-300 text-gray-700"
             }`}
           >
-            {product.pricepergram.split(",").map((item) => {
-              const weight = item.split("=")[0].trim();
-              return (
-                <option value={weight} key={weight}>
-                  {weight}
-                </option>
-              );
-            })}
+            {product.packs.map((pack) => (
+              <option key={pack.name} value={pack.name}>
+                {pack.name} - ₹{pack.price}
+              </option>
+            ))}
           </select>
         )}
 
-        {/* ADD TO CART */}
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
           className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
             isOutOfStock
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-700 hover:bg-green-800 text-white"
+              : "bg-[#A54B4B] hover:bg-[#903E3E] text-white"
           }`}
         >
           {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
@@ -195,51 +164,53 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 };
 
 /* ---------------------------------------------------
-    SKELETON
+   SKELETON
 ----------------------------------------------------*/
-const MasalaProductSkeleton = () => (
+const GanpatiSkeleton = () => (
   <div className="min-w-[280px] bg-white rounded-2xl border shadow-sm animate-pulse">
     <div className="h-[260px] bg-gray-200 rounded-t-2xl"></div>
     <div className="p-4 space-y-3">
-      <div className="h-4 bg-gray-200 w-3/4"></div>
-      <div className="h-3 bg-gray-200 w-1/2"></div>
-      <div className="h-10 bg-gray-200 rounded-lg"></div>
+      <div className="h-4 bg-gray-300 w-3/4"></div>
+      <div className="h-3 bg-gray-300 w-1/2"></div>
+      <div className="h-10 bg-gray-300 rounded-lg"></div>
     </div>
   </div>
 );
 
 /* ---------------------------------------------------
-    MAIN LIST
+   MAIN LIST + HERO BANNER + SLIDER
 ----------------------------------------------------*/
-const MasalaProductList = () => {
+const GanpatiProductList = ({ limit }) => {
   const [products, setProducts] = useState([]);
-  const [selectedWeights, setSelectedWeights] = useState({});
+  const [selectedPack, setSelectedPack] = useState({});
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await axios.get("/api/masala-products");
-        const items = Array.isArray(data) ? data : data.products;
-        setProducts(items);
-        const defaults = {};
+        const { data } = await axios.get("/api/ganpati/all");
+        const items = Array.isArray(data) ? data : [];
 
+        setProducts(limit ? items.slice(0, limit) : items);
+
+        const defaults = {};
         items.forEach((p) => {
-          if (p.pricepergram) {
-            defaults[p._id] = p.pricepergram.split(",")[0].split("=")[0].trim();
+          if (p.packs && p.packs.length > 0) {
+            defaults[p._id] = p.packs[0].name;
           }
         });
 
-        setSelectedWeights(defaults);
-      } catch {
-        toast.error("Failed to load masala products");
+        setSelectedPack(defaults);
+      } catch (err) {
+        toast.error("Failed to load Ganpati products");
       } finally {
         setLoading(false);
       }
     };
+
     load();
-  }, []);
+  }, [limit]);
 
   const scrollLeft = () =>
     sliderRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -251,8 +222,9 @@ const MasalaProductList = () => {
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
       <Toaster />
 
+      {/* HERO */}
       <div className="relative w-full mb-10">
-        <div className="relative w-full h-[130px] sm:h-[80px] overflow-hidden">
+        <div className="relative w-full h-[130px] overflow-hidden">
           <svg
             viewBox="0 0 1440 320"
             className="absolute inset-0 w-full h-full"
@@ -260,13 +232,13 @@ const MasalaProductList = () => {
             style={{ opacity: 0.35 }}
           >
             <path
-              fill="#E6F5E8"
+              fill="#F7E1E1"
               d="M0,256L48,229.3C96,203,192,149,288,149.3C384,149,480,203,576,224C672,245,768,235,864,218.7C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             ></path>
           </svg>
 
           <div
-            className="absolute bottom-0 w-full h-[90px]"
+            className="absolute bottom-0 w-full h-[100px]"
             style={{
               backgroundImage:
                 "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1763637527/coe_achar_ysmiwo.jpg')",
@@ -279,15 +251,18 @@ const MasalaProductList = () => {
 
         <div className="absolute inset-0 flex items-center justify-between px-6">
           <h2
-            className="text-3xl font-extrabold text-[#2F6B3D] sm:text-lg"
+            className="text-3xl font-extrabold text-[#A74B4B]"
             style={{ fontFamily: "Playfair Display" }}
           >
-            Masala
+            Ganpati Decoration
           </h2>
 
-          <button className="bg-[#328E6E] hover:bg-[#28785C] text-white px-6 py-2 rounded-md font-semibold shadow-md sm:px-3 sm:py-1 sm:text-[11px]">
+          <Link
+            to="/ganpati-products"
+            className="bg-[#BF5757] hover:bg-[#A94848] text-white px-6 py-2 rounded-md font-semibold shadow-md"
+          >
             Shop More
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -298,6 +273,7 @@ const MasalaProductList = () => {
       >
         <FaChevronLeft />
       </button>
+
       <button
         onClick={scrollRight}
         className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
@@ -313,14 +289,14 @@ const MasalaProductList = () => {
       >
         {(loading ? [...Array(6)] : products).map((item, index) =>
           loading ? (
-            <MasalaProductSkeleton key={index} />
+            <GanpatiSkeleton key={index} />
           ) : (
             <div key={item._id} className="snap-start w-[280px] h-full">
-              <MasalaProductCard
+              <GanpatiCard
                 product={item}
-                selectedWeight={selectedWeights[item._id]}
-                setSelectedWeight={(w) =>
-                  setSelectedWeights((prev) => ({ ...prev, [item._id]: w }))
+                selectedPack={selectedPack[item._id]}
+                updatePack={(p) =>
+                  setSelectedPack((prev) => ({ ...prev, [item._id]: p }))
                 }
               />
             </div>
@@ -331,4 +307,4 @@ const MasalaProductList = () => {
   );
 };
 
-export default MasalaProductList;
+export default GanpatiProductList;

@@ -1,20 +1,44 @@
+// Category.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// Hindi translations
 const translations = {
   achar: "अचार",
   ghee: "घी",
   masala: "मसाला",
   oil: "तेल",
+  agarbatti: "अगरबत्ती",
+  dhoop: "धूप",
+  ganpati: "गणपति",
+  puja: "पूजा",
+  cup: "कप",
 };
+
+// Route mapping
+const routeMapping = {
+  ghee: (slug) => `/ghee/${slug}`,
+  masala: (slug) => `/masala-category/${slug}`,
+  oil: (slug) => `/oil/category/${slug}`,
+  tel: (slug) => `/oil/category/${slug}`,
+  "pooja-essentials": (slug) => `/agarbatti-category/${slug}`, // NEW
+  dhoop: (slug) => `/dhoop-category/${slug}`,
+  ganpati: (slug) => `/ganpati-category/${slug}`,
+  puja: (slug) => `/ganpati-category/${slug}`,
+  god: (slug) => `/ganpati-category/${slug}`,
+  cup: (slug) => `/cup-category/${slug}`,
+  achar: (slug) => `/achar-category/${slug}`,
+};
+
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
   const [displayNames, setDisplayNames] = useState({});
-  const [fadeState, setFadeState] = useState({}); // smooth animation
+  const [fadeState, setFadeState] = useState({});
   const navigate = useNavigate();
 
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -23,7 +47,6 @@ const Category = () => {
 
         const initNames = {};
         const initFade = {};
-
         data.forEach((cat) => {
           initNames[cat._id] = cat.name;
           initFade[cat._id] = true;
@@ -31,116 +54,99 @@ const Category = () => {
 
         setDisplayNames(initNames);
         setFadeState(initFade);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
       }
     };
+
     fetchCategories();
   }, []);
 
-  // 🔄 Smooth Rotation
+  // Hindi-English rotate
   useEffect(() => {
+    if (categories.length === 0) return;
+
     const interval = setInterval(() => {
+      const newDisplayNames = {};
+      const newFadeState = {};
+
       categories.forEach((cat) => {
         const eng = cat.name;
-        const key = eng.toLowerCase();
+        const key = eng.toLowerCase().replace(/\s/g, "");
         const hindi = translations[key] || eng;
 
-        // FIRST: fade-out
-        setFadeState((prev) => ({ ...prev, [cat._id]: false }));
+        const currentName = displayNames[cat._id] || eng;
+        const nextName = currentName === eng ? hindi : eng;
 
-        setTimeout(() => {
-          // CHANGE TEXT
-          setDisplayNames((prev) => ({
-            ...prev,
-            [cat._id]: prev[cat._id] === eng ? hindi : eng,
-          }));
-
-          // THEN: fade-in
-          setFadeState((prev) => ({ ...prev, [cat._id]: true }));
-        }, 400); // fade-out duration
+        newDisplayNames[cat._id] = nextName;
+        newFadeState[cat._id] = false;
       });
+
+      setFadeState(newFadeState);
+
+      setTimeout(() => {
+        setDisplayNames(newDisplayNames);
+
+        const fadeIn = {};
+        categories.forEach((cat) => (fadeIn[cat._id] = true));
+        setFadeState(fadeIn);
+      }, 350);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [categories]);
+  }, [categories, displayNames]);
 
+  // Navigation
   const handleCategoryClick = (cat) => {
-    const nameLower = cat.name.toLowerCase();
+    const slugLower = cat.slug.toLowerCase(); // use slug from DB
+    console.log("Clicked category:", cat.name, "Slug:", slugLower);
 
-    if (nameLower.includes("ghee")) navigate(`/ghee/${cat.slug}`);
-    else if (nameLower.includes("masala")) navigate(`/masala-category/${cat.slug}`);
-    else if (nameLower.includes("oil")) navigate(`/oil/category/${cat.slug}`);
-    else if (nameLower.includes("agarbatti"))
-  navigate(`/agarbatti-category/${cat.slug}`);
-    else navigate(`/achar-category/${cat.slug}`);
+    // Use slug key instead of name to find route
+    const matchedKey = Object.keys(routeMapping).find((key) => key === slugLower);
+
+    if (matchedKey) {
+      const route = routeMapping[matchedKey](slugLower);
+      console.log("Navigating to:", route);
+      navigate(route);
+      return;
+    }
+
+    // Default to achar
+    console.log("Default navigating to:", `/achar-category/${slugLower}`);
+    navigate(`/achar-category/${slugLower}`);
   };
 
+  // UI
   return (
-    <div className="px-6 py-12 lg:ml-40">
-      <div className="grid gap-8 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-
+    <div className="px-4 py-10">
+      <div className="flex gap-8 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4">
         {categories.map((cat) => (
           <div
             key={cat._id}
             onClick={() => handleCategoryClick(cat)}
-            className="
-              relative group cursor-pointer overflow-hidden rounded-3xl 
-              bg-white/40 backdrop-blur-xl border border-white/50
-              shadow-[0_4px_20px_rgba(0,0,0,0.08)]
-              hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)]
-              hover:-translate-y-2 transition-all duration-500
-            "
+            className="flex flex-col items-center cursor-pointer snap-start group"
           >
-
-            {/* Image */}
-            <div className="w-full h-40 sm:h-44 md:h-48 overflow-hidden rounded-3xl">
+            {/* Circle Card */}
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden shadow-md bg-white hover:scale-105 hover:shadow-xl transition-all duration-500 flex items-center justify-center shrink-0">
               <img
-                src={cat.image || 'https://via.placeholder.com/300'}
+                src={cat.image || "https://via.placeholder.com/300"}
                 alt={cat.name}
-                className="
-                  w-full h-full object-cover 
-                  transition-transform duration-700 
-                  group-hover:scale-110
-                "
+                className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
               />
             </div>
 
-            {/* Overlay */}
-            <div className="
-              absolute inset-0 
-              bg-gradient-to-t from-black/70 via-black/30 to-transparent 
-              opacity-70 group-hover:opacity-90 
-              transition duration-500
-            "></div>
-
-            {/* SMOOTH ANIMATED NAME */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center">
-              <p
-                className={`
-                  text-white font-semibold 
-                  text-sm sm:text-base md:text-lg 
-                  tracking-wide drop-shadow-lg
-                  transition-all duration-500
-                  ${fadeState[cat._id] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}
-                `}
-              >
-                {displayNames[cat._id]}
-              </p>
-            </div>
-
-            {/* Glow */}
-            <div className="
-              absolute inset-0 rounded-3xl 
-              border border-transparent 
-              group-hover:border-green-400/80 
-              group-hover:shadow-[0_0_25px_rgba(74,222,128,0.5)]
-              transition-all duration-500
-            "></div>
-
+            {/* Name */}
+            <p
+              className={`text-[#25421C] font-semibold text-sm sm:text-base mt-3 transition-all duration-500 text-center ${
+                fadeState[cat._id]
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-2"
+              }`}
+            >
+              {displayNames[cat._id]}
+            </p>
           </div>
         ))}
-
       </div>
     </div>
   );

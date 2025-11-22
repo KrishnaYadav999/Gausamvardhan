@@ -3,56 +3,60 @@
 ----------------------------------------------------*/
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 /* ---------------------------------------------------
-    CARD COMPONENT
+    CARD COMPONENT (Ganpati Style)
 ----------------------------------------------------*/
-const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
+const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
-
   const [hovered, setHovered] = useState(false);
 
   if (!product) return null;
 
-  const getPriceByWeight = (product, weight) => {
-    if (!product) return 0;
-    const basePrice = parseFloat(product?.currentPrice || 0);
-    if (!weight) return basePrice;
+  const getPriceByWeight = (weight) => {
+    const base = parseFloat(product.currentPrice || 0);
+    const cut = parseFloat(product.cutPrice || 0);
 
-    if (product?.pricePerGram) {
-      const map = {};
-      product.pricePerGram.split(",").forEach((p) => {
-        const [w, v] = p.split("=");
-        if (w && v) map[w.trim()] = parseFloat(v.trim());
-      });
-      return map[weight] || basePrice;
-    }
+    if (!product.pricePerGram) return base;
 
-    return basePrice;
+    const map = {};
+    const cutMap = {};
+    product.pricePerGram.split(",").forEach((p) => {
+      const [w, v] = p.split("=");
+      if (w && v) map[w.trim()] = parseFloat(v.trim());
+      // optional: cutPrice per weight (if you store it in "weight=cutPrice")
+      if (w && cut) cutMap[w.trim()] = cut;
+    });
+
+    return map[weight] || base;
   };
 
-  const selectedPrice = getPriceByWeight(product, selectedWeight);
+  const currentPrice = getPriceByWeight(selectedWeight);
+  const cutPrice = parseFloat(product.cutPrice || 0);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    if (!selectedWeight) return toast.error("Please select weight");
 
     addToCart({
       _id: product._id,
       productName: product.title,
       selectedWeight,
       quantity: 1,
-      selectedPrice,
-      cutPrice: product.cutPrice || 0,
-      productImages: product.images || [],
+      selectedPrice: currentPrice,
+      cutPrice: cutPrice,
+      productImages: product.images,
     });
 
     toast.success(`${product.title} added to cart`);
+  };
+
+  const goToDetail = () => {
+    navigate(`/ghee-product/${product.slug}/${product._id}`);
   };
 
   const avgRating =
@@ -63,41 +67,37 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         ).toFixed(1)
       : "0.0";
 
-  const navigateToProduct = () => {
-    navigate(`/ghee-product/${product.slug}/${product._id}`);
-  };
-
   return (
     <div
-      onClick={navigateToProduct}
-      className="min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer h-full flex flex-col"
+      onClick={goToDetail}
+      className="min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer h-full flex flex-col relative"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ fontFamily: 'Inter' }}
+      style={{ fontFamily: "Inter" }}
     >
       {/* IMAGE */}
       <div className="relative h-[260px] overflow-hidden rounded-t-2xl bg-gray-50">
         <img
           src={product.images?.[0]}
-          className={`w-full h-full object-contain absolute inset-0 transition duration-500 ${
-            hovered && product.images?.[1] ? 'opacity-0' : 'opacity-100'
+          className={`w-full h-full object-cover absolute inset-0 transition duration-500 ${
+            hovered && product.images?.[1] ? "opacity-0" : "opacity-100"
           }`}
         />
-
         {product.images?.[1] && (
           <img
             src={product.images[1]}
-            className={`w-full h-full object-contain absolute inset-0 transition duration-500 ${
-              hovered ? 'opacity-100' : 'opacity-0'
+            className={`w-full h-full object-cover absolute inset-0 transition duration-500 ${
+              hovered ? "opacity-100" : "opacity-0"
             }`}
           />
         )}
 
+        {/* HEART */}
         <span
           onClick={(e) => e.stopPropagation()}
           className="absolute top-4 right-4 bg-white p-2 rounded-full shadow cursor-pointer"
         >
-          <FaHeart size={16} className="text-green-600" />
+          <FaHeart size={16} className="text-green-700" />
         </span>
       </div>
 
@@ -107,13 +107,21 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
           <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2">
             {product.title}
           </h3>
-          <p className="text-[20px] font-bold text-green-700">₹{selectedPrice}</p>
+          <div className="flex flex-col items-end">
+            {cutPrice > 0 && (
+              <span className="text-xs text-gray-400 line-through">
+                ₹{cutPrice}
+              </span>
+            )}
+            <p className="text-[20px] font-bold text-green-700">₹{currentPrice}</p>
+          </div>
         </div>
 
-        <p className="text-sm text-gray-600 mb-3">Pure Bilona Ghee • A2 Quality</p>
+        <p className="text-sm text-gray-500 mb-3">Pure Bilona Ghee • A2 Quality</p>
 
+        {/* Ratings */}
         <div className="flex items-center gap-1 mb-4">
-          <span className="text-green-600 text-lg">★</span>
+          <span className="text-green-700 text-lg">★</span>
           <span className="text-sm font-semibold text-gray-800">{avgRating}</span>
           <span className="text-xs text-gray-500">
             ({product?.reviews?.length || 0}+)
@@ -124,14 +132,13 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
           <select
             value={selectedWeight}
             onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setSelectedWeight(e.target.value)}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm font-medium 
-                       text-gray-700 focus:ring-2 focus:ring-green-500"
+            onChange={(e) => updateWeight(e.target.value)}
+            className="w-full border px-4 py-2 text-sm font-medium text-gray-700 border-gray-300"
           >
-            {product.pricePerGram.split(',').map((item) => {
-              const weight = item.split('=')[0].trim();
+            {product.pricePerGram.split(",").map((i) => {
+              const weight = i.split("=")[0].trim();
               return (
-                <option value={weight} key={weight}>
+                <option key={weight} value={weight}>
                   {weight}
                 </option>
               );
@@ -141,8 +148,7 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
         <button
           onClick={handleAddToCart}
-          className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold 
-                     text-sm tracking-wide hover:bg-green-700 active:scale-95 mt-4 transition"
+          className="w-full py-3 font-semibold text-sm tracking-wide mt-4 bg-green-700 hover:bg-green-800 text-white"
         >
           ADD TO CART
         </button>
@@ -158,17 +164,17 @@ const GheeProductSkeleton = () => (
   <div className="min-w-[280px] bg-white rounded-2xl border shadow-sm animate-pulse">
     <div className="h-[260px] bg-gray-200 rounded-t-2xl"></div>
     <div className="p-4 space-y-3">
-      <div className="h-4 bg-gray-200 w-3/4"></div>
-      <div className="h-3 bg-gray-200 w-1/2"></div>
-      <div className="h-10 bg-gray-200 rounded-lg"></div>
+      <div className="h-4 bg-gray-300 w-3/4"></div>
+      <div className="h-3 bg-gray-300 w-1/2"></div>
+      <div className="h-10 bg-gray-300 rounded-lg"></div>
     </div>
   </div>
 );
 
 /* ---------------------------------------------------
-    MAIN + SLIDER
+    MAIN + HERO BANNER + SLIDER (Ganpati Style)
 ----------------------------------------------------*/
-const GheeProductList = () => {
+const GheeProductList = ({ limit }) => {
   const [products, setProducts] = useState([]);
   const [selectedWeights, setSelectedWeights] = useState({});
   const [loading, setLoading] = useState(true);
@@ -180,7 +186,7 @@ const GheeProductList = () => {
         const { data } = await axios.get("/api/ghee-products");
         const items = Array.isArray(data) ? data : data.products;
 
-        setProducts(items);
+        setProducts(limit ? items.slice(0, limit) : items);
 
         const defaults = {};
         items.forEach((p) => {
@@ -198,65 +204,82 @@ const GheeProductList = () => {
     };
 
     load();
-  }, []);
+  }, [limit]);
 
   const scrollLeft = () =>
     sliderRef.current.scrollBy({ left: -300, behavior: "smooth" });
+
   const scrollRight = () =>
     sliderRef.current.scrollBy({ left: 300, behavior: "smooth" });
 
   return (
-    <div className="p-6 relative">
+    <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
       <Toaster />
 
-      {/* HERO SECTION */}
+      {/* HERO BANNER */}
       <div className="relative w-full mb-10">
-        <div className="w-full h-[150px] overflow-hidden relative">
+        <div className="relative w-full h-[130px] overflow-hidden">
           <svg
             viewBox="0 0 1440 320"
-            className="w-full h-full absolute top-0 left-0"
+            className="absolute inset-0 w-full h-full"
             preserveAspectRatio="none"
+            style={{ opacity: 0.35 }}
           >
             <path
-              fill="#D1FAE5"
-              d="M0,96L80,117.3C160,139,320,181,480,176C640,171,800,117,960,90.7C1120,64,1280,64,1360,64L1440,64V320H0Z"
+              fill="#D1F5D9"
+              d="M0,256L48,229.3C96,203,192,149,288,149.3C384,149,480,203,576,224C672,245,768,235,864,218.7C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32V320H0Z"
             ></path>
           </svg>
+
+          <div
+            className="absolute bottom-0 w-full h-[100px]"
+            style={{
+              backgroundImage:
+                "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1763637527/coe_achar_ysmiwo.jpg')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right bottom",
+            }}
+          ></div>
         </div>
 
         <div className="absolute inset-0 flex items-center justify-between px-6">
           <h2
-            className="text-4xl font-bold text-green-700"
+            className="text-3xl font-extrabold text-green-700"
             style={{ fontFamily: "Playfair Display" }}
           >
             Desi Ghee
           </h2>
 
-          <button className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg text-lg font-semibold shadow">
+          <Link
+            to="/ghee-products"
+            className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold shadow-md"
+          >
             Shop More
-          </button>
+          </Link>
         </div>
       </div>
 
       {/* SLIDER BUTTONS */}
       <button
         onClick={scrollLeft}
-        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20 border border-green-200 hover:bg-green-50"
+        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
       >
-        <FaChevronLeft className="text-green-700" />
+        <FaChevronLeft />
       </button>
 
       <button
         onClick={scrollRight}
-        className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20 border border-green-200 hover:bg-green-50"
+        className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
       >
-        <FaChevronRight className="text-green-700" />
+        <FaChevronRight />
       </button>
 
       {/* SLIDER */}
       <div
         ref={sliderRef}
         className="flex gap-6 overflow-x-auto scrollbar-hide py-4 px-4 snap-x snap-mandatory whitespace-nowrap"
+        style={{ scrollBehavior: "smooth" }}
       >
         {(loading ? [...Array(6)] : products).map((item, index) =>
           loading ? (
@@ -266,8 +289,8 @@ const GheeProductList = () => {
               <GheeProductCard
                 product={item}
                 selectedWeight={selectedWeights[item._id]}
-                setSelectedWeight={(w) =>
-                  setSelectedWeights((prev) => ({ ...prev, [item._id]: w }))
+                updateWeight={(w) =>
+                  setSelectedWeights((p) => ({ ...p, [item._id]: w }))
                 }
               />
             </div>
