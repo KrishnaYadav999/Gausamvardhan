@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useCallback } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
@@ -13,10 +13,12 @@ import { FaHeart } from "react-icons/fa";
 const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
   const { addToCart } = useContext(CartContext);
   const [hover, setHover] = useState(false);
+  const navigate = useNavigate();
 
   const isOutOfStock = !product.stock || product.stockQuantity <= 0;
   const packObj = product.packs?.find((p) => p.name === selectedPack);
   const selectedPrice = packObj?.price || product.current_price;
+
   const avgRating = product.reviews?.length
     ? (
         product.reviews.reduce((a, r) => a + (r.rating || 0), 0) /
@@ -44,20 +46,24 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
 
   return (
     <div
-      className={`bg-white rounded-2xl border shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col h-full relative ${
-        isOutOfStock ? "opacity-60 cursor-not-allowed" : ""
-      }`}
+      className={`bg-white rounded-2xl border shadow-md hover:shadow-xl 
+      transition-all cursor-pointer flex flex-col h-full relative 
+      ${isOutOfStock ? "opacity-60 cursor-not-allowed" : ""}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onClick={() =>
+        navigate(`/ganpati-product/${product.slug}/${product._id}`)
+      }
     >
       {/* Image */}
-      <div className="relative h-[250px] overflow-hidden rounded-t-2xl bg-gray-100">
+      <div className="relative h-40 sm:h-48 md:h-[250px] overflow-hidden rounded-t-2xl bg-gray-100">
         <img
           src={product.images?.[0]}
           className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${
             hover && product.images?.[1] ? "opacity-0" : "opacity-100"
           }`}
         />
+
         {product.images?.[1] && (
           <img
             src={product.images[1]}
@@ -77,7 +83,7 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
         )}
 
         {isOutOfStock && (
-          <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-lg shadow">
+          <span className="absolute top-3 left-3 bg-red-600 text-white text-[0.7rem] font-bold px-3 py-1 rounded-lg shadow">
             OUT OF STOCK
           </span>
         )}
@@ -85,15 +91,17 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
 
       {/* Details */}
       <div className="px-3 py-3 flex flex-col flex-1">
-        <h3 className="font-semibold text-base text-gray-900 line-clamp-2">
+
+        {/* TITLE responsive */}
+        <h3 className="font-semibold text-[0.9rem] sm:text-base text-gray-900 line-clamp-2">
           {product.title}
         </h3>
 
         {/* Rating */}
-        <div className="flex items-center gap-1 text-sm mt-1 mb-2">
+        <div className="flex items-center gap-1 text-[0.8rem] sm:text-sm mt-1 mb-2">
           <span className="text-yellow-500 text-lg">★</span>
           <span className="font-semibold">{avgRating}</span>
-          <span className="text-xs text-gray-500">
+          <span className="text-gray-500 text-[0.75rem]">
             ({product?.reviews?.length || 0}+)
           </span>
         </div>
@@ -104,7 +112,8 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
             value={selectedPack}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => setSelectedPack(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm mb-2"
+            className="w-full border border-gray-300 px-3 py-2 rounded-lg 
+            text-[0.9rem] sm:text-sm mb-2"
           >
             {product.packs.map((p) => (
               <option key={p.name} value={p.name}>
@@ -116,9 +125,11 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
 
         {/* Price */}
         <div className="flex justify-between items-center mb-2">
-          <p className="text-xl font-bold text-green-700">₹{selectedPrice}</p>
+          <p className="text-lg sm:text-xl font-bold text-green-700">
+            ₹{selectedPrice}
+          </p>
           {product.cut_price > 0 && (
-            <p className="text-xs line-through text-gray-400">
+            <p className="text-[0.75rem] sm:text-xs line-through text-gray-400">
               ₹{product.cut_price}
             </p>
           )}
@@ -128,7 +139,8 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
         <button
           onClick={add}
           disabled={isOutOfStock}
-          className={`w-full py-2 text-sm font-semibold rounded-lg transition ${
+          className={`w-full py-2 
+          text-[0.9rem] sm:text-sm font-semibold rounded-lg transition ${
             isOutOfStock
               ? "bg-gray-400 text-gray-700"
               : "bg-orange-600 hover:bg-orange-700 text-white"
@@ -160,8 +172,7 @@ export default function GanpatiCategoryProduct() {
 
         const defaults = {};
         data.forEach((p) => {
-          if (p.packs?.length > 0)
-            defaults[p._id] = p.packs[0].name;
+          if (p.packs?.length > 0) defaults[p._id] = p.packs[0].name;
         });
         setSelectedPack(defaults);
       } catch {
@@ -187,8 +198,7 @@ export default function GanpatiCategoryProduct() {
         });
       }
 
-      if (filters.stock)
-        temp = temp.filter((p) => p.stock === true);
+      if (filters.stock) temp = temp.filter((p) => p.stock === true);
 
       setFiltered(temp);
     },
@@ -196,25 +206,27 @@ export default function GanpatiCategoryProduct() {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen px-4 sm:px-6 py-8">
+    <div className="bg-gray-50 min-h-screen px-3 sm:px-6 py-6 sm:py-8">
       <Toaster />
 
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 capitalize">
+        <h2 className="text-xl sm:text-3xl font-bold text-gray-800 capitalize">
           {slug} Products
         </h2>
 
+        {/* Mobile filter btn */}
         <button
-          className="md:hidden flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg shadow"
+          className="md:hidden flex items-center gap-2 px-4 py-2 
+          text-[0.9rem] bg-orange-600 text-white rounded-lg shadow"
           onClick={() => setFilterOpen(true)}
         >
           <FiFilter /> Filter
         </button>
       </div>
 
-      <div className="flex gap-6">
-        {/* Desktop Filter */}
+      <div className="flex gap-4 sm:gap-6">
+        {/* Desktop filter */}
         <div className="hidden md:block w-72 shrink-0 sticky top-24">
           <Filter
             minPrice={0}
@@ -224,13 +236,14 @@ export default function GanpatiCategoryProduct() {
           />
         </div>
 
-        {/* Mobile Filter */}
+        {/* Mobile Filter Drawer */}
         {filterOpen && (
           <div className="fixed inset-0 z-50 flex bg-black bg-opacity-50">
             <div className="flex-1" onClick={() => setFilterOpen(false)}></div>
+
             <div className="w-72 bg-white p-5 overflow-y-auto shadow-lg">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">Filters</h3>
+                <h3 className="font-semibold text-[0.9rem]">Filters</h3>
                 <button onClick={() => setFilterOpen(false)}>
                   <FiX size={22} />
                 </button>
@@ -246,9 +259,9 @@ export default function GanpatiCategoryProduct() {
         )}
 
         {/* PRODUCT GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
           {filtered.length === 0 ? (
-            <p className="text-gray-600 col-span-full text-center py-20">
+            <p className="text-gray-600 col-span-full text-center py-20 text-[0.9rem]">
               No products found.
             </p>
           ) : (

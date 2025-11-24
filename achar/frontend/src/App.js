@@ -36,6 +36,9 @@ import ProceedToCheckout from "./components/ProceedToCheckout";
 import Invoice from "./components/Invoice";
 import OrderTracking from "./components/OrderTracking";
 
+//seo
+import { Helmet } from "react-helmet-async";
+
 // Support Pages
 import FAQs from "./components/FAQs";
 import ShippingReturns from "./components/ShippingReturns";
@@ -57,6 +60,52 @@ import GanpatiProductList from "./components/GanpatiProductList";
 
 function App() {
   return (
+   <>
+     <Helmet>
+      {/* Title */}
+      <title>Gau Samvardhan - Organic Products & Pooja Essentials</title>
+
+      {/* Meta Description */}
+      <meta
+        name="description"
+        content="Buy high-quality Ghee, Oils, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, and Ganpati Murti products from Gau Samvardhan. Shop online and get authentic products for your home and rituals."
+      />
+
+      {/* Canonical Links */}
+      <link rel="canonical" href="https://gausamvardhan.com" />
+      <link rel="canonical" href="https://www.gausamvardhan.com" />
+
+      {/* Open Graph Tags */}
+      <meta property="og:title" content="Gau Samvardhan - Organic Products & Pooja Essentials" />
+      <meta
+        property="og:description"
+        content="Buy high-quality Ghee, Oils, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, and Ganpati Murti products from Gau Samvardhan."
+      />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://www.gausamvardhan.com" />
+      <meta property="og:site_name" content="Gau Samvardhan" />
+      <meta
+        property="og:image"
+        content="https://www.gausamvardhan.com/images/og-image.jpg"
+      />
+
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Gau Samvardhan - Organic Products & Pooja Essentials" />
+      <meta
+        name="twitter:description"
+        content="Buy high-quality Ghee, Oils, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, and Ganpati Murti products from Gau Samvardhan."
+      />
+      <meta
+        name="twitter:image"
+        content="https://www.gausamvardhan.com/images/og-image.jpg"
+      />
+      <meta name="twitter:site" content="@GauSamvardhan" />
+
+      {/* Additional SEO */}
+      <meta name="robots" content="index, follow" />
+      <meta name="keywords" content="Ghee, Oil, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, Ganpati Murti, Organic Products, Gau Samvardhan" />
+    </Helmet>
     <ThemeProvider>
       <SmoothScroll />
       <AnimatedText />
@@ -152,6 +201,7 @@ function App() {
 
       <Footer />
     </ThemeProvider>
+   </>
   );
 }
 

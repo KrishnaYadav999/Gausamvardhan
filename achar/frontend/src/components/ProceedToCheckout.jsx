@@ -70,15 +70,17 @@ const ProceedToCheckout = () => {
         
         productType:
           item.productType ||
-          (item.category === "Oil"
-            ? "OilProduct"
-            : item.category === "Masala"
-            ? "MasalaProduct"
-            : item.category === "Ghee"
-            ? "GheeProduct"
-              : item.category === "Agarbatti"
+    (item.category === "Oil"
+      ? "OilProduct"
+      : item.category === "Masala"
+      ? "MasalaProduct"
+      : item.category === "Ghee"
+      ? "GheeProduct"
+      : item.category === "Agarbatti"
       ? "AgarbattiProduct"
-            : "Product"),
+      : item.category === "Ganpati"
+      ? "GanpatiProduct"
+      : "Product"),
         product: item._id,
         quantity: item.quantity || 1,
         price: item.currentPrice || 0,

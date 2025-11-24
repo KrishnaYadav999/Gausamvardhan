@@ -234,9 +234,24 @@ const AdminUserOrders = () => {
                     <img src={item.image || "/no-image.png"} alt={item.name} className="w-16 h-16 rounded mr-4 object-cover" />
                     <div>
                       <p className="font-medium">{item.name}</p>
+ {item.pack && (
+  <p className="text-sm text-gray-600">Pack: {item.pack}</p>
+)}
+
+{item.weight && (
+  <p className="text-sm text-gray-600">Weight: {item.weight}</p>
+)}
+
+{item.volume && (
+  <p className="text-sm text-gray-600">Volume: {item.volume}</p>
+)}
+
+
                       <p className="text-sm text-gray-600">Qty: {item.quantity} × ₹{item.price}</p>
                       <p className="font-bold">₹{item.quantity * item.price}</p>
+                      
                     </div>
+                    
                   </div>
                 ))}
               </div>

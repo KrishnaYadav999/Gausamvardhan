@@ -7,6 +7,7 @@ import ProductVideo from "../components/ProductVideo";
 import toast from "react-hot-toast";
 import Features from "./Features";
 import { Star } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -37,7 +38,10 @@ const AgarbattiProductDetail = () => {
 
         const avgRating =
           data.reviews && data.reviews.length > 0
-            ? data.reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / data.reviews.length
+            ? data.reviews.reduce(
+                (sum, r) => sum + (Number(r.rating) || 0),
+                0
+              ) / data.reviews.length
             : 0;
 
         setProduct({ ...data, rating: avgRating });
@@ -62,7 +66,9 @@ const AgarbattiProductDetail = () => {
     if (!product) return;
     const fetchSimilarProducts = async () => {
       try {
-        const { data } = await axios.get(`/api/agarbatti/${product._id}/similar`);
+        const { data } = await axios.get(
+          `/api/agarbatti/${product._id}/similar`
+        );
         setSimilarProducts(data || []);
       } catch (error) {
         console.error("Error fetching similar products:", error);
@@ -134,7 +140,8 @@ const AgarbattiProductDetail = () => {
 
   const handleMouseMove = (e) => {
     if (!zoomRef.current) return;
-    const { left, top, width, height } = zoomRef.current.getBoundingClientRect();
+    const { left, top, width, height } =
+      zoomRef.current.getBoundingClientRect();
     const x = ((e.pageX - left) / width) * 100;
     const y = ((e.pageY - top) / height) * 100;
     setZoomStyle({
@@ -153,314 +160,518 @@ const AgarbattiProductDetail = () => {
   const productDetails = [
     { key: "description", label: "Description", value: product.description },
     { key: "quantity", label: "Quantity", value: product.quantity },
-    { key: "keyBenefits", label: "Key Benefits", value: product.keyBenefits?.join(", ") },
-    { key: "ingredients", label: "Ingredients", value: product.ingredients?.join(", ") },
+    {
+      key: "keyBenefits",
+      label: "Key Benefits",
+      value: product.keyBenefits?.join(", "),
+    },
+    {
+      key: "ingredients",
+      label: "Ingredients",
+      value: product.ingredients?.join(", "),
+    },
   ];
 
   return (
-    <div className="text-[0.9rem] bg-gray-50 min-h-screen">
-      <div className="max-w-screen-xl mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          {/* LEFT SIDE */}
-          <div>
-            {/* MAIN IMAGE + ZOOM */}
-            <div
-              ref={zoomRef}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              className="relative bg-white rounded-3xl p-6 shadow-2xl overflow-hidden"
-            >
-              <div className="w-full h-[420px] md:h-[580px] flex items-center justify-center">
-                <img
-                  src={HERO_IMAGE_URL}
-                  alt="hero"
-                  className="object-cover w-full h-full rounded-xl"
-                />
+    <>
+      {" "}
+      <Helmet>
+        {/* Dynamic Title */}
+        <title>{`${product.title} – Premium Agarbatti | Gau Samvardhan`}</title>
+
+        {/* Meta Description */}
+        <meta
+          name="description"
+          content={
+            product.shortDescription ||
+            product.description ||
+            "Premium natural agarbatti with long-lasting fragrance, made with pure ingredients by Gau Samvardhan."
+          }
+        />
+
+        {/* Canonical URLs (www + non-www both accepted by Google) */}
+        <link
+          rel="canonical"
+          href={`https://www.gausamvardhan.com/agarbatti/${id}`}
+        />
+        <link
+          rel="alternate"
+          href={`https://gausamvardhan.com/agarbatti/${id}`}
+        />
+
+        {/* Keywords */}
+        <meta
+          name="keywords"
+          content={`Agarbatti, Incense Sticks, Natural Agarbatti, Long lasting fragrance, Organic Agarbatti, ${product.title}, Gau Samvardhan`}
+        />
+
+        {/* Open Graph Meta (Facebook, Instagram, WhatsApp) */}
+        <meta
+          property="og:title"
+          content={`${product.title} – Gau Samvardhan`}
+        />
+        <meta
+          property="og:description"
+          content={
+            product.shortDescription ||
+            product.description ||
+            "Buy premium natural agarbatti with long-lasting fragrance."
+          }
+        />
+        <meta property="og:type" content="product" />
+        <meta
+          property="og:url"
+          content={`https://www.gausamvardhan.com/agarbatti/${id}`}
+        />
+        <meta
+          property="og:image"
+          content={product.images?.[0] || HERO_IMAGE_URL}
+        />
+        <meta property="og:site_name" content="Gau Samvardhan" />
+
+        {/* Twitter Card Meta */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={`${product.title} – Gau Samvardhan`}
+        />
+        <meta
+          name="twitter:description"
+          content={
+            product.shortDescription ||
+            product.description ||
+            "Premium organic agarbatti by Gau Samvardhan."
+          }
+        />
+        <meta
+          name="twitter:image"
+          content={product.images?.[0] || HERO_IMAGE_URL}
+        />
+        <meta name="twitter:site" content="@GauSamvardhan" />
+
+        {/* Robots */}
+        <meta name="robots" content="index, follow" />
+
+        {/* Structured Data (Google Rich Snippets) */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.title,
+            image: product.images,
+            description:
+              product.shortDescription ||
+              product.description ||
+              "Premium handmade agarbatti",
+            sku: id,
+            brand: {
+              "@type": "Brand",
+              name: "Gau Samvardhan",
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: product.rating?.toFixed(1) || "4.9",
+              reviewCount: product.reviews?.length || 12,
+            },
+            offers: {
+              "@type": "Offer",
+              url: `https://www.gausamvardhan.com/agarbatti/${id}`,
+              priceCurrency: "INR",
+              price: product.current_price,
+              availability: product.stock ? "InStock" : "OutOfStock",
+            },
+          })}
+        </script>
+      </Helmet>
+      <div className="text-[0.9rem] bg-gray-50 min-h-screen">
+        <div className="max-w-screen-xl mx-auto p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {/* LEFT SIDE */}
+            <div>
+              {/* MAIN IMAGE + ZOOM */}
+              <div
+                ref={zoomRef}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className="relative bg-white rounded-3xl p-6 shadow-2xl overflow-hidden"
+              >
+                <div className="w-full h-[420px] md:h-[580px] flex items-center justify-center">
+                  <img
+                    src={HERO_IMAGE_URL}
+                    alt="hero"
+                    className="object-cover w-full h-full rounded-xl"
+                  />
+                </div>
+
+                <div className="absolute left-6 top-10 md:left-10 md:top-16 w-[70%] md:w-[65%] transform -translate-y-6 md:-translate-y-12">
+                  <img
+                    src={mainImage}
+                    alt={product.title}
+                    className="w-full h-[360px] md:h-[460px] object-contain rounded-xl border-2 border-white shadow-lg bg-white"
+                  />
+                </div>
+
+                <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
+                  <div className="font-semibold">
+                    {product.brand || "Agarbatti"}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {product.quantity || ""}
+                  </div>
+                </div>
+
+                {zoomStyle.backgroundImage && (
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ ...zoomStyle }}
+                  />
+                )}
               </div>
 
-              <div className="absolute left-6 top-10 md:left-10 md:top-16 w-[70%] md:w-[65%] transform -translate-y-6 md:-translate-y-12">
-                <img
-                  src={mainImage}
-                  alt={product.title}
-                  className="w-full h-[360px] md:h-[460px] object-contain rounded-xl border-2 border-white shadow-lg bg-white"
-                />
+              {/* THUMBNAILS */}
+              <div className="mt-4 flex items-center gap-3 overflow-x-auto py-2">
+                {product.images?.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setMainImage(img)}
+                    className={`flex-shrink-0 border rounded-lg overflow-hidden p-1 transition-transform hover:scale-105 ${
+                      mainImage === img
+                        ? "ring-2 ring-green-400"
+                        : "border-gray-200"
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`thumb-${idx}`}
+                      className="w-20 h-20 object-cover"
+                    />
+                  </button>
+                ))}
               </div>
 
-              <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
-                <div className="font-semibold">{product.brand || "Agarbatti"}</div>
-                <div className="text-xs text-gray-600">{product.quantity || ""}</div>
+              {/* MORE ABOUT */}
+              <div className="mt-6 bg-white p-6 rounded-2xl shadow">
+                <h3 className="text-lg md:text-xl font-semibold mb-3">
+                  More About
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {product.moreAboutProduct?.description ||
+                    product.description ||
+                    "Premium handcrafted agarbatti."}
+                </p>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  {[
+                    {
+                      label: "Natural",
+                      desc: "Made from natural ingredients",
+                      color: "green",
+                    },
+                    {
+                      label: "Long Burning",
+                      desc: "Long-lasting fragrance",
+                      color: "yellow",
+                    },
+                    {
+                      label: "Smooth Smoke",
+                      desc: "Pleasant low smoke",
+                      color: "indigo",
+                    },
+                    { label: "Aromatic", desc: product.title, color: "pink" },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-start space-x-3">
+                      <div
+                        className={
+                          "w-9 h-9 rounded-full flex items-center justify-center font-semibold " +
+                          (item.color === "green"
+                            ? "bg-green-100 text-green-700"
+                            : item.color === "yellow"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : item.color === "indigo"
+                            ? "bg-indigo-100 text-indigo-700"
+                            : item.color === "pink"
+                            ? "bg-pink-100 text-pink-700"
+                            : "")
+                        }
+                      >
+                        {item.label.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-medium">{item.label}</div>
+                        <div className="text-xs text-gray-600">{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {zoomStyle.backgroundImage && (
-                <div className="absolute inset-0 pointer-events-none" style={{ ...zoomStyle }} />
+              {/* MORE ABOUT THIS PACK */}
+              {product.moreAboutProduct?.images?.length > 0 && (
+                <div className="mt-6 bg-white p-6 rounded-2xl shadow">
+                  <h3 className="text-lg md:text-xl font-semibold">
+                    {product.moreAboutProduct.name || "More About This Pack"}
+                  </h3>
+
+                  {product.moreAboutProduct.description && (
+                    <p className="text-gray-700 mt-2 leading-relaxed">
+                      {product.moreAboutProduct.description}
+                    </p>
+                  )}
+
+                  <div className="mt-4 space-y-4">
+                    {product.moreAboutProduct.images.map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        alt={`pack-${i}`}
+                        className="w-full rounded-xl object-cover"
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* THUMBNAILS */}
-            <div className="mt-4 flex items-center gap-3 overflow-x-auto py-2">
-              {product.images?.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setMainImage(img)}
-                  className={`flex-shrink-0 border rounded-lg overflow-hidden p-1 transition-transform hover:scale-105 ${
-                    mainImage === img ? "ring-2 ring-green-400" : "border-gray-200"
-                  }`}
-                >
-                  <img src={img} alt={`thumb-${idx}`} className="w-20 h-20 object-cover" />
-                </button>
-              ))}
-            </div>
+            {/* RIGHT SIDE */}
+            <div className="sticky top-6 self-start">
+              <div className="bg-white rounded-3xl p-6 shadow-lg">
+                <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">
+                  {product.title}
+                </h1>
 
-            {/* MORE ABOUT */}
-            <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-              <h3 className="text-lg md:text-xl font-semibold mb-3">More About</h3>
-              <p className="text-gray-700 leading-relaxed">
-                {product.moreAboutProduct?.description || product.description || "Premium handcrafted agarbatti."}
-              </p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {[
-                  { label: "Natural", desc: "Made from natural ingredients", color: "green" },
-                  { label: "Long Burning", desc: "Long-lasting fragrance", color: "yellow" },
-                  { label: "Smooth Smoke", desc: "Pleasant low smoke", color: "indigo" },
-                  { label: "Aromatic", desc: product.title, color: "pink" },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-start space-x-3">
-                    <div
-                      className={
-                        "w-9 h-9 rounded-full flex items-center justify-center font-semibold " +
-                        (item.color === "green"
-                          ? "bg-green-100 text-green-700"
-                          : item.color === "yellow"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : item.color === "indigo"
-                          ? "bg-indigo-100 text-indigo-700"
-                          : item.color === "pink"
-                          ? "bg-pink-100 text-pink-700"
-                          : "")
-                      }
-                    >
-                      {item.label.charAt(0)}
+                <div className="flex items-center mt-3 space-x-3">
+                  <div className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={18}
+                        className={
+                          i < Math.round(Number(averageRating) || 0)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-gray-600 text-sm">
+                    ({totalReviews} reviews)
+                  </span>
+                </div>
+
+                <p className="mt-4 text-gray-700 text-[0.95rem]">
+                  {product.description || "Premium handcrafted agarbatti."}
+                </p>
+
+                <div className="mt-6 flex items-end gap-4">
+                  <div>
+                    <div className="text-3xl md:text-4xl font-bold text-green-600">
+                      ₹
+                      {getPrice(product, selectedPack) *
+                        (packQuantities[selectedPack] || 1)}
                     </div>
-                    <div>
-                      <div className="font-medium">{item.label}</div>
-                      <div className="text-xs text-gray-600">{item.desc}</div>
+                    {product.cut_price && (
+                      <div className="line-through text-gray-400">
+                        ₹{product.cut_price}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* PACK OPTIONS */}
+                {product.packs?.length > 0 && (
+                  <div className="mt-6">
+                    <p className="font-medium text-gray-700 mb-2">
+                      Select Pack
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      {product.packs.map((pack, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedPack(pack.name)}
+                          className={`flex items-center justify-between border p-3 rounded-lg cursor-pointer transition-all duration-300 ${
+                            selectedPack === pack.name
+                              ? "border-green-600 bg-green-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-green-400"
+                          }`}
+                        >
+                          <span className="text-sm font-medium">
+                            {pack.name} - ₹
+                            {getPrice(product, pack.name) *
+                              (packQuantities[pack.name] || 1)}
+                          </span>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updatePackQuantity(pack.name, -1);
+                              }}
+                              className="px-3 py-1 border rounded"
+                            >
+                              -
+                            </button>
+                            <span>{packQuantities[pack.name] || 1}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updatePackQuantity(pack.name, 1);
+                              }}
+                              className="px-3 py-1 border rounded"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA BUTTONS */}
+                <div className="mt-6 grid grid-cols-1 gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                    className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
+                      isOutOfStock
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={isOutOfStock}
+                    className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
+                      isOutOfStock
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-yellow-400 hover:bg-yellow-500"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
+                  </button>
+                </div>
+
+                <Features />
+
+                {/* PRODUCT DETAILS */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Product Details
+                  </h3>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    {productDetails.map(
+                      (item) =>
+                        item.value && (
+                          <li key={item.key}>
+                            <span className="font-medium text-gray-900">
+                              {item.label}:
+                            </span>{" "}
+                            {item.value}
+                          </li>
+                        )
+                    )}
+                  </ul>
+                </div>
+
+                {/* PRODUCT VIDEO */}
+                {product.videoUrl && (
+                  <div className="mt-6">
+                    <div className="bg-white p-4 rounded-2xl shadow">
+                      <h4 className="font-semibold mb-2">Product Video</h4>
+                      <ProductVideo
+                        videoUrl={product.videoUrl}
+                        thumbnail={product.images?.[0]}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* REVIEWS */}
+          {product.reviews?.length > 0 && (
+            <div className="mt-10">
+              <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+              <div className="space-y-4">
+                {product.reviews.map((rev, i) => (
+                  <div key={i} className="bg-white p-4 rounded-xl shadow-sm">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                        {rev.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900 text-sm">
+                          {rev.name}
+                        </div>
+                        <div className="flex mt-1">
+                          {Array.from({ length: Number(rev.rating) || 0 }).map(
+                            (_, idx) => (
+                              <Star
+                                key={idx}
+                                size={14}
+                                className="text-yellow-400 fill-yellow-400"
+                              />
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 leading-snug">{rev.comment}</p>
+                    {rev.images?.length > 0 && (
+                      <div className="flex mt-3 gap-2 flex-wrap">
+                        {rev.images.map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img}
+                            alt={`review-${idx}`}
+                            className="w-20 h-20 rounded-lg object-cover"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-gray-400 text-xs mt-2">
+                      {rev.createdAt
+                        ? new Date(rev.createdAt).toLocaleDateString()
+                        : ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SIMILAR PRODUCTS */}
+          {similarProducts.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-xl font-semibold mb-4">You May Also Like</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {similarProducts.map((sp, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition cursor-pointer"
+                  >
+                    <img
+                      src={sp.images?.[0]}
+                      alt={sp.title}
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-medium text-gray-900 text-sm">
+                        {sp.title}
+                      </h4>
+                      <p className="text-green-600 font-semibold text-sm mt-1">
+                        ₹{sp.current_price}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* MORE ABOUT THIS PACK */}
-            {product.moreAboutProduct?.images?.length > 0 && (
-              <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-                <h3 className="text-lg md:text-xl font-semibold">
-                  {product.moreAboutProduct.name || "More About This Pack"}
-                </h3>
-
-                {product.moreAboutProduct.description && (
-                  <p className="text-gray-700 mt-2 leading-relaxed">
-                    {product.moreAboutProduct.description}
-                  </p>
-                )}
-
-                <div className="mt-4 space-y-4">
-                  {product.moreAboutProduct.images.map((img, i) => (
-                    <img
-                      key={i}
-                      src={img}
-                      alt={`pack-${i}`}
-                      className="w-full rounded-xl object-cover"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT SIDE */}
-          <div className="sticky top-6 self-start">
-            <div className="bg-white rounded-3xl p-6 shadow-lg">
-              <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">{product.title}</h1>
-
-              <div className="flex items-center mt-3 space-x-3">
-                <div className="flex items-center">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={18}
-                      className={i < Math.round(Number(averageRating) || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
-              </div>
-
-              <p className="mt-4 text-gray-700 text-[0.95rem]">{product.description || "Premium handcrafted agarbatti."}</p>
-
-              <div className="mt-6 flex items-end gap-4">
-                <div>
-                  <div className="text-3xl md:text-4xl font-bold text-green-600">
-                    ₹{getPrice(product, selectedPack) * (packQuantities[selectedPack] || 1)}
-                  </div>
-                  {product.cut_price && <div className="line-through text-gray-400">₹{product.cut_price}</div>}
-                </div>
-              </div>
-
-              {/* PACK OPTIONS */}
-              {product.packs?.length > 0 && (
-                <div className="mt-6">
-                  <p className="font-medium text-gray-700 mb-2">Select Pack</p>
-                  <div className="flex flex-col gap-3">
-                    {product.packs.map((pack, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => setSelectedPack(pack.name)}
-                        className={`flex items-center justify-between border p-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                          selectedPack === pack.name
-                            ? "border-green-600 bg-green-50 shadow-sm"
-                            : "border-gray-200 bg-white hover:border-green-400"
-                        }`}
-                      >
-                        <span className="text-sm font-medium">
-                          {pack.name} - ₹{getPrice(product, pack.name) * (packQuantities[pack.name] || 1)}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updatePackQuantity(pack.name, -1);
-                            }}
-                            className="px-3 py-1 border rounded"
-                          >
-                            -
-                          </button>
-                          <span>{packQuantities[pack.name] || 1}</span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              updatePackQuantity(pack.name, 1);
-                            }}
-                            className="px-3 py-1 border rounded"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* CTA BUTTONS */}
-              <div className="mt-6 grid grid-cols-1 gap-3">
-                <button
-                  onClick={handleAddToCart}
-                  disabled={isOutOfStock}
-                  className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
-                    isOutOfStock
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
-                  }`}
-                >
-                  {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
-                </button>
-                <button
-                  onClick={handleBuyNow}
-                  disabled={isOutOfStock}
-                  className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
-                    isOutOfStock ? "bg-gray-300 cursor-not-allowed" : "bg-yellow-400 hover:bg-yellow-500"
-                  }`}
-                >
-                  {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
-                </button>
-              </div>
-
-              <Features />
-
-              {/* PRODUCT DETAILS */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Product Details</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  {productDetails.map(
-                    (item) =>
-                      item.value && (
-                        <li key={item.key}>
-                          <span className="font-medium text-gray-900">{item.label}:</span> {item.value}
-                        </li>
-                      )
-                  )}
-                </ul>
-              </div>
-
-              {/* PRODUCT VIDEO */}
-              {product.videoUrl && (
-                <div className="mt-6">
-                  <div className="bg-white p-4 rounded-2xl shadow">
-                    <h4 className="font-semibold mb-2">Product Video</h4>
-                    <ProductVideo videoUrl={product.videoUrl} thumbnail={product.images?.[0]} />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
-
-        {/* REVIEWS */}
-        {product.reviews?.length > 0 && (
-          <div className="mt-10">
-            <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-            <div className="space-y-4">
-              {product.reviews.map((rev, i) => (
-                <div key={i} className="bg-white p-4 rounded-xl shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                      {rev.name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900 text-sm">{rev.name}</div>
-                      <div className="flex mt-1">
-                        {Array.from({ length: Number(rev.rating) || 0 }).map((_, idx) => (
-                          <Star key={idx} size={14} className="text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 leading-snug">{rev.comment}</p>
-                  {rev.images?.length > 0 && (
-                    <div className="flex mt-3 gap-2 flex-wrap">
-                      {rev.images.map((img, idx) => (
-                        <img key={idx} src={img} alt={`review-${idx}`} className="w-20 h-20 rounded-lg object-cover" />
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-gray-400 text-xs mt-2">
-                    {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : ""}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* SIMILAR PRODUCTS */}
-        {similarProducts.length > 0 && (
-          <div className="mt-12">
-            <h3 className="text-xl font-semibold mb-4">You May Also Like</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {similarProducts.map((sp, idx) => (
-                <div key={idx} className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
-                  <img src={sp.images?.[0]} alt={sp.title} className="w-full h-40 object-cover" />
-                  <div className="p-3">
-                    <h4 className="font-medium text-gray-900 text-sm">{sp.title}</h4>
-                    <p className="text-green-600 font-semibold text-sm mt-1">₹{sp.current_price}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
+    </>
   );
 };
 

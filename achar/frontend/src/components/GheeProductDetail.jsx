@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import Features from "./Features";
 import { Star } from "lucide-react";
 import ImageZoom from "./ImageZoom";
+import Certificate from "./Certificate";
+import { Helmet } from "react-helmet-async";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png"; // use same hero or change
 
@@ -205,6 +207,94 @@ const GheeProductDetail = () => {
 
   return (
     <>
+    <Helmet>
+  <title>{product?.title || "Pure A2 Ghee | Gausamvardhan"}</title>
+
+  <meta
+    name="description"
+    content={
+      product?.shortDescription ||
+      "Buy 100% Pure A2 Ghee made from Gir Cow milk. Handcrafted, chemical-free ghee with rich aroma & premium quality from Gausamvardhan."
+    }
+  />
+
+  <meta
+    name="keywords"
+    content="A2 ghee, gir cow ghee, pure ghee, organic ghee, desi ghee, bilona ghee, gausamvardhan ghee"
+  />
+
+  {/* Canonical */}
+  <link
+    rel="canonical"
+    href={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
+  />
+
+  {/* Open Graph */}
+  <meta property="og:type" content="product" />
+  <meta
+    property="og:title"
+    content={product?.title || "Gausamvardhan Pure A2 Gir Cow Ghee"}
+  />
+  <meta
+    property="og:description"
+    content={
+      product?.shortDescription ||
+      "Buy Pure A2 Gir Cow Ghee online. Traditional method, organic, high aroma, rich nutrition."
+    }
+  />
+  <meta
+    property="og:image"
+    content={product?.images?.[0] || "https://www.gausamvardhan.com/default-ghee.jpg"}
+  />
+  <meta
+    property="og:url"
+    content={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
+  />
+  <meta property="og:site_name" content="Gausamvardhan" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta
+    name="twitter:title"
+    content={product?.title || "Pure A2 Ghee | Gausamvardhan"}
+  />
+  <meta
+    name="twitter:description"
+    content={
+      product?.shortDescription ||
+      "Pure A2 Gir Cow Ghee handcrafted with traditional method. Order online."
+    }
+  />
+  <meta
+    name="twitter:image"
+    content={product?.images?.[0] || "https://www.gausamvardhan.com/default-ghee.jpg"}
+  />
+
+  {/* Robots */}
+  <meta name="robots" content="index, follow" />
+
+  {/* Schema.org Product JSON-LD */}
+  <script type="application/ld+json">
+    {`
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "${product?.title || "Gausamvardhan Pure A2 Ghee"}",
+        "image": "${product?.images?.[0] || ""}",
+        "description": "${product?.shortDescription || ""}",
+        "sku": "${product?._id || ""}",
+        "brand": { "@type": "Brand", "name": "Gausamvardhan" },
+        "offers": {
+          "@type": "Offer",
+          "url": "https://www.gausamvardhan.com/ghee-product/${slug}/${id}",
+          "priceCurrency": "INR",
+          "price": "${getPrice(product, selectedWeight) || ""}",
+          "availability": "https://schema.org/${isOutOfStock ? "OutOfStock" : "InStock"}"
+        }
+      }
+    `}
+  </script>
+</Helmet>
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -468,6 +558,8 @@ const GheeProductDetail = () => {
                       <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
                         {rev.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
+
+                      <Certificate />
 
                       <div>
                         <div className="font-medium text-gray-900 text-sm">{rev.name}</div>

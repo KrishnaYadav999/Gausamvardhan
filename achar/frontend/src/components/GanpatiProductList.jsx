@@ -16,27 +16,27 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
 
   if (!product) return null;
 
-  const isOutOfStock = !product.stock;
+  const isOutOfStock = !product.stock || product.stockQuantity <= 0;
 
-  const getCurrentPrice = () => {
-    if (product.packs && selectedPack) {
-      const pack = product.packs.find((p) => p.name === selectedPack);
-      return pack ? Number(pack.price) : Number(product.current_price);
-    }
-    return Number(product.current_price);
-  };
-
-  const currentPrice = getCurrentPrice();
-  const cutPrice = Number(product.cut_price);
+  // Always use selected pack price
+  const currentPrice = product.packs?.find((p) => p.name === selectedPack)?.price
+    ? Number(product.packs.find((p) => p.name === selectedPack).price)
+    : 0;
+  const cutPrice = product.cut_price ? Number(product.cut_price) : 0;
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     if (isOutOfStock) return toast.error("Product is out of stock");
+    if (!selectedPack) return toast.error("Select a pack");
 
     addToCart({
-      ...product,
+      _id: product._id,
+      productName: product.title,
       selectedPack,
+      quantity: 1,
       selectedPrice: currentPrice,
+      cutPrice: cutPrice,
+      productImages: product.images,
     });
 
     toast.success(`${product.title} added to cart`);
@@ -46,6 +46,13 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
     if (isOutOfStock) return;
     navigate(`/ganpati-product/${product.slug}/${product._id}`);
   };
+
+  const avgRating = product.reviews?.length
+    ? (
+        product.reviews.reduce((acc, r) => acc + (r.rating || 0), 0) /
+        product.reviews.length
+      ).toFixed(1)
+    : "0.0";
 
   return (
     <div
@@ -61,14 +68,14 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
       <div className="relative h-[260px] overflow-hidden rounded-t-2xl bg-gray-50">
         <img
           src={product.images?.[0]}
-          className={`w-full h-full object-cover absolute inset-0 transition duration-500 ${
+          className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-500 ${
             hovered && product.images?.[1] ? "opacity-0" : "opacity-100"
           }`}
         />
         {product.images?.[1] && (
           <img
             src={product.images[1]}
-            className={`w-full h-full object-cover absolute inset-0 transition duration-500 ${
+            className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-500 ${
               hovered ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -120,13 +127,12 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
         {/* RATING */}
         <div className="flex items-center gap-1 mb-3">
           <FaStar className="text-yellow-500 text-sm" />
-          <span className="text-sm font-medium text-gray-700">
-            {product.rating ? product.rating.toFixed(1) : "0.0"}
-          </span>
+          <span className="text-sm font-medium text-gray-700">{avgRating}</span>
         </div>
 
         <p className="text-sm text-gray-500 mb-3">Ganpati Decoration • Premium</p>
 
+        {/* PACK SELECT */}
         {product.packs && (
           <select
             value={selectedPack}
@@ -187,21 +193,21 @@ const GanpatiProductList = ({ limit }) => {
   const sliderRef = useRef(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadProducts = async () => {
       try {
         const { data } = await axios.get("/api/ganpati/all");
         const items = Array.isArray(data) ? data : [];
 
         setProducts(limit ? items.slice(0, limit) : items);
 
-        const defaults = {};
+        const defaultPacks = {};
         items.forEach((p) => {
           if (p.packs && p.packs.length > 0) {
-            defaults[p._id] = p.packs[0].name;
+            defaultPacks[p._id] = p.packs[0].name;
           }
         });
 
-        setSelectedPack(defaults);
+        setSelectedPack(defaultPacks);
       } catch (err) {
         toast.error("Failed to load Ganpati products");
       } finally {
@@ -209,12 +215,11 @@ const GanpatiProductList = ({ limit }) => {
       }
     };
 
-    load();
+    loadProducts();
   }, [limit]);
 
   const scrollLeft = () =>
     sliderRef.current.scrollBy({ left: -300, behavior: "smooth" });
-
   const scrollRight = () =>
     sliderRef.current.scrollBy({ left: 300, behavior: "smooth" });
 
@@ -222,7 +227,7 @@ const GanpatiProductList = ({ limit }) => {
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
       <Toaster />
 
-      {/* HERO */}
+      {/* HERO BANNER */}
       <div className="relative w-full mb-10">
         <div className="relative w-full h-[130px] overflow-hidden">
           <svg
@@ -285,9 +290,8 @@ const GanpatiProductList = ({ limit }) => {
       <div
         ref={sliderRef}
         className="flex gap-6 overflow-x-auto scrollbar-hide py-4 px-4 snap-x snap-mandatory whitespace-nowrap"
-        style={{ scrollBehavior: "smooth" }}
       >
-        {(loading ? [...Array(6)] : products).map((item, index) =>
+        {(loading ? Array(6).fill(null) : products).map((item, index) =>
           loading ? (
             <GanpatiSkeleton key={index} />
           ) : (

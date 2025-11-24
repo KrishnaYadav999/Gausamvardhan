@@ -9,6 +9,9 @@ import OilProduct from "../models/oilProductModel.js";
 import MasalaProduct from "../models/MasalaProduct.js";
 import GheeProduct from "../models/GheeProduct.js";
 import AgarbattiProduct from "./../models/agarbattiModel.js"
+import GanpatiProduct from "../models/ganpatimodel.js"; 
+import { sendPaymentSuccessMail,sendOrderCancelledMail, sendPaymentFailedMail } from "../utils/paymentMail.js";
+
 dotenv.config();
 
 // ✅ Razorpay Instance
@@ -69,12 +72,14 @@ export const createOrder = async (req, res) => {
   OilProduct.findById(p.product),
   Product.findById(p.product),
   AgarbattiProduct.findById(p.product), // added agarbatti
+  GanpatiProduct.findById(p.product),
 ]);
 if (masala) p.productType = "MasalaProduct";
 else if (ghee) p.productType = "GheeProduct";
 else if (oil) p.productType = "OilProduct";
 else if (normal) p.productType = "Product";
 else if (agarbatti) p.productType = "AgarbattiProduct"; 
+else if (ganpati) p.productType = "GanpatiProduct";
       }
     }
 
@@ -100,6 +105,9 @@ else if (agarbatti) p.productType = "AgarbattiProduct";
           case "AgarbattiProduct":
   prodData = await AgarbattiProduct.findById(product).select("title images");
   break;
+   case "GanpatiProduct": // ✅ added Ganpati
+    prodData = await GanpatiProduct.findById(product).select("title images");
+    break;
       }
 
  products[i] = {
@@ -110,7 +118,9 @@ else if (agarbatti) p.productType = "AgarbattiProduct";
     prodData?.productImages?.[0] ||
     prodData?.images?.[0] ||
     "/no-image.png",
-  pack: products[i].pack || products[i].selectedPack || null, // add this line
+   pack: products[i].pack || products[i].selectedPack || prodData?.pack || null,
+  weight: products[i].weight || prodData?.weight || null,
+  volume: products[i].volume || prodData?.volume || null,
 };
 
     }
@@ -173,35 +183,44 @@ export const verifyPayment = async (req, res) => {
   try {
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
-    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature)
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      await sendPaymentFailedMail("unknown", "Incomplete payment details");
       return res.status(400).json({
         success: false,
         message: "Incomplete payment details",
       });
+    }
 
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpayOrderId}|${razorpayPaymentId}`)
       .digest("hex");
 
-    if (razorpaySignature !== expectedSignature)
+    // ❌ Signature Mismatch → Payment Failed Email
+    if (razorpaySignature !== expectedSignature) {
+      await sendPaymentFailedMail("unknown", "Signature mismatch");
       return res.status(400).json({
         success: false,
         message: "Invalid payment signature",
       });
+    }
 
+    // ✔ Payment is valid → Update order
     const order = await Order.findOneAndUpdate(
       { razorpayOrderId },
       { razorpayPaymentId, razorpaySignature, status: "paid" },
       { new: true }
-    );
+    ).populate("user");
 
     if (!order)
       return res.status(404).json({ success: false, message: "Order not found" });
 
-    // ✅ Reduce stock for each product
+    // -------------------------------------
+    // 🔥 Reduce Stock For Each Product
+    // -------------------------------------
     for (const item of order.products) {
       let prodModel = null;
+
       switch (item.productType) {
         case "Product":
           prodModel = Product;
@@ -215,10 +234,14 @@ export const verifyPayment = async (req, res) => {
         case "GheeProduct":
           prodModel = GheeProduct;
           break;
-          case "AgarbattiProduct":
-        prodModel = AgarbattiProduct;
-  break;
+        case "AgarbattiProduct":
+          prodModel = AgarbattiProduct;
+          break;
+        case "GanpatiProduct":
+          prodModel = GanpatiProduct;
+          break;
       }
+
       if (prodModel) {
         const prod = await prodModel.findById(item.product);
         if (prod) {
@@ -229,13 +252,35 @@ export const verifyPayment = async (req, res) => {
       }
     }
 
-    console.log("✅ Payment verified:", order._id);
-    res.json({ success: true, message: "Payment verified successfully", order });
+    // -------------------------------------
+    // 📩 Send Payment SUCCESS Email
+    // -------------------------------------
+    await sendPaymentSuccessMail(
+      order.user.email,
+      order.user.name,
+      order._id,
+      order.totalAmount
+    );
+
+    return res.json({
+      success: true,
+      message: "Payment verified successfully",
+      order,
+    });
+
   } catch (err) {
     console.error("❌ Payment verification error:", err);
-    res.status(500).json({ success: false, message: err.message });
+
+    // Payment failed email
+    await sendPaymentFailedMail("unknown", err.message);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
+
 
 // ======================================================
 // 🚫 CANCEL ORDER
@@ -244,18 +289,47 @@ export const cancelOrder = async (req, res) => {
   try {
     const { orderId, reason } = req.body;
 
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    const order = await Order.findById(orderId).populate("user");
+    if (!order)
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
 
+    // Already cancelled check
+    if (order.status === "cancelled") {
+      return res.json({
+        success: true,
+        message: "Order already cancelled",
+      });
+    }
+
+    // Updating order status
     order.status = "cancelled";
     order.isCancelled = true;
     order.cancelReason = reason || "User cancelled";
     await order.save();
 
-    res.json({ success: true, message: "Order cancelled successfully" });
+    // 📩 SEND CANCEL EMAIL
+    if (order.user && order.user.email) {
+      await sendOrderCancelledMail(
+        order.user.email,
+        order.user.name,
+        order._id,
+        order.cancelReason
+      );
+    }
+
+    return res.json({
+      success: true,
+      message: "Order cancelled successfully",
+    });
   } catch (err) {
     console.error("Cancel order error:", err);
-    res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 

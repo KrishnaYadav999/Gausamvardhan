@@ -8,15 +8,17 @@ import Filter from "../components/Filter";
 import AcharAdvertizeBanner from "../components/AcharAdvertizeBanner";
 import { FaHeart } from "react-icons/fa";
 
-/* ------------------ Card ------------------ */
+/* ------------------ Product Card ------------------ */
 const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavigate }) => {
   const { addToCart } = useContext(CartContext);
   const [hovered, setHovered] = useState(false);
 
   if (!product) return null;
+
   const isOutOfStock = product.stock === false || product.stockQuantity <= 0;
 
-  const getPrice = (product, weight) => {
+  // Price calculation based on selectedWeight
+  const getPrice = (weight) => {
     const base = parseFloat(product.current_price || 0) || 0;
     if (!product.pricepergram) return base;
     const map = {};
@@ -27,7 +29,7 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavig
     return map[weight] || base;
   };
 
-  const price = getPrice(product, selectedWeight);
+  const price = getPrice(selectedWeight);
 
   const avgRating =
     product?.reviews?.length > 0
@@ -66,12 +68,13 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavig
       onClick={() => !isOutOfStock && onNavigate(product)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full relative ${
+      className={`bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col relative h-[360px] md:h-full ${
         isOutOfStock ? "opacity-70 cursor-not-allowed" : ""
       }`}
       style={{ fontFamily: "Inter" }}
     >
-      <div className="relative h-[260px] overflow-hidden rounded-t-2xl bg-gray-100">
+      {/* Images */}
+      <div className="relative h-[160px] md:h-[260px] overflow-hidden rounded-t-2xl bg-gray-100">
         <img
           src={firstImg}
           className={`w-full h-full object-contain absolute inset-0 transition duration-500 ${
@@ -108,9 +111,9 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavig
         )}
       </div>
 
-      <div className="px-3 py-3 flex flex-col flex-1">
+      {/* Content */}
+      <div className="px-3 py-2 md:py-3 flex flex-col flex-1">
         <h3 className="font-semibold text-sm text-gray-900 leading-tight line-clamp-2">{product.title}</h3>
-
         <p className="text-sm text-gray-500 mb-2 mt-1">Small-batch • Handcrafted</p>
 
         <div className="flex items-center gap-2 mb-3">
@@ -119,17 +122,13 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavig
           <span className="text-xs text-gray-500">({product.reviews?.length || 0})</span>
         </div>
 
+        {/* Weight selector */}
         {product.pricepergram && (
           <select
             value={selectedWeight}
             disabled={isOutOfStock}
             onClick={(e) => e.stopPropagation()}
-            onChange={(e) =>
-              setSelectedWeight((prev) => ({
-                ...prev,
-                [product._id]: e.target.value,
-              }))
-            }
+            onChange={(e) => setSelectedWeight(e.target.value)}
             className={`w-full border px-3 py-2 text-xs font-medium rounded-lg ${
               isOutOfStock ? "bg-gray-200 cursor-not-allowed text-gray-500" : "border-gray-300 text-gray-700"
             }`}
@@ -153,7 +152,7 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavig
           </div>
 
           <button
-            onClick={(e) => addCart(e)}
+            onClick={addCart}
             disabled={isOutOfStock}
             className={`px-3 py-2 text-xs tracking-wide font-semibold rounded-lg ${
               isOutOfStock ? "bg-gray-400 cursor-not-allowed" : "bg-green-700 hover:bg-green-800 text-white"
@@ -171,6 +170,7 @@ const MasalaProductCard = ({ product, selectedWeight, setSelectedWeight, onNavig
 export default function MasalaCategoryProduct() {
   const { slug } = useParams();
   const navigate = useNavigate();
+
   const { addToCart } = useContext(CartContext);
 
   const [products, setProducts] = useState([]);
@@ -180,18 +180,18 @@ export default function MasalaCategoryProduct() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    // fetch categories (optional) and products
     const load = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
           axios.get(`/api/masala-products/category/${slug}`),
           axios.get(`/api/categories`).catch(() => ({ data: [] })),
         ]);
+
         const prods = prodRes.data || [];
         setProducts(prods);
         setFilteredProducts(prods);
 
-        // defaults for weight selector
+        // Set default selected weight per product
         const defaults = {};
         prods.forEach((p) => {
           const def = p.pricepergram?.split(",")[0].split("=")[0].trim() || "";
@@ -212,22 +212,14 @@ export default function MasalaCategoryProduct() {
     (filters) => {
       let temp = [...products];
 
-      // category filter (if id passed)
       if (filters.category) temp = temp.filter((p) => String(p.category) === String(filters.category));
-
-      // rating
       if (filters.rating && filters.rating > 0) temp = temp.filter((p) => (p.rating || 0) >= filters.rating);
-
-      // stock
       if (filters.stock) temp = temp.filter((p) => p.stock === true);
 
-      // price (min-max): only compare selected weight price if weight present; otherwise current_price
       if (filters.price && Array.isArray(filters.price)) {
         const [minP, maxP] = filters.price;
         temp = temp.filter((p) => {
-          // check base price (current_price) and any pricepergram first option
           const base = parseFloat(p.current_price || 0) || 0;
-          // attempt to get lowest price among pricepergram
           let low = base;
           if (p.pricepergram) {
             const vals = p.pricepergram
@@ -255,7 +247,7 @@ export default function MasalaCategoryProduct() {
       <div className="px-4 sm:px-6 py-8">
         <Toaster />
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">{slug} Masala Products</h2>
+           <h2 className="text-[0.9rem] md:text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">{slug} Masala Products</h2>
 
           <button className="md:hidden flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg shadow" onClick={() => setFilterOpen(true)}>
             <FiFilter /> Filter

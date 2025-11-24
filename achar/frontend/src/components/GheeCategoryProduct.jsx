@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
@@ -13,6 +13,7 @@ import { FaHeart } from "react-icons/fa";
 const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   const { addToCart } = useContext(CartContext);
   const [hovered, setHovered] = useState(false);
+  const navigate = useNavigate();
 
   if (!product) return null;
   const isOutOfStock = !product.stock;
@@ -63,12 +64,15 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
   return (
     <div
-      className={`bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full`}
+      className="bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full"
+      onClick={() =>
+        navigate(`/ghee-product/${product.slug}/${product._id}`)
+      }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* IMAGE */}
-      <div className="relative h-48 rounded-t-2xl overflow-hidden bg-gray-50">
+      <div className="relative h-40 sm:h-48 rounded-t-2xl overflow-hidden bg-gray-50">
         <img
           src={product.images?.[0]}
           alt={product.title}
@@ -104,22 +108,22 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       {/* DETAILS */}
       <div className="px-4 py-3 flex flex-col flex-1">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-semibold text-sm sm:text-base text-gray-900 w-[70%] line-clamp-2">
+          <h3 className="font-semibold text-[0.9rem] sm:text-base text-gray-900 w-[70%] line-clamp-2">
             {product.title}
           </h3>
-          <p className="text-sm sm:text-base font-bold text-gray-900">
+          <p className="text-[0.9rem] sm:text-base font-bold text-gray-900">
             ₹{selectedPrice}
           </p>
         </div>
 
-        <p className="text-xs text-gray-500 mb-2">Pure & Natural Ghee</p>
+        <p className="text-[0.75rem] sm:text-sm text-gray-500 mb-2">
+          Pure & Natural Ghee
+        </p>
 
-        <div className="flex items-center gap-1 mb-2">
+        <div className="flex items-center gap-1 mb-2 text-[0.8rem] sm:text-sm">
           <span className="text-yellow-500 text-sm sm:text-base">★</span>
-          <span className="text-xs sm:text-sm font-semibold text-gray-800">
-            {avgRating}
-          </span>
-          <span className="text-xs text-gray-400">
+          <span className="font-semibold text-gray-800">{avgRating}</span>
+          <span className="text-gray-400">
             ({product.reviews?.length || 0}+)
           </span>
         </div>
@@ -131,7 +135,7 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
             disabled={isOutOfStock}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => setSelectedWeight(e.target.value)}
-            className={`w-full border px-3 py-1.5 text-sm rounded-lg mb-2 ${
+            className={`w-full border px-3 py-1.5 text-[0.8rem] sm:text-sm rounded-lg mb-2 ${
               isOutOfStock
                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                 : "border-gray-300 text-gray-700"
@@ -148,7 +152,7 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`w-full py-2 font-semibold text-sm tracking-wide rounded-lg ${
+          className={`w-full py-2 font-semibold text-[0.9rem] sm:text-sm tracking-wide rounded-lg ${
             isOutOfStock
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-yellow-600 text-white hover:bg-yellow-700"
@@ -208,11 +212,12 @@ export default function GheeCategoryProduct() {
       <div className="px-4 sm:px-6 py-8">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">
             {slug} Ghee Products
           </h2>
+
           <button
-            className="md:hidden flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg shadow hover:bg-yellow-700"
+            className="md:hidden flex items-center gap-2 px-4 py-2 text-[0.9rem] bg-yellow-600 text-white rounded-lg shadow hover:bg-yellow-700"
             onClick={() => setFilterOpen(true)}
           >
             <FiFilter /> Filter
@@ -222,7 +227,12 @@ export default function GheeCategoryProduct() {
         <div className="flex gap-6">
           {/* SIDEBAR FILTER */}
           <div className="hidden md:block w-64 shrink-0 sticky top-24 mr-4">
-            <Filter minPrice={0} maxPrice={5000} categories={[]} onFilterChange={handleFilter} />
+            <Filter
+              minPrice={0}
+              maxPrice={5000}
+              categories={[]}
+              onFilterChange={handleFilter}
+            />
           </div>
 
           {/* MOBILE FILTER DRAWER */}
@@ -231,12 +241,19 @@ export default function GheeCategoryProduct() {
               <div className="flex-1" onClick={() => setFilterOpen(false)}></div>
               <div className="w-72 bg-white h-full shadow-lg p-4 mr-4 overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <h3 className="text-[0.9rem] sm:text-lg font-semibold">
+                    Filters
+                  </h3>
                   <button onClick={() => setFilterOpen(false)}>
                     <FiX size={22} />
                   </button>
                 </div>
-                <Filter minPrice={0} maxPrice={5000} categories={[]} onFilterChange={handleFilter} />
+                <Filter
+                  minPrice={0}
+                  maxPrice={5000}
+                  categories={[]}
+                  onFilterChange={handleFilter}
+                />
               </div>
             </div>
           )}
@@ -244,7 +261,7 @@ export default function GheeCategoryProduct() {
           {/* PRODUCT GRID */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
             {filteredProducts.length === 0 ? (
-              <p className="text-gray-600 col-span-full text-center py-20">
+              <p className="text-gray-600 text-[0.9rem] col-span-full text-center py-20">
                 No products found.
               </p>
             ) : (

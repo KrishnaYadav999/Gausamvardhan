@@ -7,6 +7,8 @@ import ProductVideo from "../components/ProductVideo";
 import toast from "react-hot-toast";
 import Features from "./Features";
 import { Star } from "lucide-react";
+import Certificate from "./Certificate";
+import { Helmet } from "react-helmet-async";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -182,6 +184,78 @@ const AcharProductDetail = () => {
 
   return (
     <>
+    <Helmet>
+  {/* Title & Description */}
+  <title>{`${product.productName} | Gau Samvardhan`}</title>
+  <meta
+    name="description"
+    content={product.shortDescription || product.productTagline || "High-quality organic products from Gau Samvardhan."}
+  />
+
+  {/* Canonical - always www */}
+  <link rel="canonical" href={`https://www.gausamvardhan.com/products/achar/${id}`} />
+
+  {/* Open Graph */}
+  <meta property="og:title" content={`${product.productName} | Gau Samvardhan`} />
+  <meta property="og:description" content={product.shortDescription || product.productTagline} />
+  <meta property="og:type" content="product" />
+  <meta property="og:url" content={`https://www.gausamvardhan.com/products/achar/${id}`} />
+  <meta property="og:image" content={product.productImages?.[0] || HERO_IMAGE_URL} />
+  <meta property="og:site_name" content="Gau Samvardhan" />
+  <meta property="og:locale" content="en_IN" />
+
+  {/* Twitter Card */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={`${product.productName} | Gau Samvardhan`} />
+  <meta name="twitter:description" content={product.shortDescription || product.productTagline} />
+  <meta name="twitter:image" content={product.productImages?.[0] || HERO_IMAGE_URL} />
+  <meta name="twitter:site" content="@GauSamvardhan" />
+
+  {/* Keywords & Robots */}
+  <meta name="keywords" content={`Achar, Pickle, ${product.productName}, Gau Samvardhan, Organic Products`} />
+  <meta name="robots" content="index, follow" />
+
+  {/* JSON-LD Product Schema */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      name: product.productName,
+      image: product.productImages || [HERO_IMAGE_URL],
+      description: product.shortDescription || product.productTagline,
+      sku: product._id,
+      brand: {
+        "@type": "Brand",
+        name: product.brand || "Gau Samvardhan"
+      },
+      offers: {
+        "@type": "Offer",
+        url: `https://www.gausamvardhan.com/products/achar/${id}`,
+        priceCurrency: "INR",
+        price: getPrice(product, selectedWeight),
+        availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+      },
+      aggregateRating: product.rating
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: product.rating.toFixed(1),
+            reviewCount: product.reviews?.length || 0
+          }
+        : undefined,
+      review: product.reviews?.map((r) => ({
+        "@type": "Review",
+        author: r.name,
+        reviewBody: r.comment,
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: r.rating
+        },
+        datePublished: new Date(r.createdAt).toISOString()
+      }))
+    })}
+  </script>
+</Helmet>
+
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -340,6 +414,7 @@ const AcharProductDetail = () => {
                   </div>
                   <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
                 </div>
+                <Certificate />
 
                 <p className="mt-4 text-gray-700 text-[0.95rem]">
                   {product.shortDescription ||
