@@ -207,7 +207,7 @@ const GheeProductDetail = () => {
 
   return (
     <>
-    <Helmet>
+   <Helmet>
   <title>{product?.title || "Pure A2 Ghee | Gausamvardhan"}</title>
 
   <meta
@@ -223,7 +223,6 @@ const GheeProductDetail = () => {
     content="A2 ghee, gir cow ghee, pure ghee, organic ghee, desi ghee, bilona ghee, gausamvardhan ghee"
   />
 
-  {/* Canonical */}
   <link
     rel="canonical"
     href={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
@@ -270,31 +269,32 @@ const GheeProductDetail = () => {
     content={product?.images?.[0] || "https://www.gausamvardhan.com/default-ghee.jpg"}
   />
 
-  {/* Robots */}
   <meta name="robots" content="index, follow" />
 
-  {/* Schema.org Product JSON-LD */}
+  {/* JSON-LD (IMPORTANT FIXED VERSION) */}
   <script type="application/ld+json">
-    {`
-      {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        "name": "${product?.title || "Gausamvardhan Pure A2 Ghee"}",
-        "image": "${product?.images?.[0] || ""}",
-        "description": "${product?.shortDescription || ""}",
-        "sku": "${product?._id || ""}",
-        "brand": { "@type": "Brand", "name": "Gausamvardhan" },
-        "offers": {
-          "@type": "Offer",
-          "url": "https://www.gausamvardhan.com/ghee-product/${slug}/${id}",
-          "priceCurrency": "INR",
-          "price": "${getPrice(product, selectedWeight) || ""}",
-          "availability": "https://schema.org/${isOutOfStock ? "OutOfStock" : "InStock"}"
-        }
-      }
-    `}
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product?.title || "Gausamvardhan Pure A2 Ghee",
+      image: product?.images?.[0] || "",
+      description: product?.shortDescription || "",
+      sku: product?._id || "",
+      brand: {
+        "@type": "Brand",
+        name: "Gausamvardhan",
+      },
+      offers: {
+        "@type": "Offer",
+        url: `https://www.gausamvardhan.com/ghee-product/${slug}/${id}`,
+        priceCurrency: "INR",
+        price: getPrice(product, selectedWeight) || "",
+        availability: `https://schema.org/${isOutOfStock ? "OutOfStock" : "InStock"}`,
+      },
+    })}
   </script>
 </Helmet>
+
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">

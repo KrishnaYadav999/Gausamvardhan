@@ -61,51 +61,87 @@ import GanpatiProductList from "./components/GanpatiProductList";
 function App() {
   return (
    <>
-     <Helmet>
-      {/* Title */}
-      <title>Gau Samvardhan - Organic Products & Pooja Essentials</title>
+    <Helmet>
+  {/* ===== PAGE TITLE ===== */}
+  <title>
+    gausamvardhan – pure desi ghee, achar, agarbatti, masala, oils & pooja essentials online
+  </title>
 
-      {/* Meta Description */}
-      <meta
-        name="description"
-        content="Buy high-quality Ghee, Oils, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, and Ganpati Murti products from Gau Samvardhan. Shop online and get authentic products for your home and rituals."
-      />
+  {/* ===== META DESCRIPTION ===== */}
+  <meta
+    name="description"
+    content="Buy premium desi ghee, achar (pickles), oils, masala, agarbatti, dhoop cups, ganpati murti & pooja essentials at gausamvardhan. Shop garlic ginger chili pickle, bharwa lal mirch achar, mango achar, amla pickle, haldi mirchi achar & more. 100% authentic, chemical-free products."
+  />
 
-      {/* Canonical Links */}
-      <link rel="canonical" href="https://gausamvardhan.com" />
-      <link rel="canonical" href="https://www.gausamvardhan.com" />
+  {/* ===== CANONICAL ===== */}
+  <link rel="canonical" href="https://www.gausamvardhan.com/" />
 
-      {/* Open Graph Tags */}
-      <meta property="og:title" content="Gau Samvardhan - Organic Products & Pooja Essentials" />
-      <meta
-        property="og:description"
-        content="Buy high-quality Ghee, Oils, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, and Ganpati Murti products from Gau Samvardhan."
-      />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://www.gausamvardhan.com" />
-      <meta property="og:site_name" content="Gau Samvardhan" />
-      <meta
-        property="og:image"
-        content="https://www.gausamvardhan.com/images/og-image.jpg"
-      />
+  {/* ===== OPEN GRAPH ===== */}
+  <meta property="og:title"
+    content="gausamvardhan – pure ghee, pickles, masala, oils & pooja essentials" />
+  <meta
+    property="og:description"
+    content="Shop premium desi ghee, handmade achar, pure oils, agarbatti, dhoop cups, masalas & ganpati murti from gausamvardhan. Authentic natural products for your home."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.gausamvardhan.com/" />
+  <meta property="og:site_name" content="gausamvardhan" />
+  <meta property="og:image" content="https://www.gausamvardhan.com/images/og-image.jpg" />
 
-      {/* Twitter Card */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="Gau Samvardhan - Organic Products & Pooja Essentials" />
-      <meta
-        name="twitter:description"
-        content="Buy high-quality Ghee, Oils, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, and Ganpati Murti products from Gau Samvardhan."
-      />
-      <meta
-        name="twitter:image"
-        content="https://www.gausamvardhan.com/images/og-image.jpg"
-      />
-      <meta name="twitter:site" content="@GauSamvardhan" />
+  {/* ===== TWITTER CARD ===== */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="gausamvardhan – organic & pooja products store" />
+  <meta
+    name="twitter:description"
+    content="Explore premium ghee, achar, oils, masala, pooja essentials, agarbatti, dhoop & ganpati murti from gausamvardhan."
+  />
+  <meta name="twitter:image" content="https://www.gausamvardhan.com/images/og-image.jpg" />
+  <meta name="twitter:site" content="@gausamvardhan" />
 
-      {/* Additional SEO */}
-      <meta name="robots" content="index, follow" />
-      <meta name="keywords" content="Ghee, Oil, Masala, Pooja Essentials, Agarbatti, Dhoop, Cups, Ganpati Murti, Organic Products, Gau Samvardhan" />
-    </Helmet>
+  {/* ===== ROBOTS ===== */}
+  <meta name="robots" content="index, follow" />
+
+  {/* ===== KEYWORDS (ENGLISH + HINDI) ===== */}
+  <meta
+    name="keywords"
+    content="
+    desi ghee, pure ghee, a2 ghee, cow ghee,
+    organic oil, mustard oil, groundnut oil, cold pressed oil,
+    masala, indian spices, haldi, mirchi, garam masala,
+    achar, pickles, handmade pickles, traditional pickle,
+    garlic ginger chili pickle, ginger garlic pickle,
+    lal mirchi bharwa achar, stuffed red chili pickle,
+    jackfruit pickle, kathal ka achar,
+    lemon chili pickle, nimbu mirchi achar,
+    nimbu achar, lemon pickle,
+    amla pickle, amla achar,
+    haldi mirchi amla adrak pickle, mixed pickle,
+    mango pickle, aam ka achar, mango achar,
+    agarbatti, dhoop, dhoop cups, pooja essentials,
+    ganpati murti, ganesh murti, pooja samagri,
+    cups for dhoop, organic pooja products,
+    gausamvardhan products, natural products, ayurvedic products,
+
+    desi ghee online, pure ghee buy, organic ghee shop,
+    achar online, pickles online india,
+    agarbatti online, dhoop cups shop,
+    pooja essentials online, ganpati murti online,
+
+    देसी घी, ए2 घी, शुद्ध घी,
+    अचार, मिक्स अचार, आम का अचार,
+    नींबू का अचार, नींबू मिर्च का अचार,
+    लहसुन अदरक मिर्च अचार,
+    लाल मिर्च भरवा अचार,
+    कटहल का अचार, आंवला अचार,
+    हल्दी मिर्च आंवला अदरक अचार,
+    मसाला, तेल, पूजा सामग्री,
+    अगरबत्ती, धूप, धूप कप,
+    गणपति मूर्ति, पूजा का सामान,
+    gausamvardhan उत्पाद
+    "
+  />
+</Helmet>
+
     <ThemeProvider>
       <SmoothScroll />
       <AnimatedText />

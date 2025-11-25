@@ -43,7 +43,9 @@ const AcharProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`/api/products/category/${slug}/${id}`);
+        const { data } = await axios.get(
+          `/api/products/category/${slug}/${id}`
+        );
 
         const avgRating =
           data.reviews && data.reviews.length > 0
@@ -54,7 +56,10 @@ const AcharProductDetail = () => {
         setProduct({ ...data, rating: avgRating });
 
         if (data.pricePerGram) {
-          const firstWeight = data.pricePerGram.split(",")[0].split("=")[0].trim();
+          const firstWeight = data.pricePerGram
+            .split(",")[0]
+            .split("=")[0]
+            .trim();
           setSelectedWeight(firstWeight);
           setWeightQuantities({ [firstWeight]: 1 });
         } else {
@@ -124,7 +129,9 @@ const AcharProductDetail = () => {
       totalPrice: getPrice(product, selectedWeight) * qty,
     });
 
-    toast.success(`${product.productName} (${selectedWeight}) x${qty} added to cart!`);
+    toast.success(
+      `${product.productName} (${selectedWeight}) x${qty} added to cart!`
+    );
   };
 
   const handleBuyNow = () => {
@@ -156,7 +163,8 @@ const AcharProductDetail = () => {
   const handleMouseMove = (e) => {
     if (!zoomRef.current) return;
 
-    const { left, top, width, height } = zoomRef.current.getBoundingClientRect();
+    const { left, top, width, height } =
+      zoomRef.current.getBoundingClientRect();
     const x = ((e.pageX - left) / width) * 100;
     const y = ((e.pageY - top) / height) * 100;
 
@@ -174,87 +182,92 @@ const AcharProductDetail = () => {
   const averageRating = product.rating ? product.rating.toFixed(1) : "0.0";
 
   const productDetails = [
-    { key: "tasteDescription", label: "Taste Description", value: product.tasteDescription },
-    { key: "buyMoreTogether", label: "Buy More Together", value: product.buyMoreTogether },
-    { key: "moreAboutPickle", label: "More About Pickle", value: product.moreAboutPickle },
-    { key: "traditionalRecipes", label: "Traditional Recipes", value: product.traditionalRecipes },
-    { key: "localIngredients", label: "Local Ingredients", value: product.localIngredients },
-    { key: "driedNaturally", label: "Dried Naturally", value: product.driedNaturally },
+    {
+      key: "tasteDescription",
+      label: "Taste Description",
+      value: product.tasteDescription,
+    },
+    {
+      key: "buyMoreTogether",
+      label: "Buy More Together",
+      value: product.buyMoreTogether,
+    },
+    {
+      key: "moreAboutPickle",
+      label: "More About Pickle",
+      value: product.moreAboutPickle,
+    },
+    {
+      key: "traditionalRecipes",
+      label: "Traditional Recipes",
+      value: product.traditionalRecipes,
+    },
+    {
+      key: "localIngredients",
+      label: "Local Ingredients",
+      value: product.localIngredients,
+    },
+    {
+      key: "driedNaturally",
+      label: "Dried Naturally",
+      value: product.driedNaturally,
+    },
   ];
 
   return (
     <>
-    <Helmet>
-  {/* Title & Description */}
-  <title>{`${product.productName} | Gau Samvardhan`}</title>
-  <meta
-    name="description"
-    content={product.shortDescription || product.productTagline || "High-quality organic products from Gau Samvardhan."}
-  />
+      <Helmet>
+        <title>{product.productName} | Gau Samvardhan</title>
 
-  {/* Canonical - always www */}
-  <link rel="canonical" href={`https://www.gausamvardhan.com/products/achar/${id}`} />
-
-  {/* Open Graph */}
-  <meta property="og:title" content={`${product.productName} | Gau Samvardhan`} />
-  <meta property="og:description" content={product.shortDescription || product.productTagline} />
-  <meta property="og:type" content="product" />
-  <meta property="og:url" content={`https://www.gausamvardhan.com/products/achar/${id}`} />
-  <meta property="og:image" content={product.productImages?.[0] || HERO_IMAGE_URL} />
-  <meta property="og:site_name" content="Gau Samvardhan" />
-  <meta property="og:locale" content="en_IN" />
-
-  {/* Twitter Card */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={`${product.productName} | Gau Samvardhan`} />
-  <meta name="twitter:description" content={product.shortDescription || product.productTagline} />
-  <meta name="twitter:image" content={product.productImages?.[0] || HERO_IMAGE_URL} />
-  <meta name="twitter:site" content="@GauSamvardhan" />
-
-  {/* Keywords & Robots */}
-  <meta name="keywords" content={`Achar, Pickle, ${product.productName}, Gau Samvardhan, Organic Products`} />
-  <meta name="robots" content="index, follow" />
-
-  {/* JSON-LD Product Schema */}
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org/",
-      "@type": "Product",
-      name: product.productName,
-      image: product.productImages || [HERO_IMAGE_URL],
-      description: product.shortDescription || product.productTagline,
-      sku: product._id,
-      brand: {
-        "@type": "Brand",
-        name: product.brand || "Gau Samvardhan"
-      },
-      offers: {
-        "@type": "Offer",
-        url: `https://www.gausamvardhan.com/products/achar/${id}`,
-        priceCurrency: "INR",
-        price: getPrice(product, selectedWeight),
-        availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-      },
-      aggregateRating: product.rating
-        ? {
-            "@type": "AggregateRating",
-            ratingValue: product.rating.toFixed(1),
-            reviewCount: product.reviews?.length || 0
+        <meta
+          name="description"
+          content={
+            product.shortDescription ||
+            product.productTagline ||
+            "Premium handmade products from Gau Samvardhan."
           }
-        : undefined,
-      review: product.reviews?.map((r) => ({
-        "@type": "Review",
-        author: r.name,
-        reviewBody: r.comment,
-        reviewRating: {
-          "@type": "Rating",
-          ratingValue: r.rating
-        },
-        datePublished: new Date(r.createdAt).toISOString()
-      }))
-    })}
-  </script>
-</Helmet>
+        />
+
+        {/* FIXED CANONICAL */}
+        <link rel="canonical" href="https://www.gausamvardhan.com/" />
+
+        <meta property="og:type" content="product" />
+        <meta
+          property="og:title"
+          content={`${product.productName} | Gau Samvardhan`}
+        />
+        <meta
+          property="og:description"
+          content={product.shortDescription || product.productTagline}
+        />
+        <meta
+          property="og:image"
+          content={product.productImages?.[0] || HERO_IMAGE_URL}
+        />
+        <meta property="og:url" content="https://www.gausamvardhan.com/" />
+        <meta property="og:site_name" content="Gau Samvardhan" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={`${product.productName} | Gau Samvardhan`}
+        />
+        <meta
+          name="twitter:description"
+          content={product.shortDescription || product.productTagline}
+        />
+        <meta
+          name="twitter:image"
+          content={product.productImages?.[0] || HERO_IMAGE_URL}
+        />
+
+        <meta
+          name="keywords"
+          content={`Achar, Pickle, ${product.productName}, Gau Samvardhan, Organic Pickle, Homemade Pickle`}
+        />
+
+        <meta name="robots" content="index, follow" />
+      </Helmet>
 
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
@@ -284,12 +297,19 @@ const AcharProductDetail = () => {
                 </div>
 
                 <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
-                  <div className="font-semibold">{product.brand || "Rosier"}</div>
-                  <div className="text-xs text-gray-600">Made with A2 Gir Cow Ghee</div>
+                  <div className="font-semibold">
+                    {product.brand || "Rosier"}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Made with A2 Gir Cow Ghee
+                  </div>
                 </div>
 
                 {zoomStyle.backgroundImage && (
-                  <div className="absolute inset-0 pointer-events-none" style={{ ...zoomStyle }} />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ ...zoomStyle }}
+                  />
                 )}
               </div>
 
@@ -300,17 +320,25 @@ const AcharProductDetail = () => {
                     key={index}
                     onClick={() => setMainImage(img)}
                     className={`flex-shrink-0 border rounded-lg overflow-hidden p-1 transition-transform hover:scale-105 ${
-                      mainImage === img ? "ring-2 ring-green-400" : "border-gray-200"
+                      mainImage === img
+                        ? "ring-2 ring-green-400"
+                        : "border-gray-200"
                     }`}
                   >
-                    <img src={img} alt={`thumb-${index}`} className="w-20 h-20 object-cover" />
+                    <img
+                      src={img}
+                      alt={`thumb-${index}`}
+                      className="w-20 h-20 object-cover"
+                    />
                   </button>
                 ))}
               </div>
 
               {/* MORE ABOUT (EXISTING BLOCK - UNTOUCHED) */}
               <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-                <h3 className="text-lg md:text-xl font-semibold mb-3">More About</h3>
+                <h3 className="text-lg md:text-xl font-semibold mb-3">
+                  More About
+                </h3>
                 <p className="text-gray-700 leading-relaxed">
                   {product.moreAboutPickle ||
                     "Rich, traditional amlaprash made with desi khand and A2 Gir cow ghee."}
@@ -323,7 +351,9 @@ const AcharProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">Authentic</div>
-                      <div className="text-xs text-gray-600">Small-batch, traditional recipe</div>
+                      <div className="text-xs text-gray-600">
+                        Small-batch, traditional recipe
+                      </div>
                     </div>
                   </div>
 
@@ -333,7 +363,9 @@ const AcharProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">Ghee Rich</div>
-                      <div className="text-xs text-gray-600">Made with A2 Gir cow ghee</div>
+                      <div className="text-xs text-gray-600">
+                        Made with A2 Gir cow ghee
+                      </div>
                     </div>
                   </div>
 
@@ -343,7 +375,9 @@ const AcharProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">No Preservatives</div>
-                      <div className="text-xs text-gray-600">Naturally preserved</div>
+                      <div className="text-xs text-gray-600">
+                        Naturally preserved
+                      </div>
                     </div>
                   </div>
 
@@ -393,7 +427,6 @@ const AcharProductDetail = () => {
             {/* RIGHT SIDE */}
             <div className="sticky top-6 self-start">
               <div className="bg-white rounded-3xl p-6 shadow-lg">
-                
                 <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">
                   {product.productName}
                 </h1>
@@ -412,7 +445,9 @@ const AcharProductDetail = () => {
                       />
                     ))}
                   </div>
-                  <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
+                  <span className="text-gray-600 text-sm">
+                    ({totalReviews} reviews)
+                  </span>
                 </div>
                 <Certificate />
 
@@ -440,7 +475,9 @@ const AcharProductDetail = () => {
                 {/* WEIGHT OPTIONS */}
                 {(product.pricePerGram || product.weightOptions) && (
                   <div className="mt-6">
-                    <p className="font-medium text-gray-700 mb-2">Select Weight</p>
+                    <p className="font-medium text-gray-700 mb-2">
+                      Select Weight
+                    </p>
 
                     <div className="flex flex-col gap-3">
                       {(
@@ -524,7 +561,9 @@ const AcharProductDetail = () => {
 
                 {/* PRODUCT DETAILS */}
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-2">Product Details</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Product Details
+                  </h3>
                   <ul className="list-disc list-inside space-y-2 text-gray-700">
                     {productDetails.map(
                       (item) =>
@@ -623,7 +662,9 @@ const AcharProductDetail = () => {
                     key={item._id}
                     className="group border rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer"
                     onClick={() =>
-                      navigate(`/products/${item.categorySlug || slug}/${item._id}`)
+                      navigate(
+                        `/products/${item.categorySlug || slug}/${item._id}`
+                      )
                     }
                   >
                     <img

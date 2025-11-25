@@ -176,110 +176,56 @@ const AgarbattiProductDetail = () => {
     <>
       {" "}
       <Helmet>
-        {/* Dynamic Title */}
-        <title>{`${product.title} – Premium Agarbatti | Gau Samvardhan`}</title>
+        {/* BASIC */}
+        <title>
+          gausamvardhan – pooja essentials, agarbatti, dhoop & dhoop cups
+        </title>
 
-        {/* Meta Description */}
         <meta
           name="description"
-          content={
-            product.shortDescription ||
-            product.description ||
-            "Premium natural agarbatti with long-lasting fragrance, made with pure ingredients by Gau Samvardhan."
-          }
+          content="Shop pooja essentials, agarbatti, dhoop and dhoop cups from gausamvardhan. Pure, natural and traditional products."
         />
 
-        {/* Canonical URLs (www + non-www both accepted by Google) */}
         <link
           rel="canonical"
-          href={`https://www.gausamvardhan.com/agarbatti/${id}`}
-        />
-        <link
-          rel="alternate"
-          href={`https://gausamvardhan.com/agarbatti/${id}`}
+          href="https://www.gausamvardhan.com/pooja-essentials/"
         />
 
-        {/* Keywords */}
-        <meta
-          name="keywords"
-          content={`Agarbatti, Incense Sticks, Natural Agarbatti, Long lasting fragrance, Organic Agarbatti, ${product.title}, Gau Samvardhan`}
-        />
-
-        {/* Open Graph Meta (Facebook, Instagram, WhatsApp) */}
+        {/* OG */}
         <meta
           property="og:title"
-          content={`${product.title} – Gau Samvardhan`}
+          content="gausamvardhan – pooja essentials, agarbatti, dhoop & dhoop cups"
         />
         <meta
           property="og:description"
-          content={
-            product.shortDescription ||
-            product.description ||
-            "Buy premium natural agarbatti with long-lasting fragrance."
-          }
+          content="Buy premium pooja essentials including agarbatti, dhoop and dhoop cups from gausamvardhan."
         />
-        <meta property="og:type" content="product" />
         <meta
           property="og:url"
-          content={`https://www.gausamvardhan.com/agarbatti/${id}`}
+          content="https://www.gausamvardhan.com/pooja-essentials/"
         />
-        <meta
-          property="og:image"
-          content={product.images?.[0] || HERO_IMAGE_URL}
-        />
-        <meta property="og:site_name" content="Gau Samvardhan" />
+        <meta property="og:type" content="website" />
 
-        {/* Twitter Card Meta */}
-        <meta name="twitter:card" content="summary_large_image" />
+        {/* TWITTER */}
         <meta
           name="twitter:title"
-          content={`${product.title} – Gau Samvardhan`}
+          content="gausamvardhan – pooja essentials, agarbatti, dhoop & dhoop cups"
         />
         <meta
           name="twitter:description"
-          content={
-            product.shortDescription ||
-            product.description ||
-            "Premium organic agarbatti by Gau Samvardhan."
-          }
+          content="Shop agarbatti, dhoop sticks, dhoop cups and pooja essentials from gausamvardhan."
         />
-        <meta
-          name="twitter:image"
-          content={product.images?.[0] || HERO_IMAGE_URL}
-        />
-        <meta name="twitter:site" content="@GauSamvardhan" />
 
-        {/* Robots */}
-        <meta name="robots" content="index, follow" />
-
-        {/* Structured Data (Google Rich Snippets) */}
+        {/* JSON-LD */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Product",
-            name: product.title,
-            image: product.images,
+            "@type": "ProductCollection",
+            name: "Pooja Essentials – Agarbatti, Dhoop, Dhoop Cups",
+            brand: "gausamvardhan",
+            url: "https://www.gausamvardhan.com/pooja-essentials/",
             description:
-              product.shortDescription ||
-              product.description ||
-              "Premium handmade agarbatti",
-            sku: id,
-            brand: {
-              "@type": "Brand",
-              name: "Gau Samvardhan",
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: product.rating?.toFixed(1) || "4.9",
-              reviewCount: product.reviews?.length || 12,
-            },
-            offers: {
-              "@type": "Offer",
-              url: `https://www.gausamvardhan.com/agarbatti/${id}`,
-              priceCurrency: "INR",
-              price: product.current_price,
-              availability: product.stock ? "InStock" : "OutOfStock",
-            },
+              "Pure and natural pooja essentials including agarbatti, dhoop and dhoop cups from gausamvardhan.",
           })}
         </script>
       </Helmet>

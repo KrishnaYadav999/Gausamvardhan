@@ -172,101 +172,104 @@ const GanpatiDetail = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{`${product.productName} | Gau Samvardhan`}</title>
-        <meta
-          name="description"
-          content={
-            product.shortDescription ||
-            product.productTagline ||
-            "High-quality Ganpati Murti for Pooja and rituals from Gau Samvardhan."
+     <Helmet>
+  <title>{`${product.productName} | gau samvardhan`}</title>
+
+  <meta
+    name="description"
+    content={
+      product.shortDescription ||
+      product.productTagline ||
+      "High-quality Ganpati Murti for Pooja and rituals from gau samvardhan."
+    }
+  />
+
+  <link
+    rel="canonical"
+    href={`https://www.gausamvardhan.com/ganpati-category/${product._id}`}
+  />
+
+  {/* Open Graph */}
+  <meta
+    property="og:title"
+    content={`${product.productName} | gau samvardhan`}
+  />
+  <meta
+    property="og:description"
+    content={product.shortDescription || product.productTagline}
+  />
+  <meta property="og:type" content="product" />
+  <meta
+    property="og:url"
+    content={`https://www.gausamvardhan.com/ganpati-category/${product._id}`}
+  />
+  <meta
+    property="og:image"
+    content={product.images?.[0] || HERO_IMAGE_URL}
+  />
+  <meta property="og:site_name" content="gau samvardhan" />
+  <meta property="og:locale" content="en_IN" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta
+    name="twitter:title"
+    content={`${product.productName} | gau samvardhan`}
+  />
+  <meta
+    name="twitter:description"
+    content={product.shortDescription || product.productTagline}
+  />
+  <meta
+    name="twitter:image"
+    content={product.images?.[0] || HERO_IMAGE_URL}
+  />
+  <meta name="twitter:site" content="@gausamvardhan" />
+
+  {/* Keywords */}
+  <meta
+    name="keywords"
+    content={`Ganpati Murti, Pooja Murti, ${product.productName}, gau samvardhan, Handmade, Premium`}
+  />
+  <meta name="robots" content="index, follow" />
+
+  {/* JSON-LD Schema */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      name: product.productName,
+      image: product.images || [HERO_IMAGE_URL],
+      description: product.shortDescription || product.productTagline,
+      sku: product._id,
+      brand: { "@type": "Brand", name: "gau samvardhan" },
+      offers: {
+        "@type": "Offer",
+        url: `https://www.gausamvardhan.com/ganpati-category/${product._id}`,
+        priceCurrency: "INR",
+        price: getPrice(product, selectedPack),
+        availability: product.stock
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      },
+      aggregateRating: product.rating
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: product.rating.toFixed(1),
+            reviewCount: totalReviews,
           }
-        />
-        <link
-          rel="canonical"
-          href={`https://www.gausamvardhan.com/ganpati-category/${product._id}`}
-        />
+        : undefined,
+      review: product.reviews?.map((r) => ({
+        "@type": "Review",
+        author: r.name,
+        reviewBody: r.comment,
+        reviewRating: { "@type": "Rating", ratingValue: r.rating },
+        datePublished: new Date(r.createdAt).toISOString(),
+      })),
+    })}
+  </script>
+</Helmet>
 
-        {/* Open Graph */}
-        <meta
-          property="og:title"
-          content={`${product.productName} | Gau Samvardhan`}
-        />
-        <meta
-          property="og:description"
-          content={product.shortDescription || product.productTagline}
-        />
-        <meta property="og:type" content="product" />
-        <meta
-          property="og:url"
-          content={`https://www.gausamvardhan.com/ganpati-category/${product._id}`}
-        />
-        <meta
-          property="og:image"
-          content={product.images?.[0] || HERO_IMAGE_URL}
-        />
-        <meta property="og:site_name" content="Gau Samvardhan" />
-        <meta property="og:locale" content="en_IN" />
-
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={`${product.productName} | Gau Samvardhan`}
-        />
-        <meta
-          name="twitter:description"
-          content={product.shortDescription || product.productTagline}
-        />
-        <meta
-          name="twitter:image"
-          content={product.images?.[0] || HERO_IMAGE_URL}
-        />
-        <meta name="twitter:site" content="@GauSamvardhan" />
-
-        {/* Keywords & Robots */}
-        <meta
-          name="keywords"
-          content={`Ganpati Murti, Pooja Murti, ${product.productName}, Gau Samvardhan, Handmade, Premium`}
-        />
-        <meta name="robots" content="index, follow" />
-
-        {/* JSON-LD Product Schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            name: product.productName,
-            image: product.images || [HERO_IMAGE_URL],
-            description: product.shortDescription || product.productTagline,
-            sku: product._id,
-            brand: { "@type": "Brand", name: "Gau Samvardhan" },
-            offers: {
-              "@type": "Offer",
-              url: `https://www.gausamvardhan.com/ganpati-category/${product._id}`,
-              priceCurrency: "INR",
-              price: getPrice(product, selectedPack),
-              availability: product.stock
-                ? "https://schema.org/InStock"
-                : "https://schema.org/OutOfStock",
-            },
-            aggregateRating: product.rating
-              ? {
-                  "@type": "AggregateRating",
-                  ratingValue: product.rating.toFixed(1),
-                  reviewCount: totalReviews,
-                }
-              : undefined,
-            review: product.reviews?.map((r) => ({
-              "@type": "Review",
-              author: r.name,
-              reviewBody: r.comment,
-              reviewRating: { "@type": "Rating", ratingValue: r.rating },
-              datePublished: new Date(r.createdAt).toISOString(),
-            })),
-          })}
-        </script>
-      </Helmet>
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
