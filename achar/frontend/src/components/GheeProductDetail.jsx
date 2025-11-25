@@ -36,9 +36,16 @@ const GheeProductDetail = () => {
         const [w, v] = p.split("=");
         if (w && v) priceMap[w.trim()] = Number(v.trim());
       });
-      if (weight) return priceMap[weight] || Number(prod.currentPrice || prod.current_price || 0);
+      if (weight)
+        return (
+          priceMap[weight] ||
+          Number(prod.currentPrice || prod.current_price || 0)
+        );
       const firstWeight = Object.keys(priceMap)[0];
-      return priceMap[firstWeight] || Number(prod.currentPrice || prod.current_price || 0);
+      return (
+        priceMap[firstWeight] ||
+        Number(prod.currentPrice || prod.current_price || 0)
+      );
     }
 
     // Fallback to weightVolume logic (comma separated) -> cannot map price, return currentPrice
@@ -49,12 +56,15 @@ const GheeProductDetail = () => {
     const fetchProduct = async () => {
       try {
         // Using your Ghee API route
-        const { data } = await axios.get(`/api/ghee-products/category/${slug}/${id}`);
+        const { data } = await axios.get(
+          `/api/ghee-products/category/${slug}/${id}`
+        );
 
         // compute avg rating from reviews
         const avgRating =
           data.reviews && data.reviews.length > 0
-            ? data.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / data.reviews.length
+            ? data.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+              data.reviews.length
             : 0;
 
         // keep rating field
@@ -64,7 +74,10 @@ const GheeProductDetail = () => {
 
         // default selected weight
         if (data.pricePerGram) {
-          const firstWeight = data.pricePerGram.split(",")[0].split("=")[0].trim();
+          const firstWeight = data.pricePerGram
+            .split(",")[0]
+            .split("=")[0]
+            .trim();
           setSelectedWeight(firstWeight);
           setWeightQuantities({ [firstWeight]: 1 });
         } else if (data.weightVolume) {
@@ -139,7 +152,11 @@ const GheeProductDetail = () => {
       productImages: product.images || [],
     });
 
-    toast.success(`${product.title || product.productName} (${selectedWeight}) x${qty} added to cart!`);
+    toast.success(
+      `${
+        product.title || product.productName
+      } (${selectedWeight}) x${qty} added to cart!`
+    );
   };
 
   const handleBuyNow = () => {
@@ -174,7 +191,8 @@ const GheeProductDetail = () => {
   // zoom handlers (same UX as Achar)
   const handleMouseMove = (e) => {
     if (!zoomRef.current) return;
-    const { left, top, width, height } = zoomRef.current.getBoundingClientRect();
+    const { left, top, width, height } =
+      zoomRef.current.getBoundingClientRect();
     const x = ((e.pageX - left) / width) * 100;
     const y = ((e.pageY - top) / height) * 100;
 
@@ -194,10 +212,18 @@ const GheeProductDetail = () => {
   // product-specific details to show in product details list (adapted)
   const productDetails = [
     { key: "origin", label: "Origin", value: product.origin },
-    { key: "madeFrom", label: "Made From", value: product.madeFrom || "A2 Gir Cow Milk" },
+    {
+      key: "madeFrom",
+      label: "Made From",
+      value: product.madeFrom || "A2 Gir Cow Milk",
+    },
     { key: "shelfLife", label: "Shelf Life", value: product.shelfLife },
     { key: "storage", label: "Storage", value: product.storageInstructions },
-    { key: "packInfo", label: "Pack Info", value: product.moreAboutProduct?.[0]?.description },
+    {
+      key: "packInfo",
+      label: "Pack Info",
+      value: product.moreAboutProduct?.[0]?.description,
+    },
   ];
 
   // weights array (from pricePerGram or weightVolume)
@@ -207,93 +233,101 @@ const GheeProductDetail = () => {
 
   return (
     <>
-   <Helmet>
-  <title>{product?.title || "Pure A2 Ghee | Gausamvardhan"}</title>
+      <Helmet>
+        <title>{product?.title || "Pure A2 Ghee | Gausamvardhan"}</title>
 
-  <meta
-    name="description"
-    content={
-      product?.shortDescription ||
-      "Buy 100% Pure A2 Ghee made from Gir Cow milk. Handcrafted, chemical-free ghee with rich aroma & premium quality from Gausamvardhan."
-    }
-  />
+        <meta
+          name="description"
+          content={
+            product?.shortDescription ||
+            "Buy 100% Pure A2 Ghee made from Gir Cow milk. Handcrafted, chemical-free ghee with rich aroma & premium quality from Gausamvardhan."
+          }
+        />
 
-  <meta
-    name="keywords"
-    content="A2 ghee, gir cow ghee, pure ghee, organic ghee, desi ghee, bilona ghee, gausamvardhan ghee"
-  />
+        <meta
+          name="keywords"
+          content="A2 ghee, gir cow ghee, pure ghee, organic ghee, desi ghee, bilona ghee, gausamvardhan ghee"
+        />
 
-  <link
-    rel="canonical"
-    href={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
-  />
+        <link
+          rel="canonical"
+          href={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
+        />
 
-  {/* Open Graph */}
-  <meta property="og:type" content="product" />
-  <meta
-    property="og:title"
-    content={product?.title || "Gausamvardhan Pure A2 Gir Cow Ghee"}
-  />
-  <meta
-    property="og:description"
-    content={
-      product?.shortDescription ||
-      "Buy Pure A2 Gir Cow Ghee online. Traditional method, organic, high aroma, rich nutrition."
-    }
-  />
-  <meta
-    property="og:image"
-    content={product?.images?.[0] || "https://www.gausamvardhan.com/default-ghee.jpg"}
-  />
-  <meta
-    property="og:url"
-    content={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
-  />
-  <meta property="og:site_name" content="Gausamvardhan" />
+        {/* Open Graph */}
+        <meta property="og:type" content="product" />
+        <meta
+          property="og:title"
+          content={product?.title || "Gausamvardhan Pure A2 Gir Cow Ghee"}
+        />
+        <meta
+          property="og:description"
+          content={
+            product?.shortDescription ||
+            "Buy Pure A2 Gir Cow Ghee online. Traditional method, organic, high aroma, rich nutrition."
+          }
+        />
+        <meta
+          property="og:image"
+          content={
+            product?.images?.[0] ||
+            "https://www.gausamvardhan.com/default-ghee.jpg"
+          }
+        />
+        <meta
+          property="og:url"
+          content={`https://www.gausamvardhan.com/ghee-product/${slug}/${id}`}
+        />
+        <meta property="og:site_name" content="Gausamvardhan" />
 
-  {/* Twitter */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta
-    name="twitter:title"
-    content={product?.title || "Pure A2 Ghee | Gausamvardhan"}
-  />
-  <meta
-    name="twitter:description"
-    content={
-      product?.shortDescription ||
-      "Pure A2 Gir Cow Ghee handcrafted with traditional method. Order online."
-    }
-  />
-  <meta
-    name="twitter:image"
-    content={product?.images?.[0] || "https://www.gausamvardhan.com/default-ghee.jpg"}
-  />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={product?.title || "Pure A2 Ghee | Gausamvardhan"}
+        />
+        <meta
+          name="twitter:description"
+          content={
+            product?.shortDescription ||
+            "Pure A2 Gir Cow Ghee handcrafted with traditional method. Order online."
+          }
+        />
+        <meta
+          name="twitter:image"
+          content={
+            product?.images?.[0] ||
+            "https://www.gausamvardhan.com/default-ghee.jpg"
+          }
+        />
 
-  <meta name="robots" content="index, follow" />
+        <meta name="robots" content="index, follow" />
 
-  {/* JSON-LD (IMPORTANT FIXED VERSION) */}
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: product?.title || "Gausamvardhan Pure A2 Ghee",
-      image: product?.images?.[0] || "",
-      description: product?.shortDescription || "",
-      sku: product?._id || "",
-      brand: {
-        "@type": "Brand",
-        name: "Gausamvardhan",
-      },
-      offers: {
-        "@type": "Offer",
-        url: `https://www.gausamvardhan.com/ghee-product/${slug}/${id}`,
-        priceCurrency: "INR",
-        price: getPrice(product, selectedWeight) || "",
-        availability: `https://schema.org/${isOutOfStock ? "OutOfStock" : "InStock"}`,
-      },
-    })}
-  </script>
-</Helmet>
+        {/* JSON-LD (IMPORTANT FIXED VERSION) */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product?.title || "Gausamvardhan Pure A2 Ghee",
+            image: product?.images?.[0] || "",
+            description: product?.shortDescription || "",
+            sku: product?._id || "",
+            brand: {
+              "@type": "Brand",
+              name: "Gausamvardhan",
+            },
+            offers: {
+              "@type": "Offer",
+              url: `https://www.gausamvardhan.com/ghee-product/${slug}/${id}`,
+              priceCurrency: "INR",
+              price: getPrice(product, selectedWeight) || "",
+              availability: `https://schema.org/${
+                isOutOfStock ? "OutOfStock" : "InStock"
+              }`,
+            },
+          })}
+        </script>
+      </Helmet>
 
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
@@ -307,7 +341,11 @@ const GheeProductDetail = () => {
                 className="relative bg-white rounded-3xl p-6 shadow-2xl overflow-hidden"
               >
                 <div className="w-full h-[420px] md:h-[580px] flex items-center justify-center">
-                  <img src={HERO_IMAGE_URL} alt="hero" className="object-cover w-full h-full rounded-xl" />
+                  <img
+                    src={HERO_IMAGE_URL}
+                    alt="hero"
+                    className="object-cover w-full h-full rounded-xl"
+                  />
                 </div>
 
                 <div className="absolute left-6 top-10 md:left-10 md:top-16 w-[70%] md:w-[65%] transform -translate-y-6 md:-translate-y-12">
@@ -320,12 +358,19 @@ const GheeProductDetail = () => {
                 </div>
 
                 <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
-                  <div className="font-semibold">{product.brand || "Our Ghee"}</div>
-                  <div className="text-xs text-gray-600">{product.tagline || "Pure A2 Ghee"}</div>
+                  <div className="font-semibold">
+                    {product.brand || "Our Ghee"}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {product.tagline || "Pure A2 Ghee"}
+                  </div>
                 </div>
 
                 {zoomStyle.backgroundImage && (
-                  <div className="absolute inset-0 pointer-events-none" style={{ ...zoomStyle }} />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ ...zoomStyle }}
+                  />
                 )}
               </div>
 
@@ -336,17 +381,25 @@ const GheeProductDetail = () => {
                     key={index}
                     onClick={() => setMainImage(img)}
                     className={`flex-shrink-0 border rounded-lg overflow-hidden p-1 transition-transform hover:scale-105 ${
-                      mainImage === img ? "ring-2 ring-green-400" : "border-gray-200"
+                      mainImage === img
+                        ? "ring-2 ring-green-400"
+                        : "border-gray-200"
                     }`}
                   >
-                    <img src={img} alt={`thumb-${index}`} className="w-20 h-20 object-cover" />
+                    <img
+                      src={img}
+                      alt={`thumb-${index}`}
+                      className="w-20 h-20 object-cover"
+                    />
                   </button>
                 ))}
               </div>
 
               {/* MORE ABOUT - left column */}
               <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-                <h3 className="text-lg md:text-xl font-semibold mb-3">More About</h3>
+                <h3 className="text-lg md:text-xl font-semibold mb-3">
+                  More About
+                </h3>
                 <p className="text-gray-700 leading-relaxed">
                   {product.moreAboutProduct?.[0]?.description ||
                     product.description ||
@@ -360,7 +413,9 @@ const GheeProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">Authentic</div>
-                      <div className="text-xs text-gray-600">Small-batch, traditional process</div>
+                      <div className="text-xs text-gray-600">
+                        Small-batch, traditional process
+                      </div>
                     </div>
                   </div>
 
@@ -370,7 +425,9 @@ const GheeProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">Ghee Rich</div>
-                      <div className="text-xs text-gray-600">Made with pure A2 milk</div>
+                      <div className="text-xs text-gray-600">
+                        Made with pure A2 milk
+                      </div>
                     </div>
                   </div>
 
@@ -380,7 +437,9 @@ const GheeProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">No Additives</div>
-                      <div className="text-xs text-gray-600">No preservatives</div>
+                      <div className="text-xs text-gray-600">
+                        No preservatives
+                      </div>
                     </div>
                   </div>
 
@@ -390,7 +449,9 @@ const GheeProductDetail = () => {
                     </div>
                     <div>
                       <div className="font-medium">Taste</div>
-                      <div className="text-xs text-gray-600">{product.tasteDescription || "Pure, buttery & nutty"}</div>
+                      <div className="text-xs text-gray-600">
+                        {product.tasteDescription || "Pure, buttery & nutty"}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -399,11 +460,21 @@ const GheeProductDetail = () => {
               {/* OPTIONAL: moreAboutProduct images block */}
               {product.moreAboutProduct?.length > 0 && (
                 <div className="mt-6 bg-white p-6 rounded-2xl shadow">
-                  <h3 className="text-lg md:text-xl font-semibold mb-3">More About This Pack</h3>
+                  <h3 className="text-lg md:text-xl font-semibold mb-3">
+                    More About This Pack
+                  </h3>
                   {product.moreAboutProduct.map((m, idx) => (
                     <div key={idx} className="mb-4">
-                      {m.image && <img src={m.image} alt={`more-${idx}`} className="w-full rounded-xl mb-2 object-cover" />}
-                      {m.description && <p className="text-gray-700">{m.description}</p>}
+                      {m.image && (
+                        <img
+                          src={m.image}
+                          alt={`more-${idx}`}
+                          className="w-full rounded-xl mb-2 object-cover"
+                        />
+                      )}
+                      {m.description && (
+                        <p className="text-gray-700">{m.description}</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -423,45 +494,67 @@ const GheeProductDetail = () => {
                       <Star
                         key={i}
                         size={18}
-                        className={i < Math.round(Number(averageRating) || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                        className={
+                          i < Math.round(Number(averageRating) || 0)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }
                       />
                     ))}
                   </div>
-                  <span className="text-gray-600 text-sm">({totalReviews} reviews)</span>
+                  <span className="text-gray-600 text-sm">
+                    ({totalReviews} reviews)
+                  </span>
                 </div>
 
                 <p className="mt-4 text-gray-700 text-[0.95rem]">
-                  {product.shortDescription || product.tagline || "Handcrafted, fresh & delicious ghee."}
+                  {product.shortDescription ||
+                    product.tagline ||
+                    "Handcrafted, fresh & delicious ghee."}
                 </p>
 
                 <div className="mt-6 flex items-end gap-4">
                   <div>
                     <div className="text-3xl md:text-4xl font-bold text-green-600">
-                      ₹{getPrice(product, selectedWeight) * (weightQuantities[selectedWeight] || 1)}
+                      ₹
+                      {getPrice(product, selectedWeight) *
+                        (weightQuantities[selectedWeight] || 1)}
                     </div>
-                    {product.cutPrice && <div className="line-through text-gray-400">₹{product.cutPrice}</div>}
+                    {product.cutPrice && (
+                      <div className="line-through text-gray-400">
+                        ₹{product.cutPrice}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* WEIGHT OPTIONS */}
                 {(product.pricePerGram || product.weightVolume) && (
                   <div className="mt-6">
-                    <p className="font-medium text-gray-700 mb-2">Select Weight</p>
+                    <p className="font-medium text-gray-700 mb-2">
+                      Select Weight
+                    </p>
 
                     <div className="flex flex-col gap-3">
                       {(product.pricePerGram
-                        ? product.pricePerGram.split(",").map((p) => p.split("=")[0].trim())
+                        ? product.pricePerGram
+                            .split(",")
+                            .map((p) => p.split("=")[0].trim())
                         : product.weightVolume.split(",")
                       )?.map((weight, idx) => (
                         <div
                           key={idx}
                           onClick={() => setSelectedWeight(weight)}
                           className={`flex items-center justify-between border p-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                            selectedWeight === weight ? "border-green-600 bg-green-50 shadow-sm" : "border-gray-200 bg-white hover:border-green-400"
+                            selectedWeight === weight
+                              ? "border-green-600 bg-green-50 shadow-sm"
+                              : "border-gray-200 bg-white hover:border-green-400"
                           }`}
                         >
                           <span className="text-sm font-medium">
-                            {weight} - ₹{getPrice(product, weight) * (weightQuantities[weight] || 1)}
+                            {weight} - ₹
+                            {getPrice(product, weight) *
+                              (weightQuantities[weight] || 1)}
                           </span>
 
                           <div className="flex items-center space-x-2">
@@ -499,7 +592,9 @@ const GheeProductDetail = () => {
                     onClick={handleAddToCart}
                     disabled={isOutOfStock}
                     className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
-                      isOutOfStock ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
+                      isOutOfStock
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
                     }`}
                   >
                     {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
@@ -509,7 +604,9 @@ const GheeProductDetail = () => {
                     onClick={handleBuyNow}
                     disabled={isOutOfStock}
                     className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
-                      isOutOfStock ? "bg-gray-300 cursor-not-allowed" : "bg-yellow-400 hover:bg-yellow-500"
+                      isOutOfStock
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-yellow-400 hover:bg-yellow-500"
                     }`}
                   >
                     {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
@@ -520,13 +617,18 @@ const GheeProductDetail = () => {
 
                 {/* PRODUCT DETAILS */}
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-2">Product Details</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Product Details
+                  </h3>
                   <ul className="list-disc list-inside space-y-2 text-gray-700">
                     {productDetails.map(
                       (item) =>
                         item.value && (
                           <li key={item.key}>
-                            <span className="font-medium text-gray-900">{item.label}:</span> {item.value}
+                            <span className="font-medium text-gray-900">
+                              {item.label}:
+                            </span>{" "}
+                            {item.value}
                           </li>
                         )
                     )}
@@ -539,7 +641,10 @@ const GheeProductDetail = () => {
                 <div className="mt-6">
                   <div className="bg-white p-4 rounded-2xl shadow">
                     <h4 className="font-semibold mb-2">Product Video</h4>
-                    <ProductVideo videoUrl={product.videoUrl} thumbnail={product.images?.[0]} />
+                    <ProductVideo
+                      videoUrl={product.videoUrl}
+                      thumbnail={product.images?.[0]}
+                    />
                   </div>
                 </div>
               )}
@@ -562,12 +667,20 @@ const GheeProductDetail = () => {
                       <Certificate />
 
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">{rev.name}</div>
+                        <div className="font-medium text-gray-900 text-sm">
+                          {rev.name}
+                        </div>
 
                         <div className="flex mt-1">
-                          {Array.from({ length: Number(rev.rating) || 0 }).map((_, idx) => (
-                            <Star key={idx} size={14} className="text-yellow-400 fill-yellow-400" />
-                          ))}
+                          {Array.from({ length: Number(rev.rating) || 0 }).map(
+                            (_, idx) => (
+                              <Star
+                                key={idx}
+                                size={14}
+                                className="text-yellow-400 fill-yellow-400"
+                              />
+                            )
+                          )}
                         </div>
                       </div>
                     </div>
@@ -577,12 +690,19 @@ const GheeProductDetail = () => {
                     {rev.images?.length > 0 && (
                       <div className="flex mt-3 gap-2 flex-wrap">
                         {rev.images.map((img, idx) => (
-                          <img key={idx} src={img} alt={`review-${idx}`} className="w-20 h-20 rounded-lg object-cover" />
+                          <img
+                            key={idx}
+                            src={img}
+                            alt={`review-${idx}`}
+                            className="w-20 h-20 rounded-lg object-cover"
+                          />
                         ))}
                       </div>
                     )}
 
-                    <p className="text-gray-400 text-xs mt-2">{new Date(rev.createdAt).toLocaleDateString()}</p>
+                    <p className="text-gray-400 text-xs mt-2">
+                      {new Date(rev.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -599,11 +719,23 @@ const GheeProductDetail = () => {
                   <div
                     key={item._id}
                     className="group border rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition cursor-pointer"
-                    onClick={() => navigate(`/ghee-product/${item.slug || item._id}/${item._id}`)}
+                    onClick={() =>
+                      navigate(
+                        `/ghee-product/${item.slug || item._id}/${item._id}`
+                      )
+                    }
                   >
-                    <img src={item.images?.[0] || HERO_IMAGE_URL} alt={item.title || item.productName} className="w-full h-40 object-contain mb-2 rounded-lg" />
-                    <h4 className="text-gray-900 font-medium text-sm">{item.title || item.productName}</h4>
-                    <p className="text-green-600 font-semibold mt-1">₹{getPrice(item)}</p>
+                    <img
+                      src={item.images?.[0] || HERO_IMAGE_URL}
+                      alt={item.title || item.productName}
+                      className="w-full h-40 object-contain mb-2 rounded-lg"
+                    />
+                    <h4 className="text-gray-900 font-medium text-sm">
+                      {item.title || item.productName}
+                    </h4>
+                    <p className="text-green-600 font-semibold mt-1">
+                      ₹{getPrice(item)}
+                    </p>
                   </div>
                 ))}
               </div>

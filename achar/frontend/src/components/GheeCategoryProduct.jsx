@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "../components/Filter";
 import { FaHeart } from "react-icons/fa";
+import { Helmet } from "react-helmet-async";
 
 /* ---------------------------------------------------
     PRODUCT CARD
@@ -65,9 +66,7 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   return (
     <div
       className="bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full"
-      onClick={() =>
-        navigate(`/ghee-product/${product.slug}/${product._id}`)
-      }
+      onClick={() => navigate(`/ghee-product/${product.slug}/${product._id}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -208,6 +207,84 @@ export default function GheeCategoryProduct() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      <Helmet>
+        {/* Dynamic title in small letters */}
+        <title>{`${slug.toLowerCase()} ghee products | gausamvardhan`}</title>
+
+        {/* Meta description */}
+        <meta
+          name="description"
+          content={`Explore our premium ${slug.toLowerCase()} ghee products. Pure, natural, multiple weights. Shop online at GausamVardhan.`}
+        />
+
+        {/* Canonical URL */}
+        <link
+          rel="canonical"
+          href={`https://www.gausamvardhan.com/ghee-category/${slug}`}
+        />
+
+        {/* Open Graph */}
+        <meta
+          property="og:title"
+          content={`${slug.toLowerCase()} ghee products | gausamvardhan`}
+        />
+        <meta
+          property="og:description"
+          content={`Buy premium ${slug.toLowerCase()} ghee online. Pure & natural ghee from GausamVardhan.`}
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content={`https://www.gausamvardhan.com/ghee-category/${slug}`}
+        />
+        <meta
+          property="og:image"
+          content={`https://www.gausamvardhan.com/images/ghee-category/${slug}.jpg`}
+        />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={`${slug.toLowerCase()} ghee products | gausamvardhan`}
+        />
+        <meta
+          name="twitter:description"
+          content={`Buy premium ${slug.toLowerCase()} ghee online. Pure & natural ghee from GausamVardhan.`}
+        />
+        <meta
+          name="twitter:image"
+          content={`https://www.gausamvardhan.com/images/ghee-category/${slug}.jpg`}
+        />
+
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: `${slug.toLowerCase()} ghee`,
+            image: [
+              `https://www.gausamvardhan.com/images/ghee-category/${slug}.jpg`,
+            ],
+            description: `Pure & natural ${slug.toLowerCase()} ghee from GausamVardhan. Available in multiple weights.`,
+            brand: { "@type": "Brand", name: "GausamVardhan" },
+            offers: {
+              "@type": "AggregateOffer",
+              offerCount: products.length,
+              lowPrice: products.reduce(
+                (min, p) => Math.min(min, parseFloat(p.currentPrice || 0)),
+                Infinity
+              ),
+              highPrice: products.reduce(
+                (max, p) => Math.max(max, parseFloat(p.currentPrice || 0)),
+                0
+              ),
+              priceCurrency: "INR",
+              availability: "https://schema.org/InStock",
+            },
+          })}
+        </script>
+      </Helmet>
       <Toaster />
       <div className="px-4 sm:px-6 py-8">
         {/* HEADER */}
@@ -238,7 +315,10 @@ export default function GheeCategoryProduct() {
           {/* MOBILE FILTER DRAWER */}
           {filterOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
-              <div className="flex-1" onClick={() => setFilterOpen(false)}></div>
+              <div
+                className="flex-1"
+                onClick={() => setFilterOpen(false)}
+              ></div>
               <div className="w-72 bg-white h-full shadow-lg p-4 mr-4 overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-[0.9rem] sm:text-lg font-semibold">

@@ -7,6 +7,7 @@ import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
 import AcharAdvertizeBanner from "../components/AcharAdvertizeBanner";
 import { FaHeart } from "react-icons/fa";
+import { Helmet } from "react-helmet-async";
 
 /* ---------------------------------------------------
     CARD COMPONENT
@@ -204,8 +205,7 @@ export default function CategoryProducts() {
         const defaults = {};
         data.forEach((p) => {
           if (p.pricePerGram) {
-            defaults[p._id] =
-              p.pricePerGram.split(",")[0].split("=")[0].trim();
+            defaults[p._id] = p.pricePerGram.split(",")[0].split("=")[0].trim();
           }
         });
         setSelectedWeights(defaults);
@@ -228,84 +228,151 @@ export default function CategoryProducts() {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <AcharAdvertizeBanner />
+    <>
+      <Helmet>
+        {/* Title with primary keyword + brand */}
+        <title>
+          {slug} | Buy Best Achar Online – Mango, Lemon, Haldi & More | Gausam
+          Vardhan
+        </title>
 
-      <div className="px-4 sm:px-6 py-6 sm:py-8">
-        <Toaster />
+        {/* Meta description - descriptive, enticing, natural */}
+        <meta
+          name="description"
+          content={`Shop authentic ${slug} online at Gausam Vardhan. Discover premium homemade achar including mango, lemon, haldi, garlic, carrot, and mixed varieties. Fresh, traditional, and preservative-free.`}
+        />
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 className="text-[0.9rem] sm:text-lg md:text-2xl font-bold text-gray-800 capitalize border-b pb-1 sm:pb-2 flex-1">
-            {slug} Products
-          </h2>
+        {/* Canonical URL */}
+        <link
+          rel="canonical"
+          href={`https://www.gausamvardhan.com/achar-category/${slug}`}
+        />
 
-          <button
-            className="md:hidden flex items-center gap-2 px-3 py-1.5 bg-orange-500 text-white rounded-lg shadow"
-            onClick={() => setFilterOpen(true)}
-          >
-            <FiFilter /> Filter
-          </button>
-        </div>
+        {/* Open Graph for social sharing */}
+        <meta property="og:title" content={`${slug} | Gausam Vardhan`} />
+        <meta
+          property="og:description"
+          content={`Explore a wide range of ${slug} including mango, lemon, haldi, garlic, carrot, and more.`}
+        />
+        <meta
+          property="og:url"
+          content={`https://www.gausamvardhan.com/achar-category/${slug}`}
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Gausam Vardhan" />
 
-        <div className="flex gap-4 sm:gap-6">
-          {/* SIDE FILTER (Desktop) */}
-          <div className="hidden md:block w-60 shrink-0 sticky top-20 h-fit">
-            <Filter
-              minPrice={0}
-              maxPrice={5000}
-              categories={[]}
-              onFilterChange={handleFilter}
-            />
+        {/* Twitter card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${slug} | Gausam Vardhan`} />
+        <meta
+          name="twitter:description"
+          content={`Shop authentic ${slug} including mango, lemon, haldi, garlic, carrot, and more.`}
+        />
+
+        {/* Optional keywords (less critical for SEO today) */}
+        <meta
+          name="keywords"
+          content="mango achar, lemon achar, haldi achar, garlic achar, carrot achar, mixed achar, homemade achar, traditional achar"
+        />
+
+        {/* JSON-LD Structured Data for category (boosts rich snippets) */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: `${slug} Products`,
+            description: `Shop authentic ${slug} online at Gausam Vardhan. Discover premium homemade achar including mango, lemon, haldi, garlic, carrot, and mixed varieties.`,
+            url: `https://www.gausamvardhan.com/achar-category/${slug}`,
+            publisher: {
+              "@type": "Organization",
+              name: "Gausam Vardhan",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://www.gausamvardhan.com/logo.png",
+              },
+            },
+          })}
+        </script>
+      </Helmet>
+      <div className="bg-gray-50 min-h-screen">
+        <AcharAdvertizeBanner />
+
+        <div className="px-4 sm:px-6 py-6 sm:py-8">
+          <Toaster />
+
+          {/* HEADER */}
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h2 className="text-[0.9rem] sm:text-lg md:text-2xl font-bold text-gray-800 capitalize border-b pb-1 sm:pb-2 flex-1">
+              {slug} Products
+            </h2>
+
+            <button
+              className="md:hidden flex items-center gap-2 px-3 py-1.5 bg-orange-500 text-white rounded-lg shadow"
+              onClick={() => setFilterOpen(true)}
+            >
+              <FiFilter /> Filter
+            </button>
           </div>
 
-          {/* MOBILE FILTER */}
-          {filterOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
-              <div
-                className="flex-1"
-                onClick={() => setFilterOpen(false)}
-              ></div>
-
-              <div className="w-72 bg-white h-full shadow-lg p-4 overflow-y-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Filters</h3>
-                  <button onClick={() => setFilterOpen(false)}>
-                    <FiX size={22} />
-                  </button>
-                </div>
-
-                <Filter
-                  minPrice={0}
-                  maxPrice={5000}
-                  categories={[]}
-                  onFilterChange={handleFilter}
-                />
-              </div>
+          <div className="flex gap-4 sm:gap-6">
+            {/* SIDE FILTER (Desktop) */}
+            <div className="hidden md:block w-60 shrink-0 sticky top-20 h-fit">
+              <Filter
+                minPrice={0}
+                maxPrice={5000}
+                categories={[]}
+                onFilterChange={handleFilter}
+              />
             </div>
-          )}
 
-          {/* PRODUCT GRID */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
-            {filteredProducts.length === 0 ? (
-              <p className="text-gray-600 col-span-full text-center py-16 sm:py-20">
-                No products found.
-              </p>
-            ) : (
-              filteredProducts.map((p) => (
-                <AcharProductCard
-                  key={p._id}
-                  product={p}
-                  selectedWeight={selectedWeights[p._id]}
-                  setSelectedWeight={(w) =>
-                    setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
-                  }
-                />
-              ))
+            {/* MOBILE FILTER */}
+            {filterOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
+                <div
+                  className="flex-1"
+                  onClick={() => setFilterOpen(false)}
+                ></div>
+
+                <div className="w-72 bg-white h-full shadow-lg p-4 overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Filters</h3>
+                    <button onClick={() => setFilterOpen(false)}>
+                      <FiX size={22} />
+                    </button>
+                  </div>
+
+                  <Filter
+                    minPrice={0}
+                    maxPrice={5000}
+                    categories={[]}
+                    onFilterChange={handleFilter}
+                  />
+                </div>
+              </div>
             )}
+
+            {/* PRODUCT GRID */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
+              {filteredProducts.length === 0 ? (
+                <p className="text-gray-600 col-span-full text-center py-16 sm:py-20">
+                  No products found.
+                </p>
+              ) : (
+                filteredProducts.map((p) => (
+                  <AcharProductCard
+                    key={p._id}
+                    product={p}
+                    selectedWeight={selectedWeights[p._id]}
+                    setSelectedWeight={(w) =>
+                      setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
+                    }
+                  />
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

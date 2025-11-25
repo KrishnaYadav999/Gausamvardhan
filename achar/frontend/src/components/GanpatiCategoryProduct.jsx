@@ -6,7 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
 import { FaHeart } from "react-icons/fa";
-
+import { Helmet } from "react-helmet-async";
 /* ===================================================
    CARD COMPONENT
 =================================================== */
@@ -44,112 +44,161 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
     toast.success(`${product.title} added`);
   };
 
+  const pageTitle = `${slug.toLowerCase()} ganpati products | gausamvardhan`;
+  const pageDescription = `Shop premium ${slug.toLowerCase()} ganpati products online at GausamVardhan. Pure, natural, multiple packs available.`;
+  const pageUrl = `https://www.gausamvardhan.com/ganpati-category/${slug}`;
+  const pageImage = `https://www.gausamvardhan.com/images/ganpati-category/${slug}.jpg`;
   return (
-    <div
-      className={`bg-white rounded-2xl border shadow-md hover:shadow-xl 
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageUrl} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={pageImage} />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+
+        {/* Structured Data for Products */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: `${slug.toLowerCase()} ganpati`,
+            image: products.map((p) => p.images?.[0] || pageImage),
+            description: pageDescription,
+            brand: { "@type": "Brand", name: "GausamVardhan" },
+            offers: {
+              "@type": "AggregateOffer",
+              offerCount: products.length,
+              lowPrice: products.reduce(
+                (min, p) => Math.min(min, parseFloat(p.current_price || 0)),
+                Infinity
+              ),
+              highPrice: products.reduce(
+                (max, p) => Math.max(max, parseFloat(p.current_price || 0)),
+                0
+              ),
+              priceCurrency: "INR",
+              availability: "https://schema.org/InStock",
+            },
+          })}
+        </script>
+      </Helmet>
+      <div
+        className={`bg-white rounded-2xl border shadow-md hover:shadow-xl 
       transition-all cursor-pointer flex flex-col h-full relative 
       ${isOutOfStock ? "opacity-60 cursor-not-allowed" : ""}`}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={() =>
-        navigate(`/ganpati-product/${product.slug}/${product._id}`)
-      }
-    >
-      {/* Image */}
-      <div className="relative h-40 sm:h-48 md:h-[250px] overflow-hidden rounded-t-2xl bg-gray-100">
-        <img
-          src={product.images?.[0]}
-          className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${
-            hover && product.images?.[1] ? "opacity-0" : "opacity-100"
-          }`}
-        />
-
-        {product.images?.[1] && (
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onClick={() =>
+          navigate(`/ganpati-product/${product.slug}/${product._id}`)
+        }
+      >
+        {/* Image */}
+        <div className="relative h-40 sm:h-48 md:h-[250px] overflow-hidden rounded-t-2xl bg-gray-100">
           <img
-            src={product.images[1]}
+            src={product.images?.[0]}
             className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${
-              hover ? "opacity-100" : "opacity-0"
+              hover && product.images?.[1] ? "opacity-0" : "opacity-100"
             }`}
           />
-        )}
 
-        {!isOutOfStock && (
-          <button
-            onClick={(e) => e.stopPropagation()}
-            className="absolute top-2 right-2 bg-white p-2 rounded-full shadow"
-          >
-            <FaHeart size={16} className="text-gray-700" />
-          </button>
-        )}
+          {product.images?.[1] && (
+            <img
+              src={product.images[1]}
+              className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${
+                hover ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          )}
 
-        {isOutOfStock && (
-          <span className="absolute top-3 left-3 bg-red-600 text-white text-[0.7rem] font-bold px-3 py-1 rounded-lg shadow">
-            OUT OF STOCK
-          </span>
-        )}
-      </div>
+          {!isOutOfStock && (
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="absolute top-2 right-2 bg-white p-2 rounded-full shadow"
+            >
+              <FaHeart size={16} className="text-gray-700" />
+            </button>
+          )}
 
-      {/* Details */}
-      <div className="px-3 py-3 flex flex-col flex-1">
-
-        {/* TITLE responsive */}
-        <h3 className="font-semibold text-[0.9rem] sm:text-base text-gray-900 line-clamp-2">
-          {product.title}
-        </h3>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1 text-[0.8rem] sm:text-sm mt-1 mb-2">
-          <span className="text-yellow-500 text-lg">★</span>
-          <span className="font-semibold">{avgRating}</span>
-          <span className="text-gray-500 text-[0.75rem]">
-            ({product?.reviews?.length || 0}+)
-          </span>
-        </div>
-
-        {/* Pack Dropdown */}
-        {product.packs?.length > 0 && (
-          <select
-            value={selectedPack}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setSelectedPack(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded-lg 
-            text-[0.9rem] sm:text-sm mb-2"
-          >
-            {product.packs.map((p) => (
-              <option key={p.name} value={p.name}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        )}
-
-        {/* Price */}
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-lg sm:text-xl font-bold text-green-700">
-            ₹{selectedPrice}
-          </p>
-          {product.cut_price > 0 && (
-            <p className="text-[0.75rem] sm:text-xs line-through text-gray-400">
-              ₹{product.cut_price}
-            </p>
+          {isOutOfStock && (
+            <span className="absolute top-3 left-3 bg-red-600 text-white text-[0.7rem] font-bold px-3 py-1 rounded-lg shadow">
+              OUT OF STOCK
+            </span>
           )}
         </div>
 
-        {/* Add Btn */}
-        <button
-          onClick={add}
-          disabled={isOutOfStock}
-          className={`w-full py-2 
+        {/* Details */}
+        <div className="px-3 py-3 flex flex-col flex-1">
+          {/* TITLE responsive */}
+          <h3 className="font-semibold text-[0.9rem] sm:text-base text-gray-900 line-clamp-2">
+            {product.title}
+          </h3>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1 text-[0.8rem] sm:text-sm mt-1 mb-2">
+            <span className="text-yellow-500 text-lg">★</span>
+            <span className="font-semibold">{avgRating}</span>
+            <span className="text-gray-500 text-[0.75rem]">
+              ({product?.reviews?.length || 0}+)
+            </span>
+          </div>
+
+          {/* Pack Dropdown */}
+          {product.packs?.length > 0 && (
+            <select
+              value={selectedPack}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => setSelectedPack(e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg 
+            text-[0.9rem] sm:text-sm mb-2"
+            >
+              {product.packs.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Price */}
+          <div className="flex justify-between items-center mb-2">
+            <p className="text-lg sm:text-xl font-bold text-green-700">
+              ₹{selectedPrice}
+            </p>
+            {product.cut_price > 0 && (
+              <p className="text-[0.75rem] sm:text-xs line-through text-gray-400">
+                ₹{product.cut_price}
+              </p>
+            )}
+          </div>
+
+          {/* Add Btn */}
+          <button
+            onClick={add}
+            disabled={isOutOfStock}
+            className={`w-full py-2 
           text-[0.9rem] sm:text-sm font-semibold rounded-lg transition ${
             isOutOfStock
               ? "bg-gray-400 text-gray-700"
               : "bg-orange-600 hover:bg-orange-700 text-white"
           }`}
-        >
-          {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
-        </button>
+          >
+            {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
