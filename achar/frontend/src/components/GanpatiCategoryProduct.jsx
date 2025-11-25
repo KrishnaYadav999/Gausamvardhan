@@ -44,56 +44,8 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
     toast.success(`${product.title} added`);
   };
 
-  const pageTitle = `${slug.toLowerCase()} ganpati products | gausamvardhan`;
-  const pageDescription = `Shop premium ${slug.toLowerCase()} ganpati products online at GausamVardhan. Pure, natural, multiple packs available.`;
-  const pageUrl = `https://www.gausamvardhan.com/ganpati-category/${slug}`;
-  const pageImage = `https://www.gausamvardhan.com/images/ganpati-category/${slug}.jpg`;
   return (
     <>
-      <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <link rel="canonical" href={pageUrl} />
-
-        {/* Open Graph */}
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:image" content={pageImage} />
-
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={pageImage} />
-
-        {/* Structured Data for Products */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: `${slug.toLowerCase()} ganpati`,
-            image: products.map((p) => p.images?.[0] || pageImage),
-            description: pageDescription,
-            brand: { "@type": "Brand", name: "GausamVardhan" },
-            offers: {
-              "@type": "AggregateOffer",
-              offerCount: products.length,
-              lowPrice: products.reduce(
-                (min, p) => Math.min(min, parseFloat(p.current_price || 0)),
-                Infinity
-              ),
-              highPrice: products.reduce(
-                (max, p) => Math.max(max, parseFloat(p.current_price || 0)),
-                0
-              ),
-              priceCurrency: "INR",
-              availability: "https://schema.org/InStock",
-            },
-          })}
-        </script>
-      </Helmet>
       <div
         className={`bg-white rounded-2xl border shadow-md hover:shadow-xl 
       transition-all cursor-pointer flex flex-col h-full relative 
@@ -254,8 +206,57 @@ export default function GanpatiCategoryProduct() {
     [products]
   );
 
+  const pageTitle = `${slug.toLowerCase()} ganpati products | gausamvardhan`;
+  const pageDescription = `Shop premium ${slug.toLowerCase()} ganpati products online at GausamVardhan. Pure, natural, multiple packs available.`;
+  const pageUrl = `https://www.gausamvardhan.com/ganpati-category/${slug}`;
+  const pageImage = `https://www.gausamvardhan.com/images/ganpati-category/${slug}.jpg`;
+
   return (
     <div className="bg-gray-50 min-h-screen px-3 sm:px-6 py-6 sm:py-8">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={pageUrl} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={pageImage} />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+
+        {/* Structured Data for Products */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: `${slug.toLowerCase()} ganpati`,
+            image: products.map((p) => p.images?.[0] || pageImage),
+            description: pageDescription,
+            brand: { "@type": "Brand", name: "GausamVardhan" },
+            offers: {
+              "@type": "AggregateOffer",
+              offerCount: products.length,
+              lowPrice: products.reduce(
+                (min, p) => Math.min(min, parseFloat(p.current_price || 0)),
+                Infinity
+              ),
+              highPrice: products.reduce(
+                (max, p) => Math.max(max, parseFloat(p.current_price || 0)),
+                0
+              ),
+              priceCurrency: "INR",
+              availability: "https://schema.org/InStock",
+            },
+          })}
+        </script>
+      </Helmet>
       <Toaster />
 
       {/* HEADER */}
