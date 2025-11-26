@@ -9,9 +9,9 @@ const gall4 =
 const gall5 =
   "https://i.pinimg.com/736x/bd/e3/c8/bde3c898035d6f1458c4fb6916b63ba5.jpg";
 
-// ⭐ New Image Added
-const gall6 =
-  "https://res.cloudinary.com/dtvihyts8/image/upload/v1763971838/Gemini_Generated_Image_nn84kgnn84kgnn84_jpnovt.png";
+// ⭐ Right Corner Sticker
+const cornerSticker =
+  "https://i.pinimg.com/1200x/fc/1e/aa/fc1eaa7fed0bd14e5b5280ee08aaa280.jpg";
 
 export default function Footer() {
   return (
@@ -34,6 +34,21 @@ export default function Footer() {
         }}
       />
 
+      {/* ⭐RIGHT CORNER IMAGE + LABEL */}
+      <div className="absolute right-3 bottom-20 flex flex-col items-center gap-1 animate-fadeIn">
+        <img
+          src={cornerSticker}
+          alt="decor"
+          className="w-28 h-20 object-contain opacity-95"
+        />
+        <span
+          className="text-green-800 text-xs font-semibold"
+          style={{ fontFamily: "'Montserrat', sans-serif" }}
+        >
+          🇮🇳 Made In India
+        </span>
+      </div>
+
       <div className="relative max-w-7xl mx-auto px-6 py-20 animate-fadeUp">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
           {/* Left */}
@@ -44,9 +59,9 @@ export default function Footer() {
               alt="logo"
             />
 
-            {/* Small Images Gallery Updated */}
+            {/* Small Images Gallery */}
             <div className="flex items-center gap-2 mt-6">
-              {[gall1, gall4, gall5, gall6].map((img, index) => (
+              {[gall1, gall4, gall5].map((img, index) => (
                 <img
                   key={index}
                   src={img}
@@ -155,6 +170,7 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Animations */}
       <style>{`
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }

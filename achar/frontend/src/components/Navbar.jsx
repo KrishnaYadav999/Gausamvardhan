@@ -1,15 +1,16 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import {
-  FaSearch,
-  FaShoppingBag,
-  FaUserCircle,
-  FaBars,
   FaTimes,
 } from "react-icons/fa";
+import { BiMenuAltLeft } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
+import { CiUser } from "react-icons/ci";
+import { FaOpencart } from "react-icons/fa";
+import { PiUserCheckLight } from "react-icons/pi";
+import { CiSearch } from "react-icons/ci";
 import axios from "axios";
 
 const searchItems = [
@@ -180,12 +181,12 @@ const Navbar = () => {
               className="text-2xl text-gray-400 md:hidden"
               onClick={() => setMobileMenu(true)}
             >
-              <FaBars />
+              <BiMenuAltLeft />
             </button>
 
             {/* LOGO */}
             <Link to="/">
-              <img src="/GauSamvardhan.png" alt="Logo" className="w-20 md:w-28 lg:w-32" />
+              <img src="/GauSamvardhan.png" alt="Logo"  className="w-20 md:w-28 lg:w-32 ml-3 md:ml-6 lg:ml-10"/>
             </Link>
 
             {/* DESKTOP SEARCH */}
@@ -196,12 +197,12 @@ const Navbar = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchEnter}
-                  className="w-full border border-gray-300 rounded-full px-5 py-2 text-sm shadow-sm"
+                  className="w-full border border-gray-300 px-5 py-2 text-sm shadow-sm"
                 />
-                <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-[#008031]" />
+                <CiSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-[#008031]" />
 
                 {searchQuery && (
-                  <div className="absolute top-full mt-1 w-full bg-white shadow-lg rounded-md border max-h-72 overflow-y-auto z-50">
+                  <div className="absolute top-full mt-1 w-full bg-white shadow-lg border max-h-72 overflow-y-auto z-50">
                     {renderSearchResults()}
                   </div>
                 )}
@@ -216,24 +217,24 @@ const Navbar = () => {
                 onClick={() => setShowSearch(!showSearch)}
                 className="md:hidden text-xl text-gray-400"
               >
-                <FaSearch />
+                <CiSearch />
               </button>
 
               {/* SIGN IN — ALWAYS SHOW */}
               {!user ? (
                 <Link to="/signin" className="text-gray-400 text-2xl flex items-center">
-                  <FaUserCircle />
+                  <CiUser />
                 </Link>
               ) : (
                 <Link to="/profile" className="text-gray-400 text-2xl flex items-center">
-                  <FaUserCircle />
+                  <PiUserCheckLight />
                 </Link>
               )}
 
               {/* CART */}
               <Link to="/cart" className="flex items-center gap-3 text-gray-400 text-2xl relative">
                 <div className="relative">
-                  <FaShoppingBag />
+                  <FaOpencart />
                   <span className="absolute -top-2 -right-2 bg-[#008031] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
                     {totalItems}
                   </span>
@@ -253,13 +254,13 @@ const Navbar = () => {
                   ref={mobileInputRef}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full border border-gray-300 rounded-full px-4 py-2 shadow-sm"
+                  className="w-full border border-gray-300 px-4 py-2 shadow-sm"
                   placeholder="Search..."
                   onKeyDown={handleSearchEnter}
                 />
 
                 {searchQuery && (
-                  <div className="bg-white shadow-md rounded-md mt-1 border max-h-60 overflow-y-auto">
+                  <div className="bg-white shadow-md  mt-1 border max-h-60 overflow-y-auto">
                     {renderSearchResults()}
                   </div>
                 )}

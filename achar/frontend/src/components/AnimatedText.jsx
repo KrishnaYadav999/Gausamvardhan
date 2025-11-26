@@ -22,7 +22,7 @@ const AnimatedText = () => {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Smooth animated gradient background
+    // Background animation
     gsap.to(containerRef.current, {
       background: "linear-gradient(90deg, #2F8F68, #4DB47F, #2F8F68)",
       backgroundSize: "300% 300%",
@@ -31,10 +31,11 @@ const AnimatedText = () => {
       ease: "power1.inOut",
     });
 
-    // Text animation
     const tl = gsap.timeline({ repeat: -1 });
 
     textRefs.current.forEach((el) => {
+      if (!el) return;
+
       const letters = el.textContent.split("");
       el.textContent = "";
 
@@ -51,8 +52,8 @@ const AnimatedText = () => {
         {
           opacity: 1,
           y: 0,
-          filter: "blur(0px)",
-          stagger: 0.03,
+          filter: "blur(0)",
+          stagger: 0.025,
           duration: 0.25,
           ease: "power2.out",
         }
@@ -60,8 +61,8 @@ const AnimatedText = () => {
         opacity: 0,
         y: -6,
         filter: "blur(3px)",
-        duration: 0.5,
-        delay: 1.2,
+        duration: 0.45,
+        delay: 1.15,
         ease: "power1.inOut",
       });
     });
@@ -70,7 +71,11 @@ const AnimatedText = () => {
   return (
     <div
       ref={containerRef}
-      className="relative p-3 border border-green-700 shadow-md overflow-hidden h-14 flex items-center justify-center"
+      className="
+        relative p-3 border border-green-700 shadow-md overflow-hidden 
+        h-[52px] flex items-center justify-center
+        sm:h-[64px]     /* mobile height */
+      "
       style={{
         background: "linear-gradient(90deg, #328E6E, #67AE6E, #328E6E)",
         backgroundSize: "300% 300%",
@@ -80,7 +85,12 @@ const AnimatedText = () => {
         <p
           key={index}
           ref={(el) => (textRefs.current[index] = el)}
-          className="absolute text-white text-[14px] font-semibold tracking-wide text-center drop-shadow-lg px-2"
+          className="
+            absolute text-white 
+            text-[10px] sm:text-[12px] md:text-[14px] 
+            font-semibold tracking-wide text-center 
+            drop-shadow-lg px-2
+          "
         >
           {text}
         </p>

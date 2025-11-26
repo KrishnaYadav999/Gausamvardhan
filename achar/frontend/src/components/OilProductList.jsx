@@ -96,7 +96,9 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
                 ₹{parseFloat(product.cutPrice)}
               </p>
             )}
-            <p className="text-[20px] font-bold text-gray-900">₹{selectedPrice}</p>
+            <p className="text-[20px] font-bold text-gray-900">
+              ₹{selectedPrice}
+            </p>
           </div>
         </div>
 
@@ -104,7 +106,9 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
 
         <div className="flex items-center gap-1 mb-4">
           <span className="text-yellow-500 text-lg">★</span>
-          <span className="text-sm font-semibold text-gray-800">{mainRating}</span>
+          <span className="text-sm font-semibold text-gray-800">
+            {mainRating}
+          </span>
           <span className="text-xs text-gray-500">({numberOfReviews}+)</span>
         </div>
 
@@ -114,7 +118,7 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
             value={selectedVolume}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => setSelectedVolume(e.target.value)}
-            className="w-full border px-4 py-2 text-sm font-medium border-gray-300 rounded-xl text-gray-700"
+            className="w-full border px-4 py-2 text-sm font-medium border-gray-300 text-gray-700"
           >
             {product.perPriceLiter.map((item) => (
               <option key={item.volume} value={item.volume}>
@@ -126,7 +130,7 @@ const OilProductCard = ({ product, selectedVolume, setSelectedVolume }) => {
 
         <button
           onClick={handleAddToCart}
-          className="w-full py-3 font-semibold text-sm tracking-wide mt-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl"
+          className="w-full py-3 font-semibold text-sm tracking-wide mt-4 bg-green-600 hover:bg-green-700 text-white"
         >
           ADD TO CART
         </button>
@@ -232,11 +236,21 @@ const OilProductList = () => {
 
           <button
             className="
-              bg-yellow-600 hover:bg-yellow-700
-              text-white px-6 py-2 rounded-md
-              font-semibold shadow-md
-              sm:px-3 sm:py-1 sm:text-[11px]
-            "
+    bg-[#BF5757] hover:bg-[#A94848]
+    text-white rounded-md font-semibold shadow-md
+
+    /* Mobile (default) */
+    px-3 py-1 text-[10px]
+
+    /* Small Screen (sm ≥ 640px) */
+    sm:px-4 sm:py-1.5 sm:text-[11px]
+
+    /* Medium Screen (md ≥ 768px) */
+    md:px-5 md:py-2 md:text-[13px]
+
+    /* Large Screen (lg ≥ 1024px) */
+    lg:px-6 lg:py-2 lg:text-[14px]
+  "
           >
             Shop More
           </button>

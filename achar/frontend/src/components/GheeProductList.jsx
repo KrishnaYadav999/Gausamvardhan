@@ -251,12 +251,26 @@ const GheeProductList = ({ limit }) => {
             Desi Ghee
           </h2>
 
-          <Link
-            to="/ghee-products"
-            className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold shadow-md"
-          >
-            Shop More
-          </Link>
+                  <button
+  className="
+    bg-[#BF5757] hover:bg-[#A94848]
+    text-white rounded-md font-semibold shadow-md
+
+    /* Mobile (default) */
+    px-3 py-1 text-[10px]
+
+    /* Small Screen (sm ≥ 640px) */
+    sm:px-4 sm:py-1.5 sm:text-[11px]
+
+    /* Medium Screen (md ≥ 768px) */
+    md:px-5 md:py-2 md:text-[13px]
+
+    /* Large Screen (lg ≥ 1024px) */
+    lg:px-6 lg:py-2 lg:text-[14px]
+  "
+>
+  Shop More
+</button>
         </div>
       </div>
 
