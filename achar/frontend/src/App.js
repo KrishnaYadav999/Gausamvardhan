@@ -54,6 +54,9 @@ import AgarbattiProductList from "./components/AgarbattiProductList";
 import GanpatiCategoryProduct from "./components/GanpatiCategoryProduct";
 import GanpatiDetail from "./components/GanpatiDetail";
 import GanpatiProductList from "./components/GanpatiProductList";
+import AboutUS from "./components/AboutUS";
+import Products from "./components/Products";
+import Developer from "./components/Developer";
 // import CupCategoryProduct from "./components/CupCategoryProduct";
 // import CupDetail from "./components/CupDetail";
 // import CupProductList from "./components/CupProductList";
@@ -180,6 +183,7 @@ function App() {
         {/* Auth */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/login" element={<LoginFlow />} />
+        <Route path="/about" element={<AboutUS />} />
 
         {/* Profile & Admin */}
         <Route path="/profile" element={<ProfileDashboard />} />
@@ -223,6 +227,7 @@ function App() {
           element={<GanpatiCategoryProduct />}
         />
         <Route path="/ganpati-product/:slug/:id" element={<GanpatiDetail />} />
+        <Route path="/products" element={<Products />} />
 
         {/* Orders & Invoices */}
         <Route path="/order/:id" element={<OrderTracking />} />
@@ -232,7 +237,10 @@ function App() {
         <Route path="/faq" element={<FAQs />} />
         <Route path="/shipping-returns" element={<ShippingReturns />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/contact" element={<ContactUs />} />
+
+        <Route path="/developer" element={<Developer />} />
+
       </Routes>
 
       <Footer />

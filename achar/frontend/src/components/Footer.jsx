@@ -130,7 +130,7 @@ export default function Footer() {
               <li><a href="/contact" className="hover:text-green-500">Contact</a></li>
               <li><a href="/privacy-policy" className="hover:text-green-500">Privacy Policy</a></li>
               <li><a href="/terms-and-conditions" className="hover:text-green-500">Terms & Conditions</a></li>
-              <li><a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-green-500">Developer</a></li>
+              <li><a href="developer" target="_blank" rel="noreferrer" className="hover:text-green-500">Developer</a></li>
             </ul>
           </div>
 
