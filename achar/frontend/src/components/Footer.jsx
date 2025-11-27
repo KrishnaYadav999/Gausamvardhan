@@ -45,7 +45,7 @@ export default function Footer() {
           className="text-green-800 text-xs font-semibold"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          🇮🇳 Made In India
+           Made In India
         </span>
       </div>
 

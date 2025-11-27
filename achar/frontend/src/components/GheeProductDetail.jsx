@@ -10,6 +10,7 @@ import { Star } from "lucide-react";
 import ImageZoom from "./ImageZoom";
 import Certificate from "./Certificate";
 import { Helmet } from "react-helmet-async";
+import GheeCustomerReview from "./GheeCustomerReview";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png"; // use same hero or change
 
@@ -742,6 +743,9 @@ const GheeProductDetail = () => {
             </div>
           )}
         </div>
+      </div>
+      <div>
+        <GheeCustomerReview/>
       </div>
     </>
   );

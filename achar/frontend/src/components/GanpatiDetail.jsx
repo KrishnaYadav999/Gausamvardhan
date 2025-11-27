@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import Features from "./Features";
 import { Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import GanpatiCustomerReview from "./GanpatiCustomerReview";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -173,7 +174,7 @@ const GanpatiDetail = () => {
   return (
     <>
      <Helmet>
-  <title>{`${product.productName} | gau samvardhan`}</title>
+  <title>{`${product.title} | gau samvardhan`}</title>
 
   <meta
     name="description"
@@ -654,6 +655,10 @@ const GanpatiDetail = () => {
             </div>
           )}
         </div>
+        <div>
+ <GanpatiCustomerReview/>
+        </div>
+       
       </div>
     </>
   );

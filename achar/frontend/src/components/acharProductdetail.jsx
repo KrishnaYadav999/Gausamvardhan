@@ -9,6 +9,7 @@ import Features from "./Features";
 import { Star } from "lucide-react";
 import Certificate from "./Certificate";
 import { Helmet } from "react-helmet-async";
+import AcharCustomerReview from "./AcharCustomerReview";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -684,6 +685,7 @@ const AcharProductDetail = () => {
             </div>
           )}
         </div>
+        <AcharCustomerReview />
       </div>
     </>
   );

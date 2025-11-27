@@ -19,45 +19,64 @@ const developers = [
     linkedin: "https://www.linkedin.com/in/krishna-yadav-177708284",
     portfolio: "https://portfolio-382b.vercel.app/",
     description:
-      "Krishna Yadav ek highly skilled Full Stack Developer hain jo coding ko creative art ki tarah treat karte hain. Modern UI design se lekar high-performance backend tak – Krishna har project ko top-level perfection ke saath complete karte hain. Unki debugging skills itni powerful hain ki complex issues ko bhi minutes me solve kar dete hain. Client satisfaction unka first priority hota hai, aur delivery speed itni fast hoti hai ki client har baar 200% impressed ho jata hai.",
+      "A highly skilled Full Stack MERN Developer capable of building complete, scalable, and production-ready applications. Expert in frontend development, backend architecture, REST APIs, authentication systems, database structuring, and performance optimization. Known for solving complex bugs quickly and delivering clean, maintainable code with strong technical quality.",
     skills: [
       "React",
       "Node.js",
-      "MongoDB",
       "Express",
-      "UI/UX",
-      "Animations",
-      "API Integration",
-    ],
-  },
-
-  {
-    name: "Aniket Singh",
-    role: "Frontend & UI Specialist",
-    description:
-      "Aniket Singh UI ke magician hain! Modern design, smooth animations, fast performance – sab kuch ekdum world-class level par deliver karte hai. Pixel-perfect layout banana ho ya powerful responsive UI, Aniket ka kaam premium agency jaisa hota hai. Har client unke design se heavily impress hota hai.",
-    skills: [
-      "React",
+      "MongoDB",
       "Tailwind CSS",
       "GSAP",
-      "Responsive UI",
-      "Frontend Logic",
+      "API Integration",
+      "Backend Logic",
+      "Performance Optimization",
+      "Animations",
+      "Boostrap5",
+      "Git",
+      "GitHUB",
     ],
   },
-
+  {
+    name: "Aniket Singh",
+    role: "Full Stack MERN Developer",
+    phone: "+91 8830730929",
+    email: "ani23june@gmail.com",
+    linkedin: "https://www.linkedin.com/in/aniket-singh-b209792b8",
+    portfolio: "https://portfolio-4-8gnu.onrender.com",
+    description:
+      "A highly skilled Full Stack MERN Developer capable of building complete, scalable, and production-ready applications. Expert in frontend development, backend architecture, REST APIs, authentication systems, database structuring, and performance optimization. Known for solving complex bugs quickly and delivering clean, maintainable code with strong technical quality.",
+    skills: [
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Tailwind CSS",
+      "GSAP",
+      "API Integration",
+      "Backend Logic",
+      "Performance Optimization",
+      "Git",
+      "GitHUB",
+      "Cloud Deployment",
+    ],
+  },
   {
     name: "Vivek Prajapati",
-    role: "Backend & Logic Expert",
+    role: "Cloud Engineer & Cybersecurity Specialist",
     description:
-      "Vivek Prajapati backend ke master hain. API designing, database structure, authentication system – sab kuch rocket speed aur bilkul secure tarike se banate hain. Unke code ka structure itna powerful hota hai ki future updates super easy ho jate hain. Performance optimization unka favourite game hai.",
+      "Expert in cloud infrastructure, cybersecurity, secure authentication systems, and scalable backend architecture. Ensures applications remain secure, stable, and optimized for high performance. Skilled in API security, server hardening, and cloud-based deployments.",
     skills: [
+      "Cloud Architecture",
+      "Cybersecurity",
       "Node.js",
       "MongoDB",
       "JWT Auth",
-      "APIs",
+      "Git",
       "Server Optimization",
+      "API Security",
     ],
   },
+
 ];
 
 const Developer = () => {
@@ -69,13 +88,14 @@ const Developer = () => {
       </h1>
 
       <p className="text-center text-gray-700 text-lg mb-14 max-w-3xl mx-auto">
-        Hum teen developers ek hi mission par kaam karte hain –  
+        We are a team of three developers working with one mission —{" "}
         <span className="font-semibold text-blue-700">
-          India ke businesses ko digital duniya ka superstar banana.
+          to help businesses in India grow and succeed in the digital world.
         </span>
         <br />
-        Humaare kaam ka standard itna high-quality hota hai ki client ek baar
-        project de aur hamesha ke liye hum par trust kar le ❤️.
+        Our work quality is consistently world-class, and clients trust us
+        because we deliver strong, reliable, and high-performance solutions
+        every time.
       </p>
 
       {/* Developer Cards */}
@@ -99,7 +119,7 @@ const Developer = () => {
               {dev.description}
             </p>
 
-            {/* Contact Info (only if available) */}
+            {/* Contact Info */}
             {dev.phone || dev.email || dev.linkedin || dev.portfolio ? (
               <div className="mb-5 space-y-2">
                 {dev.phone && (
@@ -118,6 +138,7 @@ const Developer = () => {
                   <a
                     href={dev.linkedin}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-2 text-blue-600 font-semibold hover:underline"
                   >
                     <FaLinkedin /> LinkedIn Profile
@@ -128,6 +149,7 @@ const Developer = () => {
                   <a
                     href={dev.portfolio}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-2 text-green-600 font-semibold hover:underline"
                   >
                     <FaGlobe /> Portfolio Website
@@ -171,9 +193,9 @@ const Developer = () => {
         </h2>
 
         <p className="text-gray-700 mt-4 text-lg">
-          Website, App, Dashboard, Ecommerce, Branding –  
-          hum sab kuch world-class quality mein banate hain.  
-          Clients hamesha humare kaam se **over-satisfied** hote hain.
+          Website, App, Dashboard, Ecommerce, Branding – hum sab kuch world-class
+          quality mein banate hain. Clients hamesha humare kaam se{" "}
+          <strong>over-satisfied</strong> hote hain.
         </p>
 
         <div className="flex justify-center mt-6">
