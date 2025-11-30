@@ -17,11 +17,11 @@ const Features = () => {
           <div
             key={index}
             className="flex flex-col items-center justify-center text-center 
-                       border border-dashed border-red-400 rounded-md p-2 w-24 h-20
+                       border border-dashed border-green-400 rounded-md p-2 w-24 h-20
                        bg-white"
           >
-            <div className="text-red-700 mb-1">{item.icon}</div>
-            <p className="text-red-700 font-medium text-[10px]">{item.title}</p>
+            <div className="text-green-700 mb-1">{item.icon}</div>
+            <p className="text-green-700 font-medium text-[10px]">{item.title}</p>
           </div>
         ))}
       </div>

@@ -7,6 +7,7 @@ import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
+
 /* ===================================================
    CARD COMPONENT
 =================================================== */
@@ -16,8 +17,16 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
   const navigate = useNavigate();
 
   const isOutOfStock = !product.stock || product.stockQuantity <= 0;
-  const packObj = product.packs?.find((p) => p.name === selectedPack);
-  const selectedPrice = packObj?.price || product.current_price;
+
+  // helper to get price same as GanpatiDetail's getPrice
+  const getPrice = (prod, packName) => {
+    if (!prod) return 0;
+    if (!packName || !prod.packs) return Number(prod.current_price || 0);
+    const found = prod.packs.find((p) => p.name === packName);
+    return found ? Number(found.price || found.mrp || found.price) : Number(prod.current_price || 0);
+  };
+
+  const selectedPrice = getPrice(product, selectedPack);
 
   const avgRating = product.reviews?.length
     ? (
@@ -31,14 +40,16 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
     if (isOutOfStock) return toast.error("Out of Stock");
     if (!selectedPack) return toast.error("Select pack");
 
+    const qty = 1;
+
+    // Spread the whole product (so coupons and other fields come through)
     addToCart({
-      _id: product._id,
-      productName: product.title,
+      ...product,
       selectedPack,
-      quantity: 1,
-      selectedPrice,
-      cutPrice: product.cut_price,
-      productImages: product.images,
+      selectedPrice: selectedPrice,
+      quantity: qty,
+      totalPrice: selectedPrice * qty,
+      productImages: product.images || [],
     });
 
     toast.success(`${product.title} added`);
@@ -63,6 +74,7 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
             className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${
               hover && product.images?.[1] ? "opacity-0" : "opacity-100"
             }`}
+            alt={product.title}
           />
 
           {product.images?.[1] && (
@@ -71,6 +83,7 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
               className={`absolute inset-0 w-full h-full object-cover transition duration-500 ${
                 hover ? "opacity-100" : "opacity-0"
               }`}
+              alt={`${product.title}-alt`}
             />
           )}
 
@@ -78,6 +91,7 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
             <button
               onClick={(e) => e.stopPropagation()}
               className="absolute top-2 right-2 bg-white p-2 rounded-full shadow"
+              aria-label="favorite"
             >
               <FaHeart size={16} className="text-gray-700" />
             </button>
@@ -161,6 +175,7 @@ export default function GanpatiCategoryProduct() {
   const { slug } = useParams();
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
+  // selectedPack is an object mapping productId -> packName (default to first pack)
   const [selectedPack, setSelectedPack] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
 

@@ -12,9 +12,9 @@ export default function AdminAgarbatiCreate() {
     quantity: "",
     stockQuantity: "",
     stock: true,
-      cutPrice: "",  
-  currentPrice: "",  
-  rating: "",  
+    cutPrice: "",
+    currentPrice: "",
+    rating: "",
     category: "",
     images: [""], // Array for multiple main images
     videoUrl: "",
@@ -22,6 +22,45 @@ export default function AdminAgarbatiCreate() {
     reviews: [{ name: "", rating: "", comment: "", images: [""] }],
     moreAboutProduct: { name: "", description: "", images: [""] },
   });
+
+  // ---------------- Coupon State ----------------
+  const [couponCode, setCouponCode] = useState("");
+  const [coupons, setCoupons] = useState([]);
+  const [discountType, setDiscountType] = useState("percentage");
+  const [discountValue, setDiscountValue] = useState("");
+  const [isPermanent, setIsPermanent] = useState(false);
+  const [expiryDate, setExpiryDate] = useState("");
+  const [usageLimit, setUsageLimit] = useState("");
+  const [isActive, setIsActive] = useState(true);
+
+  // ---------------- Add Coupon ----------------
+  const addCoupon = () => {
+    if (!couponCode || !discountValue) {
+      return alert("Coupon code and discount value required");
+    }
+
+    const newCoupon = {
+      code: couponCode,
+      discountType,
+      discountValue: Number(discountValue),
+      isPermanent,
+      expiryDate: isPermanent ? null : expiryDate,
+      usageLimit: usageLimit ? Number(usageLimit) : null,
+      usedCount: 0,
+      isActive,
+    };
+
+    setCoupons([...coupons, newCoupon]);
+
+    // Reset
+    setCouponCode("");
+    setDiscountType("percentage");
+    setDiscountValue("");
+    setIsPermanent(false);
+    setExpiryDate("");
+    setUsageLimit("");
+    setIsActive(true);
+  };
 
   // Fetch categories
   useEffect(() => {
@@ -156,17 +195,23 @@ export default function AdminAgarbatiCreate() {
     const payload = {
       title: formData.title,
       description: formData.description,
-      keyBenefits: formData.keyBenefits.split(","),
-      ingredients: formData.ingredients.split(","),
+      keyBenefits: formData.keyBenefits
+        ? formData.keyBenefits.split(",").map((k) => k.trim())
+        : [],
+      ingredients: formData.ingredients
+        ? formData.ingredients.split(",").map((i) => i.trim())
+        : [],
       quantity: formData.quantity,
       stockQuantity: formData.stockQuantity,
       stock: formData.stock,
       category: formData.category,
       images: formData.images.filter((img) => img),
       videoUrl: formData.videoUrl,
-cut_price: formData.cutPrice ? Number(formData.cutPrice) : null,
-current_price: formData.currentPrice ? Number(formData.currentPrice) : null,
-rating: Number(formData.rating),  
+      cut_price: formData.cutPrice ? Number(formData.cutPrice) : null,
+      current_price: formData.currentPrice
+        ? Number(formData.currentPrice)
+        : null,
+      rating: formData.rating ? Number(formData.rating) : null,
       packs: formData.packs.filter((p) => p.name && p.price),
       reviews: formData.reviews
         .filter((r) => r.name && r.rating && r.comment)
@@ -175,6 +220,7 @@ rating: Number(formData.rating),
         ...formData.moreAboutProduct,
         images: formData.moreAboutProduct.images.filter((img) => img),
       },
+      coupons: coupons,
     };
 
     try {
@@ -193,8 +239,8 @@ rating: Number(formData.rating),
         images: [""],
         videoUrl: "",
         cutPrice: "",
-currentPrice: "",
-rating: "",  
+        currentPrice: "",
+        rating: "",
         packs: [{ name: "", price: "" }],
         reviews: [{ name: "", rating: "", comment: "", images: [""] }],
         moreAboutProduct: { name: "", description: "", images: [""] },
@@ -247,19 +293,29 @@ rating: "",
             type: "number",
           },
           {
-  label: "Rating",
-  name: "rating",
-  placeholder: "1 to 5",
-  type: "number",
-},
+            label: "Rating",
+            name: "rating",
+            placeholder: "1 to 5",
+            type: "number",
+          },
 
           {
             label: "Video URL",
             name: "videoUrl",
             placeholder: "https://youtube.com/xyz",
           },
-          { label: "Cut Price", name: "cutPrice", placeholder: "e.g., 499", type: "number" },
-{ label: "Current Price", name: "currentPrice", placeholder: "e.g., 299", type: "number" },
+          {
+            label: "Cut Price",
+            name: "cutPrice",
+            placeholder: "e.g., 499",
+            type: "number",
+          },
+          {
+            label: "Current Price",
+            name: "currentPrice",
+            placeholder: "e.g., 299",
+            type: "number",
+          },
         ].map((field) => (
           <div key={field.name}>
             <label className="block font-medium mb-1">{field.label}</label>
@@ -333,45 +389,7 @@ rating: "",
             Add More
           </button>
         </div>
-{/* Cut Price */}
-<div>
-  <div>
-  <label className="block font-medium mb-1">Rating (1–5)</label>
-  <input
-    type="number"
-    name="rating"
-    value={formData.rating}
-    onChange={handleChange}
-    placeholder="Enter rating"
-    min="1"
-    max="5"
-    className="w-full p-2 border rounded-lg"
-  />
-</div>
-
-  <label className="block font-medium mb-1">Cut Price</label>
-  <input
-    type="number"
-    name="cutPrice"
-    value={formData.cutPrice}
-    onChange={handleChange}
-    placeholder="e.g., 499"
-    className="w-full p-2 border rounded-lg"
-  />
-</div>
-
-{/* Current Price */}
-<div>
-  <label className="block font-medium mb-1">Current Price</label>
-  <input
-    type="number"
-    name="currentPrice"
-    value={formData.currentPrice}
-    onChange={handleChange}
-    placeholder="e.g., 299"
-    className="w-full p-2 border rounded-lg"
-  />
-</div>
+        {/* Cut Price */}
 
         {/* Packs */}
         <div>
@@ -574,6 +592,98 @@ rating: "",
           />
           <label className="font-medium">In Stock</label>
         </div>
+        {/* ---------------- COUPON ---------------- */}
+        <div className="border p-4 rounded-lg mb-4">
+          <h3 className="font-semibold mb-2">Add Coupons</h3>
+
+          <input
+            type="text"
+            placeholder="Coupon Code"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+            className="w-full p-2 border rounded-lg mb-2"
+          />
+
+          <select
+            value={discountType}
+            onChange={(e) => setDiscountType(e.target.value)}
+            className="w-full p-2 border rounded-lg mb-2"
+          >
+            <option value="percentage">Percentage (%)</option>
+            <option value="flat">Flat Amount (₹)</option>
+          </select>
+
+          <input
+            type="number"
+            placeholder="Discount Value"
+            value={discountValue}
+            onChange={(e) => setDiscountValue(e.target.value)}
+            className="w-full p-2 border rounded-lg mb-2"
+          />
+
+          <div className="flex items-center gap-2 mb-2">
+            <input
+              type="checkbox"
+              checked={isPermanent}
+              onChange={(e) => setIsPermanent(e.target.checked)}
+            />
+            <label>Permanent Coupon (No Expiry)</label>
+          </div>
+
+          {!isPermanent && (
+            <input
+              type="date"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              className="w-full p-2 border rounded-lg mb-2"
+            />
+          )}
+
+          <input
+            type="number"
+            placeholder="Usage Limit (optional)"
+            value={usageLimit}
+            onChange={(e) => setUsageLimit(e.target.value)}
+            className="w-full p-2 border rounded-lg mb-2"
+          />
+
+          <button
+            type="button"
+            onClick={addCoupon}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg"
+          >
+            Add Coupon
+          </button>
+        </div>
+        {/* Show Added Coupons */}
+        {coupons.length > 0 && (
+          <div className="border p-4 rounded-lg mt-4">
+            <h3 className="font-semibold mb-2">Added Coupons</h3>
+            {coupons.map((c, i) => (
+              <div key={i} className="p-2 border rounded mb-2 bg-gray-50">
+                <p>
+                  <strong>Code:</strong> {c.code}
+                </p>
+                <p>
+                  <strong>Discount:</strong>{" "}
+                  {c.discountType === "percentage"
+                    ? `${c.discountValue}%`
+                    : `₹${c.discountValue}`}
+                </p>
+
+                <p>
+                  <strong>Expiry:</strong>{" "}
+                  {c.isPermanent ? "Permanent" : c.expiryDate}
+                </p>
+
+                <p>
+                  <strong>Usage Limit:</strong>{" "}
+                  {c.usageLimit ? c.usageLimit : "Unlimited"}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
         <button
           type="submit"

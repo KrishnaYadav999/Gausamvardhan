@@ -55,7 +55,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (!selectedWeight) return toast.error("Select weight");
 
     addToCart({
-      _id: product._id,
+       ...product,
       productName: product.productName,
       selectedWeight,
       quantity: 1,

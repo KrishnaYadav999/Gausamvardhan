@@ -10,6 +10,9 @@ import {
   getSimilarGheeProducts, // ✅ new import
   searchProductsByName,
   getLowStockGheeProducts,
+  addCouponToGheeProduct,
+  updateCouponOfGheeProduct,
+  deleteCouponOfGheeProduct,
 
 } from "../controllers/gheeProductController.js";
 
@@ -29,4 +32,12 @@ router.get("/search/:query", searchProductsByName);
 router.post("/:id/review", addGheeReview);           // Add review to product
 router.get("/ghee/lowstock", getLowStockGheeProducts);
 
+// Add coupon to a ghee product
+router.post("/:id/coupon", addCouponToGheeProduct);
+
+// Update coupon of a ghee product
+router.put("/:id/coupon/:couponId", updateCouponOfGheeProduct);
+
+// Delete coupon of a ghee product
+router.delete("/:id/coupon/:couponId", deleteCouponOfGheeProduct);
 export default router;

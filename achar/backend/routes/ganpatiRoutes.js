@@ -11,6 +11,9 @@ import {
   getSimilarGanpatiProducts,
   searchGanpatiProducts,
   getLowStockGanpatiProducts,
+  addCouponToGanpatiProduct,
+  updateCouponOfGanpatiProduct,
+  deleteCouponOfGanpatiProduct,
 } from "../controllers/ganpatiController.js";
 
 const router = express.Router();
@@ -38,7 +41,14 @@ router.get("/low-stock/list", getLowStockGanpatiProducts);
 
 // Add review
 router.post("/review/:id", addGanpatiProductReview);
+// Add coupon to a Ganpati product
+router.post("/:id/coupon", addCouponToGanpatiProduct);
 
+// Update coupon of a Ganpati product
+router.put("/:id/coupon/:couponId", updateCouponOfGanpatiProduct);
+
+// Delete coupon of a Ganpati product
+router.delete("/:id/coupon/:couponId", deleteCouponOfGanpatiProduct);
 // ---------------- DEFAULT CRUD WITH :id (ALWAYS KEEP AT LAST) ----------------
 router.get("/:id", getGanpatiProduct);
 router.put("/:id", updateGanpatiProduct);

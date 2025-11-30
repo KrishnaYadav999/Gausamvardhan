@@ -5,10 +5,12 @@
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* Global font */
+/* Global font and background */
 html, body {
   font-family: 'Poppins', sans-serif;
   scroll-behavior: auto;
+  background-color: #FCFAF8; /* Added background color */
+  color: #000; /* Optional: default text color for contrast */
 }
 
 h1,h2,h3,h4,h5,h6 {

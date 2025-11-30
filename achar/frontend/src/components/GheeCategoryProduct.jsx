@@ -48,7 +48,7 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (!selectedWeight) return toast.error("❌ Select weight");
 
     addToCart({
-      _id: product._id,
+       ...product,
       productName: product.title,
       selectedWeight,
       quantity: 1,

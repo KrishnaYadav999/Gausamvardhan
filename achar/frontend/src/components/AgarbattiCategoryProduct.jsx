@@ -44,7 +44,7 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
     if (isOut) return toast.error("❌ Out of stock");
 
     addToCart({
-      _id: product._id,
+       ...product,
       productName: product.title,
       quantity: 1,
       selectedPrice,

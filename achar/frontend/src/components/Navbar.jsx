@@ -1,14 +1,12 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
-import {
-  FaTimes,
-} from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import { BiMenuAltLeft } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import { CiUser } from "react-icons/ci";
-import { FaOpencart } from "react-icons/fa";
+import { IoCartSharp } from "react-icons/io5";
 import { PiUserCheckLight } from "react-icons/pi";
 import { CiSearch } from "react-icons/ci";
 import axios from "axios";
@@ -72,26 +70,45 @@ const Navbar = () => {
   }, [showSearch]);
 
   /** Placeholder animation */
+  /** Placeholder animation */
   useEffect(() => {
     if (!desktopInputRef.current) return;
+
+    const input = desktopInputRef.current;
 
     const timeline = gsap.timeline({ repeat: -1 });
 
     searchItems.forEach((text) => {
+      // Typewriter forward
       for (let i = 0; i <= text.length; i++) {
-        timeline.call(() => {
-          desktopInputRef.current.placeholder = text.slice(0, i);
-        }, null, "+=0.06");
+        timeline.call(
+          () => {
+            if (input) input.placeholder = text.slice(0, i); // NULL SAFE
+          },
+          null,
+          "+=0.06"
+        );
       }
+
       timeline.to({}, { duration: 1 });
 
+      // Typewriter backward
       for (let i = text.length; i >= 0; i--) {
-        timeline.call(() => {
-          desktopInputRef.current.placeholder = text.slice(0, i);
-        }, null, "+=0.04");
+        timeline.call(
+          () => {
+            if (input) input.placeholder = text.slice(0, i); // NULL SAFE
+          },
+          null,
+          "+=0.04"
+        );
       }
+
       timeline.to({}, { duration: 0.4 });
     });
+
+    return () => {
+      timeline.kill(); // Prevent running after unmount
+    };
   }, []);
 
   /** SEARCH WORKING */
@@ -106,8 +123,12 @@ const Navbar = () => {
 
       try {
         const [gheeRes, masalaRes, oilRes, productRes] = await Promise.all([
-          axios.get(`/api/ghee-products/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`/api/masala-products/search/${encodeURIComponent(searchQuery)}`),
+          axios.get(
+            `/api/ghee-products/search/${encodeURIComponent(searchQuery)}`
+          ),
+          axios.get(
+            `/api/masala-products/search/${encodeURIComponent(searchQuery)}`
+          ),
           axios.get(`/api/oils/search/${encodeURIComponent(searchQuery)}`),
           axios.get(`/api/products/search/${encodeURIComponent(searchQuery)}`),
         ]);
@@ -137,8 +158,10 @@ const Navbar = () => {
     setShowSearch(false);
     setMobileMenu(false);
 
-    if (item.type === "Ghee") navigate(`/ghee-product/${item.slug}/${item._id}`);
-    if (item.type === "Masala") navigate(`/masala-product/${item.slug}/${item._id}`);
+    if (item.type === "Ghee")
+      navigate(`/ghee-product/${item.slug}/${item._id}`);
+    if (item.type === "Masala")
+      navigate(`/masala-product/${item.slug}/${item._id}`);
     if (item.type === "Oil") navigate(`/oil-product/${item.slug}/${item._id}`);
     if (item.type === "Product")
       navigate(`/products/${item.category?.slug || "default"}/${item._id}`);
@@ -163,7 +186,9 @@ const Navbar = () => {
           className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b last:border-none"
         >
           <p className="font-medium">{item.title || item.productName}</p>
-          <p className="text-gray-400 text-xs">({item.category?.name || item.type})</p>
+          <p className="text-gray-400 text-xs">
+            ({item.category?.name || item.type})
+          </p>
         </div>
       ))
     );
@@ -173,9 +198,7 @@ const Navbar = () => {
       {/* NAVBAR */}
       <nav className="bg-white shadow-md sticky top-0 z-[999] w-full border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
           <div className="flex items-center justify-between h-24">
-
             {/* Mobile Hamburger */}
             <button
               className="text-2xl text-gray-400 md:hidden"
@@ -186,7 +209,11 @@ const Navbar = () => {
 
             {/* LOGO */}
             <Link to="/">
-              <img src="/GauSamvardhan.png" alt="Logo"  className="w-20 md:w-28 lg:w-32 ml-3 md:ml-6 lg:ml-10"/>
+              <img
+                src="/GauSamvardhan.png"
+                alt="Logo"
+                className="w-20 md:w-28 lg:w-32 ml-3 md:ml-6 lg:ml-10"
+              />
             </Link>
 
             {/* DESKTOP SEARCH */}
@@ -211,7 +238,6 @@ const Navbar = () => {
 
             {/* RIGHT SIDE ICONS */}
             <div className="flex items-center space-x-6">
-
               {/* Mobile Search */}
               <button
                 onClick={() => setShowSearch(!showSearch)}
@@ -222,19 +248,28 @@ const Navbar = () => {
 
               {/* SIGN IN — ALWAYS SHOW */}
               {!user ? (
-                <Link to="/signin" className="text-gray-400 text-2xl flex items-center">
+                <Link
+                  to="/signin"
+                  className="text-green-400 text-2xl flex items-center"
+                >
                   <CiUser />
                 </Link>
               ) : (
-                <Link to="/profile" className="text-gray-400 text-2xl flex items-center">
+                <Link
+                  to="/profile"
+                  className="text-green-400 text-2xl flex items-center"
+                >
                   <PiUserCheckLight />
                 </Link>
               )}
 
               {/* CART */}
-              <Link to="/cart" className="flex items-center gap-3 text-gray-400 text-2xl relative">
+              <Link
+                to="/cart"
+                className="flex items-center gap-3 text-green-400 text-2xl relative"
+              >
                 <div className="relative">
-                  <FaOpencart />
+                  <IoCartSharp />
                   <span className="absolute -top-2 -right-2 bg-[#008031] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
                     {totalItems}
                   </span>
@@ -282,13 +317,20 @@ const Navbar = () => {
           <FaTimes />
         </button>
 
-        <h2 className="text-lg font-bold mb-6 text-[#008031]">All Categories</h2>
+        <h2 className="text-lg font-bold mb-6 text-[#008031]">
+          All Categories
+        </h2>
 
         <div className="grid grid-cols-2 gap-6">
           {menuItems.map((item, index) => (
-            <div key={index} className="flex flex-col items-center cursor-pointer">
+            <div
+              key={index}
+              className="flex flex-col items-center cursor-pointer"
+            >
               <img src={item.icon} className="w-12 mb-2" alt={item.title} />
-              <p className="text-sm font-medium text-gray-700 text-center">{item.title}</p>
+              <p className="text-sm font-medium text-gray-700 text-center">
+                {item.title}
+              </p>
             </div>
           ))}
         </div>

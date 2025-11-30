@@ -610,7 +610,7 @@ const GheeProductDetail = () => {
                         : "bg-yellow-400 hover:bg-yellow-500"
                     }`}
                   >
-                    {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
+                    {isOutOfStock ? "Out of Stock" : "💳 Shop Now"}
                   </button>
                 </div>
 

@@ -1,18 +1,6 @@
 import React from "react";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 
-// Image URLs
-const gall1 =
-  "https://i.pinimg.com/1200x/34/94/6e/34946ea8562dc196a6b3c69f1d11997f.jpg";
-const gall4 =
-  "https://i.pinimg.com/736x/3e/55/5d/3e555d13595e2ae7037be6a8473953b7.jpg";
-const gall5 =
-  "https://i.pinimg.com/736x/bd/e3/c8/bde3c898035d6f1458c4fb6916b63ba5.jpg";
-
-// ⭐ Right Corner Sticker
-const cornerSticker =
-  "https://i.pinimg.com/1200x/fc/1e/aa/fc1eaa7fed0bd14e5b5280ee08aaa280.jpg";
-
 export default function Footer() {
   return (
     <footer
@@ -30,45 +18,33 @@ export default function Footer() {
         className="absolute bottom-0 left-0 w-full h-[230px] bg-bottom bg-cover bg-no-repeat opacity-90 animate-fadeIn"
         style={{
           backgroundImage:
-            "url('https://res.cloudinary.com/dkmxeiyvp/image/upload/v1763532491/image_gallery/fvdprloak3ogr3q9h0ap.png')",
+            "url('https://res.cloudinary.com/dkmxeiyvp/image_upload_placeholder')",
         }}
       />
-
-      {/* ⭐RIGHT CORNER IMAGE + LABEL */}
-      <div className="absolute right-3 bottom-20 flex flex-col items-center gap-1 animate-fadeIn">
-        <img
-          src={cornerSticker}
-          alt="decor"
-          className="w-28 h-20 object-contain opacity-95"
-        />
-        <span
-          className="text-green-800 text-xs font-semibold"
-          style={{ fontFamily: "'Montserrat', sans-serif" }}
-        >
-           Made In India
-        </span>
-      </div>
 
       <div className="relative max-w-7xl mx-auto px-6 py-20 animate-fadeUp">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
           {/* Left */}
           <div className="animate-slideUp">
-            <img
-              src="https://res.cloudinary.com/dtagulyhy/image/upload/v1763540008/gausamvardhan_logo_yqmzpg.png"
-              className="w-40"
-              alt="logo"
-            />
 
-            {/* Small Images Gallery */}
-            <div className="flex items-center gap-2 mt-6">
-              {[gall1, gall4, gall5].map((img, index) => (
+            {/* Logo + Added Image with Made in India */}
+            <div className="flex items-center gap-4">
+              <img
+                src="https://res.cloudinary.com/dtagulyhy/image/upload/v1763540008/gausamvardhan_logo_yqmzpg.png"
+                className="w-40"
+                alt="logo"
+              />
+
+              <div className="flex flex-col items-center mb-[5vh]">
                 <img
-                  key={index}
-                  src={img}
-                  className="w-14 h-14 object-cover rounded-lg"
-                  alt="gallery"
+                  src="https://i.pinimg.com/1200x/fc/1e/aa/fc1eaa7fed0bd14e5b5280ee08aaa280.jpg"
+                  className="w-24 rounded-lg object-cover"
+                  alt="side-img"
                 />
-              ))}
+                <span className="text-green-800 text-sm mt-1 font-semibold">
+                  Made in India
+                </span>
+              </div>
             </div>
 
             <h2

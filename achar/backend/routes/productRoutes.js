@@ -10,7 +10,10 @@ import {
   deleteReview,
   getSimilarProducts,
   searchProductsByName,
-  getLowStockProducts, // ✅ import search
+  getLowStockProducts,
+  addCouponToProduct,
+  updateCouponOfProduct,
+  deleteCouponOfProduct, // ✅ import search
 } from "../controllers/productController.js";
 
 const router = express.Router();
@@ -35,4 +38,13 @@ router.delete("/:id", deleteProduct);
 router.post("/:id/reviews", addReview);
 router.delete("/:id/reviews/:reviewId", deleteReview);
 router.get("/low-stock", getLowStockProducts);
+
+
+router.post("/:id/coupon", addCouponToProduct);
+
+// Update coupon of a product
+router.put("/:id/coupon/:couponId", updateCouponOfProduct);
+
+// Delete coupon from a product
+router.delete("/:id/coupon/:couponId", deleteCouponOfProduct);
 export default router;

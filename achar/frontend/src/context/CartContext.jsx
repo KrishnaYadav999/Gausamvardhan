@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { useNavigate } from "react-router-dom";  
+import {toast} from "react-hot-toast"
 
 export const CartContext = createContext();
 
@@ -8,6 +9,8 @@ export const CartProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
+  const [coupon, setCoupon] = useState(null); // applied coupon
+const [discountAmount, setDiscountAmount] = useState(0)
 
   // Load cart for the logged-in user
   useEffect(() => {
@@ -128,6 +131,34 @@ export const CartProvider = ({ children }) => {
     );
   };
 
+ const applyCoupon = (couponObj) => {
+  if (!couponObj || (!couponObj.isPermanent && new Date(couponObj.expiryDate) < new Date())) {
+    toast("Invalid or expired coupon");
+    return;
+  }
+
+  let discount = 0;
+  let updatedCart = [...cartItems];
+
+  if (couponObj.discountType === "percentage") {
+    updatedCart = updatedCart.map((item) => ({
+      ...item,
+      currentPrice:
+        parseFloat(item.currentPrice) - (parseFloat(item.currentPrice) * couponObj.discountValue) / 100,
+    }));
+  } else if (couponObj.discountType === "flat") {
+    discount = couponObj.discountValue;
+    updatedCart = updatedCart.map((item) => ({
+      ...item,
+      currentPrice: Math.max(0, parseFloat(item.currentPrice) - discount),
+    }));
+  }
+
+  setCartItems(updatedCart);
+  setCoupon(couponObj);
+  toast(`Coupon ${couponObj.code} applied!`);
+};
+
   // Totals
   const totalItems = cartItems.reduce(
     (acc, item) => acc + (parseInt(item.quantity) || 0),
@@ -149,6 +180,9 @@ export const CartProvider = ({ children }) => {
         totalItems,
         totalPrice,
         setCartItems, // ✅ Export this for Buy Now
+           coupon,
+    discountAmount,
+    applyCoupon,
       }}
     >
       {children}

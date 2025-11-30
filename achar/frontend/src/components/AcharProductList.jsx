@@ -33,7 +33,6 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       });
       return map[weight] || basePrice;
     }
-
     return basePrice;
   };
 
@@ -45,7 +44,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (!selectedWeight) return toast.error("Please select weight");
 
     addToCart({
-      _id: product._id,
+       ...product,
       productName: product.productName,
       selectedWeight,
       quantity: 1,
@@ -81,7 +80,6 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       onMouseLeave={() => setHovered(false)}
       style={{ fontFamily: "Inter" }}
     >
-      {/* IMAGE */}
       <div className="relative h-[260px] overflow-hidden rounded-t-2xl bg-gray-50">
         <img
           src={product.productImages?.[0]}
@@ -125,19 +123,16 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
         )}
       </div>
 
-      {/* DETAILS */}
       <div className="px-4 py-4 flex flex-col h-full">
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-semibold text-[18px] text-gray-900 w-[72%] leading-tight line-clamp-2">
             {product.productName}
           </h3>
 
-          {/* ⭐ UPDATED PRICE BLOCK */}
           <div className="flex flex-col items-end -mt-1">
             <p className="text-[20px] font-bold text-gray-900 leading-none">
               ₹{selectedPrice}
             </p>
-
             {product.cutPrice && (
               <p className="text-sm text-gray-400 line-through leading-none mt-[2px]">
                 ₹{product.cutPrice}
@@ -146,7 +141,9 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mb-3">Bilona-made • Small batches</p>
+        <p className="text-sm text-gray-500 mb-3">
+          Bilona-made • Small batches
+        </p>
 
         <div className="flex items-center gap-1 mb-4">
           <span className="text-yellow-500 text-lg">★</span>
@@ -198,7 +195,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 };
 
 /* ---------------------------------------------------
-    SKELETON
+    SKELETON LOADER
 ----------------------------------------------------*/
 const AcharProductSkeleton = () => (
   <div className="min-w-[280px] bg-white rounded-2xl border shadow-sm animate-pulse">
@@ -231,8 +228,7 @@ const AcharProductList = () => {
         const defaults = {};
         items.forEach((p) => {
           if (p.pricePerGram) {
-            defaults[p._id] =
-              p.pricePerGram.split(",")[0].split("=")[0].trim();
+            defaults[p._id] = p.pricePerGram.split(",")[0].split("=")[0].trim();
           }
         });
 
@@ -249,6 +245,7 @@ const AcharProductList = () => {
 
   const scrollLeft = () =>
     sliderRef.current.scrollBy({ left: -300, behavior: "smooth" });
+
   const scrollRight = () =>
     sliderRef.current.scrollBy({ left: 300, behavior: "smooth" });
 
@@ -257,65 +254,65 @@ const AcharProductList = () => {
       <Toaster />
 
       {/* HERO + WAVE */}
-      <div className="relative w-full mb-10">
-        <div className="relative w-full h-[130px] sm:h-[80px] overflow-hidden">
+      <div className="relative w-full mb-6">
+        <div className="relative w-full h-[100px] sm:h-[120px] md:h-[140px] lg:h-[160px] overflow-hidden">
           <svg
             viewBox="0 0 1440 320"
             className="absolute inset-0 w-full h-full"
             preserveAspectRatio="none"
-            style={{ opacity: 0.35 }}
+            style={{ opacity: 0.4 }}
           >
             <path
               fill="#F7E1E1"
               d="M0,256L48,229.3C96,203,192,149,288,149.3C384,149,480,203,576,224C672,245,768,235,864,218.7C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
             ></path>
           </svg>
-
-          <div
-            className="absolute bottom-0 w-full h-[90px]"
-            style={{
-              backgroundImage:
-                "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1763637527/coe_achar_ysmiwo.jpg')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right bottom",
-            }}
-          ></div>
         </div>
 
-        <div className="absolute inset-0 flex items-center justify-between px-6">
-          <h2
+        {/* TITLE + IMAGE + BUTTON */}
+        <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-4 sm:gap-5">
+            <img
+              src="https://res.cloudinary.com/dtvihyts8/image/upload/v1764356460/Gemini_Generated_Image_r8u5ldr8u5ldr8u5-removebg-preview_1_zjsqje.png"
+              alt="Achar Icon"
+              className="
+          h-20 w-20
+          sm:h-24 sm:w-24
+          md:h-28 md:w-28
+          lg:h-32 lg:w-32
+          object-contain
+          transition-transform
+          duration-300
+          hover:scale-105
+        "
+            />
+
+            <h2
+              className="
+          text-2xl font-extrabold 
+          text-[#A74B4B]
+          sm:text-3xl
+          md:text-4xl
+        "
+              style={{ fontFamily: "Playfair Display" }}
+            >
+              Achar
+            </h2>
+          </div>
+
+          <button
             className="
-              text-3xl font-extrabold 
-              text-[#A74B4B]
-              sm:text-lg
-            "
-            style={{ fontFamily: "Playfair Display" }}
+        bg-[#BF5757] hover:bg-[#A94848]
+        text-white rounded-md font-semibold shadow-md
+        px-3 py-1 text-[10px]
+        sm:px-4 sm:py-1.5 sm:text-[12px]
+        md:px-5 md:py-2 md:text-[13px]
+        lg:px-6 lg:py-2 lg:text-[14px]
+        transition-all
+      "
           >
-            Achar
-          </h2>
-
-         <button
-  className="
-    bg-[#BF5757] hover:bg-[#A94848]
-    text-white rounded-md font-semibold shadow-md
-
-    /* Mobile (default) */
-    px-3 py-1 text-[10px]
-
-    /* Small Screen (sm ≥ 640px) */
-    sm:px-4 sm:py-1.5 sm:text-[11px]
-
-    /* Medium Screen (md ≥ 768px) */
-    md:px-5 md:py-2 md:text-[13px]
-
-    /* Large Screen (lg ≥ 1024px) */
-    lg:px-6 lg:py-2 lg:text-[14px]
-  "
->
-  Shop More
-</button>
-
+            Shop More
+          </button>
         </div>
       </div>
 

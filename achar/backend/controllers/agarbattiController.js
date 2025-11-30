@@ -4,7 +4,8 @@ import Category from "../models/Category.js";
 // -------------------- Create Agarbatti Product --------------------
 export const createAgarbattiProduct = async (req, res) => {
   try {
-    const { category: categoryId, packs, moreAboutProduct } = req.body;
+    const { category: categoryId, packs, moreAboutProduct,coupons  } = req.body;
+console.log("Processed request body before DB save:", JSON.stringify(req.body, null, 2));
 
     // Validate category
     const category = await Category.findById(categoryId);
@@ -36,6 +37,13 @@ export const createAgarbattiProduct = async (req, res) => {
     // 🔥 FIX: Ensure cut_price & current_price are numbers
     if (req.body.cut_price) req.body.cut_price = Number(req.body.cut_price);
     if (req.body.current_price) req.body.current_price = Number(req.body.current_price);
+    
+   if (coupons) {
+      if (!Array.isArray(coupons)) return res.status(400).json({ error: "Coupons must be an array" });
+      
+      // If objects are sent, store _id if exists, or value
+      req.body.coupons = coupons.map(c => c._id ? c._id : c);
+    }
 
     const product = await AgarbattiProduct.create(req.body);
     res.status(201).json(product);
@@ -229,5 +237,99 @@ export const getLowStockAgarbattiProducts = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+export const addCouponToAgarbattiProduct = async (req, res) => {
+  try {
+    const { id } = req.params; // product id
+    const { couponId } = req.body;
+
+    // Validate product
+    const product = await AgarbattiProduct.findById(id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // Validate coupon
+    const coupon = await Coupon.findById(couponId);
+    if (!coupon) return res.status(400).json({ error: "Invalid coupon ID" });
+
+    // Check if coupon already exists
+    const exists = product.coupons.includes(couponId);
+    if (exists) {
+      return res.status(400).json({ error: "Coupon already added" });
+    }
+
+    product.coupons.push(couponId);
+    await product.save();
+
+    res.status(200).json({
+      message: "Coupon added successfully",
+      product,
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+/* ----------------------------------------------------
+   UPDATE A SPECIFIC COUPON OF AGARBATTI
+-----------------------------------------------------*/
+export const updateCouponOfAgarbattiProduct = async (req, res) => {
+  try {
+    const { id, couponId } = req.params;
+
+    // Validate product
+    const product = await AgarbattiProduct.findById(id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // Validate coupon exists in product
+    const index = product.coupons.indexOf(couponId);
+    if (index === -1) {
+      return res.status(404).json({ error: "Coupon not found in product" });
+    }
+
+    // Update coupon details
+    const updatedCoupon = await Coupon.findByIdAndUpdate(
+      couponId,
+      req.body,
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Coupon updated successfully",
+      coupon: updatedCoupon,
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+/* ----------------------------------------------------
+   DELETE COUPON FROM AGARBATTI PRODUCT
+-----------------------------------------------------*/
+export const deleteCouponOfAgarbattiProduct = async (req, res) => {
+  try {
+    const { id, couponId } = req.params;
+
+    const product = await AgarbattiProduct.findById(id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // Remove coupon
+    product.coupons = product.coupons.filter(
+      (coupon) => coupon.toString() !== couponId
+    );
+
+    await product.save();
+
+    res.status(200).json({
+      message: "Coupon removed successfully",
+      product,
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

@@ -403,7 +403,7 @@ const OilProductDetail = () => {
                   </button>
 
                   <button onClick={handleBuyNow} disabled={isOutOfStock} className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${isOutOfStock ? "bg-gray-300 cursor-not-allowed" : "bg-yellow-400 hover:bg-yellow-500"}`}>
-                    {isOutOfStock ? "Out of Stock" : "💳 Buy Now"}
+                    {isOutOfStock ? "Out of Stock" : "💳 shop Now"}
                   </button>
                 </div>
 

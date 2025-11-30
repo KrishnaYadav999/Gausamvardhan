@@ -57,6 +57,7 @@ import GanpatiProductList from "./components/GanpatiProductList";
 import AboutUS from "./components/AboutUS";
 import Products from "./components/Products";
 import Developer from "./components/Developer";
+import HomeCertificates from "./components/HomeCertificates";
 // import CupCategoryProduct from "./components/CupCategoryProduct";
 // import CupDetail from "./components/CupDetail";
 // import CupProductList from "./components/CupProductList";
@@ -175,6 +176,7 @@ function App() {
               <ServicesNav />
               <MasalaProductList />
               <OilProductList />
+              <HomeCertificates />
               <VideoAdvertiseList />
             </div>
           }

@@ -22,6 +22,46 @@ export default function AdminGanpatiCreate() {
     reviews: [{ name: "", rating: "", comment: "", images: [] }], // FIXED
     moreAboutProduct: { name: "", description: "", images: [] }, // FIXED
   });
+  // ---------------- Coupon State ----------------
+const [couponCode, setCouponCode] = useState("");
+const [coupons, setCoupons] = useState([]);
+const [discountType, setDiscountType] = useState("percentage");
+const [discountValue, setDiscountValue] = useState("");
+const [isPermanent, setIsPermanent] = useState(false);
+const [expiryDate, setExpiryDate] = useState("");
+const [usageLimit, setUsageLimit] = useState("");
+const [isActive, setIsActive] = useState(true);
+
+// ---------------- Add Coupon ----------------
+const addCoupon = () => {
+  if (!couponCode || !discountValue) {
+    return alert("Coupon code and discount value required");
+  }
+
+  const newCoupon = {
+    code: couponCode,
+    discountType,
+    discountValue: Number(discountValue),
+    isPermanent,
+    expiryDate: isPermanent ? null : expiryDate,
+    usageLimit: usageLimit ? Number(usageLimit) : null,
+    usedCount: 0,
+    isActive,
+  };
+
+  setCoupons([...coupons, newCoupon]);
+
+  // Reset the form fields
+  setCouponCode("");
+  setDiscountType("percentage");
+  setDiscountValue("");
+  setIsPermanent(false);
+  setExpiryDate("");
+  setUsageLimit("");
+  setIsActive(true);
+};
+
+
 
   // ---------------- Fetch Categories ----------------
   useEffect(() => {
@@ -179,6 +219,7 @@ export default function AdminGanpatiCreate() {
         ), // FIXED GOOD FILTER
         
       },
+          coupons: coupons.length > 0 ? coupons : null,
     };
 
     try {
@@ -596,6 +637,91 @@ current_price: "",
             In Stock
           </label>
         </div>
+{/* ---------------- COUPON ---------------- */}
+
+<div className="border p-4 rounded-lg mb-4">
+  <h3 className="font-semibold mb-2">Add Coupons</h3>
+
+  <input
+    type="text"
+    placeholder="Coupon Code"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value)}
+    className="w-full p-2 border rounded-lg mb-2"
+  />
+
+  <select
+    value={discountType}
+    onChange={(e) => setDiscountType(e.target.value)}
+    className="w-full p-2 border rounded-lg mb-2"
+  >
+    <option value="percentage">Percentage (%)</option>
+    <option value="flat">Flat Amount (₹)</option>
+  </select>
+
+  <input
+    type="number"
+    placeholder="Discount Value"
+    value={discountValue}
+    onChange={(e) => setDiscountValue(e.target.value)}
+    className="w-full p-2 border rounded-lg mb-2"
+  />
+
+  <div className="flex items-center gap-2 mb-2">
+    <input
+      type="checkbox"
+      checked={isPermanent}
+      onChange={(e) => setIsPermanent(e.target.checked)}
+    />
+    <label>Permanent Coupon (No Expiry)</label>
+  </div>
+
+  {!isPermanent && (
+    <input
+      type="date"
+      value={expiryDate}
+      onChange={(e) => setExpiryDate(e.target.value)}
+      className="w-full p-2 border rounded-lg mb-2"
+    />
+  )}
+
+  <input
+    type="number"
+    placeholder="Usage Limit (optional)"
+    value={usageLimit}
+    onChange={(e) => setUsageLimit(e.target.value)}
+    className="w-full p-2 border rounded-lg mb-2"
+  />
+
+  <div className="flex items-center gap-2 mb-3">
+    <input
+      type="checkbox"
+      checked={isActive}
+      onChange={(e) => setIsActive(e.target.checked)}
+    />
+    <label>Active</label>
+  </div>
+
+  <button
+    type="button"
+    onClick={addCoupon}
+    className="bg-purple-600 text-white px-3 py-2 rounded w-full"
+  >
+    Add Coupon
+  </button>
+
+  {/* Preview */}
+{coupons.length > 0 && (
+  <ul className="mt-3 text-sm">
+    {coupons.map((c, idx) => (
+      <li key={idx} className="border-b py-1">
+        <strong>{c.code}</strong> - {c.discountType} - {c.discountValue}
+      </li>
+    ))}
+  </ul>
+)}
+
+</div>
 
         <button
           type="submit"

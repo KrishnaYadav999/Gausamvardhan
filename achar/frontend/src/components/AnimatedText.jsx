@@ -1,100 +1,68 @@
 // AnimatedText.jsx
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { FaGift } from "react-icons/fa";
 
 const texts = [
-  "Gausamvardhan – Premium Achar crafted with traditional recipes.",
-  "Taste the purity of homemade-style Achar, made from natural ingredients.",
-  "Gausamvardhan Ghee – Authentic, rich, and 100% pure for your family.",
-  "Experience real Indian goodness with our traditionally churned Ghee.",
-  "Our Masala blends – Fresh, aromatic, and crafted to enhance every dish.",
-  "Bring home spices that add real flavor and fragrance to your cooking.",
-  "Gausamvardhan Oils – Light, healthy, and naturally refined.",
-  "Cook healthier meals with our pure and balanced cooking oils.",
-  "Agarbatti – Natural fragrance for peace, purity, and a calm home.",
-  "Handmade Agarbatti crafted with pure natural extracts.",
-  "Ganpati Bappa Idols – Beautifully crafted from natural materials.",
-  "Bring home divine blessings with eco-friendly Ganpati idols."
+  { icon: <FaGift />, text: "New customers save 10% with code GET10!" },
+  { icon: <FaGift />, text: "Trending now: Free shipping on orders over $50!" },
+  { icon: <FaGift />, text: "Exclusive deals for a limited time only!" },
 ];
 
 const AnimatedText = () => {
-  const textRefs = useRef([]);
   const containerRef = useRef(null);
+  const textWrapperRef = useRef(null);
+  const tweenRef = useRef(null); // Store GSAP instance
 
   useEffect(() => {
-    // Background animation
-    gsap.to(containerRef.current, {
-      background: "linear-gradient(90deg, #2F8F68, #4DB47F, #2F8F68)",
-      backgroundSize: "300% 300%",
-      duration: 8,
-      repeat: -1,
-      ease: "power1.inOut",
-    });
+    const wrapper = textWrapperRef.current;
+    const totalWidth = wrapper.scrollWidth;
 
-    const tl = gsap.timeline({ repeat: -1 });
+    // Create GSAP animation and store it in ref
+    tweenRef.current = gsap.fromTo(
+      wrapper,
+      { x: 0 },
+      {
+        x: -totalWidth / 2,
+        duration: 25,
+        repeat: -1,
+        ease: "linear",
+      }
+    );
 
-    textRefs.current.forEach((el) => {
-      if (!el) return;
-
-      const letters = el.textContent.split("");
-      el.textContent = "";
-
-      letters.forEach((letter) => {
-        const span = document.createElement("span");
-        span.textContent = letter;
-        span.style.display = "inline-block";
-        el.appendChild(span);
-      });
-
-      tl.fromTo(
-        el.querySelectorAll("span"),
-        { opacity: 0, y: 6, filter: "blur(3px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0)",
-          stagger: 0.025,
-          duration: 0.25,
-          ease: "power2.out",
-        }
-      ).to(el, {
-        opacity: 0,
-        y: -6,
-        filter: "blur(3px)",
-        duration: 0.45,
-        delay: 1.15,
-        ease: "power1.inOut",
-      });
-    });
+    // Cleanup on unmount
+    return () => tweenRef.current.kill();
   }, []);
+
+  // Pause/play on hover
+  const handleMouseEnter = () => tweenRef.current.pause();
+  const handleMouseLeave = () => tweenRef.current.play();
 
   return (
     <div
       ref={containerRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="
-        relative p-3 border border-green-700 shadow-md overflow-hidden 
-        h-[52px] flex items-center justify-center
-        sm:h-[64px]     /* mobile height */
+        relative overflow-hidden border border-green-700 h-[52px] flex items-center
+        sm:h-[64px] bg-gradient-to-r from-[#328E6E] via-[#67AE6E] to-[#328E6E]
+        text-white font-semibold text-[12px] sm:text-[14px] px-4 
       "
-      style={{
-        background: "linear-gradient(90deg, #328E6E, #67AE6E, #328E6E)",
-        backgroundSize: "300% 300%",
-      }}
     >
-      {texts.map((text, index) => (
-        <p
-          key={index}
-          ref={(el) => (textRefs.current[index] = el)}
-          className="
-            absolute text-white 
-            text-[10px] sm:text-[12px] md:text-[14px] 
-            font-semibold tracking-wide text-center 
-            drop-shadow-lg px-2
-          "
-        >
-          {text}
-        </p>
-      ))}
+      <div ref={textWrapperRef} className="flex whitespace-nowrap gap-x-8 items-center">
+        {texts.map((item, index) => (
+          <span key={index} className="flex items-center gap-2">
+            {item.icon}
+            {item.text}
+          </span>
+        ))}
+        {texts.map((item, index) => (
+          <span key={`dup-${index}`} className="flex items-center gap-2">
+            {item.icon}
+            {item.text}
+          </span>
+        ))}
+      </div>
     </div>
   );
 };

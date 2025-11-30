@@ -32,6 +32,23 @@ const moreAboutProductSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const couponSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, trim: true },
+    discountType: {
+      type: String,
+      enum: ["percentage", "flat"],
+      required: true,
+    },
+    discountValue: { type: Number, required: true },
+    isPermanent: { type: Boolean, default: false },
+    expiryDate: { type: Date, default: null },
+    usageLimit: { type: Number, default: null },
+    usedCount: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
+  },
+  { _id: false }
+);
 const agarbattiProductSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -59,7 +76,7 @@ current_price: { type: Number, required: false },
 
     images: { type: [String], default: [] },
     reviews: [reviewSchema],
-
+coupons: [couponSchema],
     videoUrl: { type: String, default: "" },
 
     // ⭐ Your NEW FIELD added here

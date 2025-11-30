@@ -183,3 +183,70 @@ export const getLowStockGheeProducts = async (req, res) => {
 };
 
 
+export const addCouponToGheeProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const couponData = req.body;
+
+    const product = await GheeProduct.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    product.coupons.push(couponData);
+    await product.save();
+
+    res.status(201).json({
+      message: "🎉 Coupon added successfully!",
+      coupons: product.coupons,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const updateCouponOfGheeProduct = async (req, res) => {
+  try {
+    const { id, couponId } = req.params;
+    const updateData = req.body;
+
+    const product = await GheeProduct.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const coupon = product.coupons.id(couponId);
+    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
+
+    Object.assign(coupon, updateData);
+
+    await product.save();
+
+    res.json({
+      message: "🔄 Coupon updated successfully",
+      coupons: product.coupons,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const deleteCouponOfGheeProduct = async (req, res) => {
+  try {
+    const { id, couponId } = req.params;
+
+    const product = await GheeProduct.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const coupon = product.coupons.id(couponId);
+    if (!coupon) return res.status(404).json({ message: "Coupon not found" });
+
+    coupon.remove();
+    await product.save();
+
+    res.json({
+      message: "🗑️ Coupon deleted successfully",
+      coupons: product.coupons,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

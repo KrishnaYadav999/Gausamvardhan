@@ -22,6 +22,34 @@ const moreAboutProductSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const couponSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, trim: true },
+
+    discountType: {
+      type: String,
+      enum: ["percentage", "flat"],
+      required: true,
+    },
+
+    discountValue: { type: Number, required: true },
+
+    // expiry / permanent
+    isPermanent: { type: Boolean, default: false },
+
+    expiryDate: { type: Date, default: null },
+
+    // max usage limit
+    usageLimit: { type: Number, default: null },
+
+    // how many used
+    usedCount: { type: Number, default: 0 },
+
+    isActive: { type: Boolean, default: true },
+  },
+  { _id: false }
+);
+
 // ---------------- Ghee Product Schema ----------------
 const gheeProductSchema = new mongoose.Schema(
   {
@@ -41,7 +69,7 @@ const gheeProductSchema = new mongoose.Schema(
  stockQuantity: { type: Number, default: 0 },
     // ✅ Reviews array
     reviews: [reviewSchema],
-
+coupons: [couponSchema],
     // ✅ New Fields
     videoUrl: { type: String },                  // single video url
     moreAboutProduct: [moreAboutProductSchema],  // array of { image, description }

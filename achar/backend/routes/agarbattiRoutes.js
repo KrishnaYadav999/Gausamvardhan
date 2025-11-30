@@ -11,6 +11,9 @@ import {
   getSimilarAgarbattiProducts,
   searchAgarbattiProducts,
   getLowStockAgarbattiProducts,
+  addCouponToAgarbattiProduct,
+  updateCouponOfAgarbattiProduct,
+  deleteCouponOfAgarbattiProduct,
 } from "../controllers/agarbattiController.js";
 
 const router = express.Router();
@@ -40,4 +43,11 @@ router.get("/search/:query", searchAgarbattiProducts);
 // ---------------- Low Stock ----------------
 router.get("/low-stock/list", getLowStockAgarbattiProducts);
 
+router.post("/:id/coupon", addCouponToAgarbattiProduct);
+
+// Update coupon
+router.put("/:id/coupon/:couponId", updateCouponOfAgarbattiProduct);
+
+// Delete coupon
+router.delete("/:id/coupon/:couponId", deleteCouponOfAgarbattiProduct);
 export default router;

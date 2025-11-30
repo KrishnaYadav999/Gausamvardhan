@@ -25,6 +25,34 @@ const moreAboutProductSchema = new mongoose.Schema({
   description: { type: String }, // description text
 }, { _id: false }); // optional, no separate _id for each item
 
+const couponSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, trim: true },
+
+    discountType: {
+      type: String,
+      enum: ["percentage", "flat"],
+      required: true,
+    },
+
+    discountValue: { type: Number, required: true },
+
+    // expiry / permanent
+    isPermanent: { type: Boolean, default: false },
+
+    expiryDate: { type: Date, default: null },
+
+    // coupon allowed for how many times (optional)
+    usageLimit: { type: Number, default: null },
+
+    // how many times users used already
+    usedCount: { type: Number, default: 0 },
+
+    isActive: { type: Boolean, default: true },
+  },
+  { _id: false }
+);
+
 // ---------------- Product Schema ----------------
 const productSchema = new mongoose.Schema(
   {
@@ -57,7 +85,7 @@ const productSchema = new mongoose.Schema(
 
     // ✅ More About Product array
     moreAboutProduct: [moreAboutProductSchema],
-
+ coupons: [couponSchema],
     // Relation with Category
     category: {
       type: mongoose.Schema.Types.ObjectId,

@@ -25,6 +25,16 @@ const AdminProductCreate = () => {
      stockQuantity: 0, 
     category: "",
     reviews: [],
+    coupons: [
+  {
+    code: "",
+    discountType: "percentage",
+    discountValue: "",
+    isPermanent: false,
+    expiryDate: "",
+    usageLimit: "",
+  },
+],
     
   });
 
@@ -89,6 +99,38 @@ const AdminProductCreate = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+// Handle Coupon Change
+const handleCouponChange = (index, field, value) => {
+  const updated = [...formData.coupons];
+  updated[index][field] = value;
+  setFormData((prev) => ({ ...prev, coupons: updated }));
+};
+
+// Add Coupon
+const addCoupon = () => {
+  setFormData((prev) => ({
+    ...prev,
+    coupons: [
+      ...prev.coupons,
+      {
+        code: "",
+        discountType: "percentage",
+        discountValue: "",
+        isPermanent: false,
+        expiryDate: "",
+        usageLimit: "",
+      },
+    ],
+  }));
+};
+
+// Remove Coupon
+const removeCoupon = (index) => {
+  setFormData((prev) => ({
+    ...prev,
+    coupons: prev.coupons.filter((_, i) => i !== index),
+  }));
+};
 
   // Dynamic Product Images
   const handleProductImageChange = (index, value) => {
@@ -562,6 +604,93 @@ const AdminProductCreate = () => {
         >
           Create Product
         </button>
+        <div>
+          {/* COUPONS SECTION */}
+<h3 className="text-xl font-bold mt-6">Coupons</h3>
+
+{formData.coupons.map((coupon, idx) => (
+  <div key={idx} className="border p-4 rounded mb-3">
+  
+    <input
+      type="text"
+      placeholder="Coupon Code"
+      value={coupon.code}
+      onChange={(e) => handleCouponChange(idx, "code", e.target.value)}
+      className="w-full border px-3 py-2 rounded mb-2"
+    />
+
+    <select
+      value={coupon.discountType}
+      onChange={(e) => handleCouponChange(idx, "discountType", e.target.value)}
+      className="w-full border px-3 py-2 rounded mb-2"
+    >
+      <option value="percentage">Percentage</option>
+      <option value="flat">Flat</option>
+    </select>
+
+    <input
+      type="number"
+      placeholder="Discount Value"
+      value={coupon.discountValue}
+      onChange={(e) =>
+        handleCouponChange(idx, "discountValue", e.target.value)
+      }
+      className="w-full border px-3 py-2 rounded mb-2"
+    />
+
+    {/* PERMANENT CHECKBOX */}
+    <label className="flex items-center gap-2 mb-2">
+      <input
+        type="checkbox"
+        checked={coupon.isPermanent}
+        onChange={(e) =>
+          handleCouponChange(idx, "isPermanent", e.target.checked)
+        }
+      />
+      Permanent Coupon (No Expiry)
+    </label>
+
+    {/* EXPIRY DATE only if not permanent */}
+    {!coupon.isPermanent && (
+      <input
+        type="date"
+        value={coupon.expiryDate}
+        onChange={(e) =>
+          handleCouponChange(idx, "expiryDate", e.target.value)
+        }
+        className="w-full border px-3 py-2 rounded mb-2"
+      />
+    )}
+
+    <input
+      type="number"
+      placeholder="Usage Limit (optional)"
+      value={coupon.usageLimit}
+      onChange={(e) =>
+        handleCouponChange(idx, "usageLimit", e.target.value)
+      }
+      className="w-full border px-3 py-2 rounded mb-2"
+    />
+
+    <button
+      type="button"
+      onClick={() => removeCoupon(idx)}
+      className="bg-red-500 text-white px-3 py-1 rounded"
+    >
+      Remove Coupon
+    </button>
+  </div>
+))}
+
+<button
+  type="button"
+  onClick={addCoupon}
+  className="bg-blue-500 text-white px-4 py-2 rounded"
+>
+  Add Coupon
+</button>
+
+        </div>
       </form>
     </div>
   );
