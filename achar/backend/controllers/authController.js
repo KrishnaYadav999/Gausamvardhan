@@ -64,35 +64,46 @@ export const login = async (req, res) => {
 export const requestOtp = async (req, res) => {
   try {
     const { email } = req.body;
+
     let user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    if (!user)
+      return res.status(404).json({ msg: "User not found" });
 
     const otp = generateOtp();
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000;
     await user.save();
 
-    await sendEmail(email, "Your OTP Code", `Your OTP is ${otp}`);
+    await sendEmail(email, "Your Login OTP", `Your OTP is: ${otp}`);
+
     res.json({ msg: "OTP sent to email" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+
 // ✅ Verify OTP
 export const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    let user = await User.findOne({ email });
-    if (!user || user.otp !== otp || Date.now() > user.otpExpires)
-      return res.status(400).json({ msg: "Invalid or expired OTP" });
+    const user = await User.findOne({ email });
+
+    if (!user || user.otp !== otp)
+      return res.status(400).json({ msg: "Invalid OTP" });
+
+    if (Date.now() > user.otpExpires)
+      return res.status(400).json({ msg: "OTP expired" });
 
     user.otp = null;
     user.otpExpires = null;
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d"
+    });
 
+    // Set cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -101,7 +112,7 @@ export const verifyOtp = async (req, res) => {
     });
 
     res.json({
-      msg: "OTP verified, login successful",
+      msg: "OTP verified successfully",
       token,
       user: {
         id: user._id,
@@ -113,6 +124,7 @@ export const verifyOtp = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // ✅ Logout
 export const logout = async (req, res) => {

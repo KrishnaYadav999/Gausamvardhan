@@ -144,13 +144,14 @@ else if (ganpati) p.productType = "GanpatiProduct";
 
     if (!razorpayOrder?.id)
       throw new Error("Failed to create Razorpay order. Please try again.");
-
+const customerEmail = req.body.email || shippingAddress?.email || null;
     // 🧠 Save in DB
     const newOrder = await Order.create({
       orderNumber,
       invoiceNumber,
       serialNumber,
       user: userId,
+      userEmail: customerEmail,  
       products,
       totalAmount,
       shippingAddress,
@@ -252,11 +253,13 @@ export const verifyPayment = async (req, res) => {
       }
     }
 
+    console.log("💌 Sending payment success mail to:", order.user?.email || order.userEmail);
+
     // -------------------------------------
     // 📩 Send Payment SUCCESS Email
     // -------------------------------------
     await sendPaymentSuccessMail(
-      order.user.email,
+        order.user?.email || order.userEmail, 
       order.user.name,
       order._id,
       order.totalAmount

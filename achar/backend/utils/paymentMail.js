@@ -4,20 +4,25 @@ import nodemailer from "nodemailer";
 // 📩 BASE MAIL SENDER
 // ============================================
 export const sendPaymentMail = async (to, subject, htmlMessage) => {
-   console.log("📨 Creating transporter...");
   try {
-    const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    console.log("📨 Creating transporter...");
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false, // port 587 requires secure false
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false, // Brevo requires TLS
+  },
+});
+
 
     await transporter.sendMail({
-      from: `"GausamVardhan" <${process.env.EMAIL_USER}>`,
+    from: `"GausamVardhan" <${process.env.FROM_EMAIL || process.env.EMAIL_USER}>`,
       to,
       subject,
       html: htmlMessage,
@@ -59,8 +64,8 @@ export const cancelledOrderTemplate = (name, orderId) => `
   <p>Hello ${name},</p>
   <p>Your order has been <b>successfully cancelled</b>.</p>
   <p><b>Order ID:</b> ${orderId}</p>
-  <p>If payment was deducted, refund will be processed as per the policy.</p>
-  <p>Feel free to place a new order anytime.</p>
+  <p>If payment was deducted, refund will be processed as per policy.</p>
+  <p>You can place a new order anytime.</p>
 `;
 
 // ============================================
@@ -72,10 +77,10 @@ export const sendPaymentSuccessMail = async (email, name, orderId, amount) => {
 };
 
 // ============================================
-// 📤 SEND FAILED MAIL
+// 📤 SEND FAILED MAIL (FIXED BUG)
 // ============================================
-export const sendPaymentFailedMail = async (email, reason) => {
-  const html = failedOrderTemplate(email, reason);
+export const sendPaymentFailedMail = async (email, name, reason) => {
+  const html = failedOrderTemplate(name, reason);  // FIXED!
   await sendPaymentMail(email, "Payment Failed - Please Try Again", html);
 };
 

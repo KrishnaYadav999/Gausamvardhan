@@ -7,6 +7,10 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+userEmail: {
+  type: String,
+  required: false,
+},
 
     // Add orderNumber here
     orderNumber: {
