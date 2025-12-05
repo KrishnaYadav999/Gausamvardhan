@@ -299,10 +299,10 @@ const AcharProductDetail = () => {
 
                 <div className="absolute right-6 bottom-6 bg-white/90 border rounded-lg p-3 text-sm shadow">
                   <div className="font-semibold">
-                    {product.brand || "Rosier"}
+                    {product.brand || "Gausamvardhan"}
                   </div>
                   <div className="text-xs text-gray-600">
-                    Made with A2 Gir Cow Ghee
+                    India's Best Pickle
                   </div>
                 </div>
 

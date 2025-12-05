@@ -9,14 +9,14 @@ export const sendPaymentMail = async (to, subject, htmlMessage) => {
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false, // port 587 requires secure false
+  port: 2525,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
-    rejectUnauthorized: false, // Brevo requires TLS
+    rejectUnauthorized: false,
   },
 });
 

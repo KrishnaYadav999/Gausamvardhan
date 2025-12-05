@@ -1,4 +1,3 @@
-// Category.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -34,8 +33,6 @@ const Category = () => {
   const [displayNames, setDisplayNames] = useState({});
   const [fadeState, setFadeState] = useState({});
   const [heading, setHeading] = useState("Categories");
-  const [headingFade, setHeadingFade] = useState(true);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,7 +58,7 @@ const Category = () => {
     fetchCategories();
   }, []);
 
-  // Hindi-English rotating names
+  // Toggle Hindi / English
   useEffect(() => {
     if (!categories.length) return;
 
@@ -93,9 +90,8 @@ const Category = () => {
     return () => clearInterval(interval);
   }, [categories, displayNames]);
 
-  // Heading stays English only
   useEffect(() => {
-    setHeading("Categories");
+    setHeading("SHOP BY CATEGORY");
   }, []);
 
   const handleCategoryClick = (cat) => {
@@ -112,48 +108,69 @@ const Category = () => {
   return (
     <div className="px-4 py-10 font-[Poppins] flex flex-col items-center">
 
-      {/* Heading English Only */}
-      <h2
-        className={`text-2xl sm:text-3xl font-bold text-green-700 mb-8 text-center transition-all duration-500 
-        ${headingFade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
-      >
+      {/* Heading */}
+      <h2 className="text-2xl sm:text-3xl font-bold text-green-700 mb-8 text-center">
         {heading}
       </h2>
 
-      {/* Category Wrapper */}
+      {/* Mobile + Desktop Horizontal Scroll Centered */}
       <div className="w-full flex justify-center">
-        <div className="flex gap-10 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 justify-center">
+        <div
+          className="
+            flex 
+            gap-6 
+            overflow-x-auto 
+            no-scrollbar 
+            snap-x snap-mandatory 
+            pb-4 
+            w-full
 
+            /* DESKTOP FIX: KEEP ALL IN ONE ROW, CENTER */
+            md:justify-center
+            md:flex-nowrap
+            md:overflow-x-auto
+          "
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {categories.map((cat) => (
             <div
               key={cat._id}
               onClick={() => handleCategoryClick(cat)}
-              className="flex flex-col items-center cursor-pointer snap-start group"
+              className="flex flex-col items-center cursor-pointer snap-start min-w-[110px] md:min-w-[140px]"
             >
-              {/* Circle Image */}
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden shadow-md bg-white 
-                hover:scale-105 hover:shadow-xl transition-all duration-500 flex items-center justify-center shrink-0">
+              {/* Image */}
+              <div
+                className="
+                  w-24 h-24 
+                  sm:w-28 sm:h-28 
+                  md:w-32 md:h-32
+                  rounded-full 
+                  overflow-hidden 
+                  bg-white 
+                  flex items-center justify-center
+                  transition-all duration-500
+                "
+              >
                 <img
-                  src={cat.image || "https://via.placeholder.com/300"}
+                  src={cat.image || 'https://via.placeholder.com/300'}
+                  className="w-full h-full object-cover"
                   alt={cat.name}
-                  className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
                 />
               </div>
 
-              {/* Category Name */}
+              {/* Text */}
               <p
-                className={`text-[#25421C] font-semibold text-sm sm:text-base mt-3 text-center transition-all duration-500
-                  ${
-                    fadeState[cat._id]
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-2"
-                  }`}
+                className={`text-[#25421C] font-semibold text-sm sm:text-base mt-2 text-center transition-all duration-300
+                ${
+                  fadeState[cat._id]
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-2"
+                }`}
               >
                 {displayNames[cat._id]}
               </p>
             </div>
           ))}
-
         </div>
       </div>
     </div>

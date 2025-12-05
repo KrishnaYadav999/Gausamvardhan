@@ -14,17 +14,47 @@ const certificates = [
 
 export default function HomeCertificates() {
   return (
-    <section className="py-16">
+    <section className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-green-800 mb-12">
+        <h2 className="text-3xl font-bold text-center text-green-800 mb-10">
           Our Certificates
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+
+        {/* MOBILE SLIDER (centered) */}
+        <div className="block md:hidden overflow-x-auto pb-2">
+          <div className="flex gap-3 w-max mx-auto">
+            {certificates.map((c, i) => (
+              <div
+                key={i}
+                className="min-w-[95px] h-[95px] rounded-lg p-1 flex items-center justify-center"
+              >
+                <img
+                  src={c.img}
+                  className="w-[75px] h-[75px] object-contain"
+                  alt="certificate"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* TABLET VIEW - CENTERED GRID */}
+        <div className="hidden sm:grid md:hidden grid-cols-3 gap-6 place-items-center">
           {certificates.map((certificate, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-xl transform transition duration-300 "
-            >
+            <div key={index} className="p-2 rounded-lg flex justify-center">
+              <img
+                src={certificate.img}
+                alt={`Certificate ${index + 1}`}
+                className="w-[120px] h-[120px] object-contain"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* DESKTOP GRID - CENTERED */}
+        <div className="hidden md:grid grid-cols-3 gap-8 place-items-center">
+          {certificates.map((certificate, index) => (
+            <div key={index} className="rounded-xl flex justify-center">
               <img
                 src={certificate.img}
                 alt={`Certificate ${index + 1}`}

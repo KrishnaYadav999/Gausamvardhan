@@ -19,15 +19,12 @@ const searchItems = [
 ];
 
 const menuItems = [
-  { title: "Ghee", icon: "/icons/ghee.png" },
-  { title: "Oil", icon: "/icons/oil.png" },
-  { title: "Atta", icon: "/icons/atta.png" },
-  { title: "Jaggery", icon: "/icons/jaggery.png" },
-  { title: "Immunity", icon: "/icons/immunity.png" },
-  { title: "Rice", icon: "/icons/rice.png" },
-  { title: "Breakfast & Snacks", icon: "/icons/snacks.png" },
-  { title: "Grain & Pulses", icon: "/icons/grains.png" },
-  { title: "Spices", icon: "/icons/spices.png" },
+  { title: "achar", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-06.png?v=1753598784&width=360" },
+  { title: "Ghee", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-03.png?v=1753598766" },
+  { title: "Masala", icon: "https://i.pinimg.com/736x/a3/fe/cd/a3fecda6516301b910738bac76c9e209.jpg" },
+  { title: "OIL", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-05.png?v=1753598779" },
+  { title: "Ganpati", icon: "https://i.pinimg.com/1200x/53/fd/bd/53fdbd0797322c9a2280321b51cd5548.jpg" },
+  { title: "PoojaEssentials", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-01.png?v=1753598791&width=360" },
 ];
 
 const Navbar = () => {
@@ -46,6 +43,21 @@ const Navbar = () => {
   const mobileInputRef = useRef(null);
   const dropdownRef = useRef(null);
 
+  const categoryRoutes = {
+  Achar: "/achar-category/achar",
+  Ghee: "/ghee/ghee",
+  Masala: "/masala-category/masala",
+  OIL: "/oil/category/oil",
+  Ganpati: "/ganpati-category/ganpati",
+  PoojaEssentials: "/agarbatti-category/pooja-essentials",
+  
+};
+
+const handleMenuRedirect = (item) => {
+  setMobileMenu(false);
+  const url = categoryRoutes[item.title];
+  if (url) navigate(url);
+};
   /** Drawer Animation */
   useEffect(() => {
     if (!drawerRef.current) return;
@@ -306,41 +318,53 @@ const Navbar = () => {
       </nav>
 
       {/* MOBILE DRAWER */}
+    {/* MOBILE DRAWER */}
+<div
+  ref={drawerRef}
+  className="fixed top-0 left-0 w-[80%] h-full bg-white shadow-xl z-[9999] p-6 -translate-x-full"
+>
+  <button
+    onClick={() => setMobileMenu(false)}
+    className="absolute top-4 right-4 text-xl text-gray-400"
+  >
+    <FaTimes />
+  </button>
+
+  <h2 className="text-lg font-bold mb-6 text-[#008031]">
+    All Categories
+  </h2>
+
+  <div className="grid grid-cols-2 gap-6">
+    {menuItems.map((item, index) => (
       <div
-        ref={drawerRef}
-        className="fixed top-0 left-0 w-[80%] h-full bg-white shadow-xl z-[9999] p-6 -translate-x-full"
+        key={index}
+        onClick={() => handleMenuRedirect(item)}
+        className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
       >
-        <button
-          onClick={() => setMobileMenu(false)}
-          className="absolute top-4 right-4 text-xl text-gray-400"
-        >
-          <FaTimes />
-        </button>
-
-        <h2 className="text-lg font-bold mb-6 text-[#008031]">
-          All Categories
-        </h2>
-
-        <div className="grid grid-cols-2 gap-6">
-          {menuItems.map((item, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center cursor-pointer"
-            >
-              <img src={item.icon} className="w-12 mb-2" alt={item.title} />
-              <p className="text-sm font-medium text-gray-700 text-center">
-                {item.title}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* SIGN IN REMOVED COMPLETELY FROM DRAWER */}
-
-        <div className="mt-6 text-[#008031] font-semibold cursor-pointer">
-          SHOP ALL →
-        </div>
+        <img
+          src={item.icon}
+          className="w-12 h-12 object-contain mb-2"
+          alt={item.title}
+        />
+        <p className="text-sm font-medium text-gray-700 text-center">
+          {item.title}
+        </p>
       </div>
+    ))}
+  </div>
+
+  <div
+    onClick={() => {
+      setMobileMenu(false);
+      navigate("/all-products");
+    }}
+    className="mt-6 text-[#008031] font-semibold cursor-pointer"
+  >
+    SHOP ALL →
+  </div>
+</div>
+
+      
     </>
   );
 };

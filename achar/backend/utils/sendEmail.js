@@ -3,12 +3,12 @@ import nodemailer from "nodemailer";
 export default async function sendEmail(to, subject, text) {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,      // smtp-relay.brevo.com
-      port: Number(process.env.SMTP_PORT), // 587
+      host: process.env.SMTP_HOST,      
+      port: 2525,                       
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,  // 9d34…
-        pass: process.env.EMAIL_PASS   // xsmtpsib-...
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       },
       tls: {
         rejectUnauthorized: false
