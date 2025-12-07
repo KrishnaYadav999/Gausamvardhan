@@ -20,7 +20,7 @@ export default function HomeCertificates() {
           Our Certificates
         </h2>
 
-        {/* MOBILE SLIDER (centered) */}
+        {/* MOBILE SLIDER */}
         <div className="block md:hidden overflow-x-auto pb-2">
           <div className="flex gap-3 w-max mx-auto">
             {certificates.map((c, i) => (
@@ -38,7 +38,7 @@ export default function HomeCertificates() {
           </div>
         </div>
 
-        {/* TABLET VIEW - CENTERED GRID */}
+        {/* TABLET VIEW */}
         <div className="hidden sm:grid md:hidden grid-cols-3 gap-6 place-items-center">
           {certificates.map((certificate, index) => (
             <div key={index} className="p-2 rounded-lg flex justify-center">
@@ -51,14 +51,14 @@ export default function HomeCertificates() {
           ))}
         </div>
 
-        {/* DESKTOP GRID - CENTERED */}
+        {/* DESKTOP / LAPTOP VIEW - SMALLER SIZE */}
         <div className="hidden md:grid grid-cols-3 gap-8 place-items-center">
           {certificates.map((certificate, index) => (
             <div key={index} className="rounded-xl flex justify-center">
               <img
                 src={certificate.img}
                 alt={`Certificate ${index + 1}`}
-                className="w-full h-64 object-contain p-4"
+                className="w-[160px] h-[160px] object-contain p-2"
               />
             </div>
           ))}

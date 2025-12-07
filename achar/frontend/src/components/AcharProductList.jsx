@@ -261,12 +261,10 @@ const AcharProductList = () => {
       relative w-full 
       h-[120px] sm:h-[140px] md:h-[160px] lg:h-[170px]
       bg-cover bg-center
-      rounded-b-xl
-      shadow-md
     "
           style={{
             backgroundImage:
-              "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1764588639/33b5dd6c-b692-4370-a049-45316258f599.png')",
+              "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1765003639/Untitled_design_1_jcllwz.png')",
             backgroundPosition: "center top",
           }}
         ></div>
@@ -278,7 +276,7 @@ const AcharProductList = () => {
             <h2
               className="
           text-xl sm:text-2xl md:text-3xl lg:text-4xl 
-          font-extrabold text-white drop-shadow-lg
+          font-extrabold text-emerald-500 drop-shadow-lg
         "
               style={{ fontFamily: "Playfair Display" }}
             >

@@ -10,6 +10,7 @@ import MasalaProduct from "../models/MasalaProduct.js";
 import GheeProduct from "../models/GheeProduct.js";
 import AgarbattiProduct from "./../models/agarbattiModel.js"
 import GanpatiProduct from "../models/ganpatimodel.js"; 
+import { sendOrderToDelhivery } from "../utils/delhivery.js";
 import { sendPaymentSuccessMail,sendOrderCancelledMail, sendPaymentFailedMail } from "../utils/paymentMail.js";
 
 dotenv.config();
@@ -157,6 +158,19 @@ const customerEmail = req.body.email || shippingAddress?.email || null;
       shippingAddress,
       razorpayOrderId: razorpayOrder.id,
     });
+
+  try {
+      const delhiveryRes = await sendOrderToDelhivery(newOrder);
+
+      // Optional: store Delhivery response in order
+      newOrder.delhiveryResponse = delhiveryRes;
+      await newOrder.save();
+
+      console.log("✅ Delhivery response saved in order");
+    } catch (delhiveryErr) {
+      console.error("⚠ Delhivery failed, but order is safe:", delhiveryErr.message);
+      // Order is already saved, so even if Delhivery fails, no rollback
+    }
 
     console.log("✅ Order created:", newOrder._id);
 

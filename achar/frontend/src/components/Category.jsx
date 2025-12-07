@@ -58,7 +58,6 @@ const Category = () => {
     fetchCategories();
   }, []);
 
-  // Toggle Hindi / English
   useEffect(() => {
     if (!categories.length) return;
 
@@ -108,12 +107,29 @@ const Category = () => {
   return (
     <div className="px-4 py-10 font-[Poppins] flex flex-col items-center">
 
+      {/* 🔥 CSS FIX for unwanted scrolling lines / focus highlights */}
+      <style>
+        {`
+          * { outline: none !important; }
+          .no-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          .no-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .category-item:active,
+          .category-item:focus {
+            outline: none !important;
+          }
+        `}
+      </style>
+
       {/* Heading */}
       <h2 className="text-2xl sm:text-3xl font-bold text-green-700 mb-8 text-center">
         {heading}
       </h2>
 
-      {/* Mobile + Desktop Horizontal Scroll Centered */}
       <div className="w-full flex justify-center">
         <div
           className="
@@ -124,8 +140,6 @@ const Category = () => {
             snap-x snap-mandatory 
             pb-4 
             w-full
-
-            /* DESKTOP FIX: KEEP ALL IN ONE ROW, CENTER */
             md:justify-center
             md:flex-nowrap
             md:overflow-x-auto
@@ -136,9 +150,8 @@ const Category = () => {
             <div
               key={cat._id}
               onClick={() => handleCategoryClick(cat)}
-              className="flex flex-col items-center cursor-pointer snap-start min-w-[110px] md:min-w-[140px]"
+              className="category-item flex flex-col items-center cursor-pointer snap-start min-w-[110px] md:min-w-[140px]"
             >
-              {/* Image */}
               <div
                 className="
                   w-24 h-24 
@@ -158,14 +171,15 @@ const Category = () => {
                 />
               </div>
 
-              {/* Text */}
               <p
-                className={`text-[#25421C] font-semibold text-sm sm:text-base mt-2 text-center transition-all duration-300
-                ${
-                  fadeState[cat._id]
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-2"
-                }`}
+                className={`
+                  text-[#25421C] font-semibold text-sm sm:text-base mt-2 text-center transition-all duration-300
+                  ${
+                    fadeState[cat._id]
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-2"
+                  }
+                `}
               >
                 {displayNames[cat._id]}
               </p>
