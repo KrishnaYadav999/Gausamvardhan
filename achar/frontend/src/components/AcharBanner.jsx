@@ -3,8 +3,10 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BannerSkeleton = () => (
-  <div className="relative w-full overflow-hidden bg-gray-200 animate-pulse" style={{ paddingTop: "56.18%" }}></div>
-  // 56.18% ~ (2016/3586)*100 for your image ratio fallback
+  <div
+    className="relative w-full overflow-hidden bg-gray-200 animate-pulse"
+    style={{ paddingTop: "56.18%" }}
+  ></div>
 );
 
 const AcharBanner = () => {
@@ -15,10 +17,20 @@ const AcharBanner = () => {
 
   const containerRef = useRef(null);
 
+  // Fetch banner list once
   useEffect(() => {
     const fetchBanners = async () => {
+      const cached = localStorage.getItem("banners_cache");
+
+      if (cached) {
+        setBanners(JSON.parse(cached));
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data } = await axios.get("/api/banners");
+        localStorage.setItem("banners_cache", JSON.stringify(data));
         setBanners(data);
       } catch (error) {
         console.error("Failed to fetch banners:", error);
@@ -26,14 +38,17 @@ const AcharBanner = () => {
         setLoading(false);
       }
     };
+
     fetchBanners();
   }, []);
 
+  // Auto-switch banner images
   useEffect(() => {
-    if (banners.length === 0) return;
+    if (!banners.length) return;
 
     const interval = setInterval(() => {
       const images = banners[currentBannerIndex]?.images || [];
+
       if (images.length > 1) {
         setCurrentImageIndex((prev) => (prev + 1) % images.length);
       } else {
@@ -50,19 +65,13 @@ const AcharBanner = () => {
 
   const currentBanner = banners[currentBannerIndex];
   const images = currentBanner.images || [];
-  const currentImage = images[currentImageIndex] || "";
+  const currentImage = images[currentImageIndex];
 
-  // when image loads, set container padding-top to match image ratio
   const handleImageLoad = (e) => {
-    try {
-      const img = e.target;
-      const { naturalWidth, naturalHeight } = img;
-      if (naturalWidth && naturalHeight && containerRef.current) {
-        const ratioPercent = (naturalHeight / naturalWidth) * 100; // padding-top %
-        containerRef.current.style.paddingTop = `${ratioPercent}%`;
-      }
-    } catch (err) {
-      // ignore
+    const { naturalWidth, naturalHeight } = e.target;
+    if (containerRef.current && naturalWidth && naturalHeight) {
+      const ratioPercent = (naturalHeight / naturalWidth) * 100;
+      containerRef.current.style.paddingTop = `${ratioPercent}%`;
     }
   };
 
@@ -70,8 +79,7 @@ const AcharBanner = () => {
     <div
       ref={containerRef}
       className="relative w-full overflow-hidden bg-black"
-      // IMPORTANT: we don't set h-[] or aspect-[] here — we use padding-top dynamicaly
-      style={{ paddingTop: "56.18%" }} // fallback: your image ratio ~ (2016/3586)*100
+      style={{ paddingTop: "56.18%" }}
     >
       <AnimatePresence mode="wait">
         <motion.img
@@ -79,40 +87,24 @@ const AcharBanner = () => {
           src={currentImage}
           alt="banner"
           onLoad={handleImageLoad}
-          className="
-            absolute inset-0
-            w-full h-full
-            object-contain      /* ensures whole image visible, no crop */
-            bg-black
-          "
-          initial={{ opacity: 0, scale: 1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1 }}
-          transition={{ duration: 0.9, ease: "easeInOut" }}
+          className="absolute inset-0 w-full h-full object-contain bg-black"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
         />
       </AnimatePresence>
 
-      {/* Gradient Overlay */}
-      {/* <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/60 to-transparent"></div>
-
-      Button
-      <div className="absolute bottom-8 left-8 z-10">
-        <a href={currentBanner.buttonLink || "#"}>
-          <button className="bg-white text-black px-6 py-2 text-sm md:text-base font-semibold rounded-full shadow-md hover:bg-gray-100 transition">
-            {currentBanner.buttonText || "Shop Now"}
-          </button>
-        </a>
-      </div> */}
-
-      {/* Dots */}
-      <div className="absolute bottom-8 right-8 flex gap-3 z-10">
+      <div className="absolute bottom-6 right-8 flex gap-3 z-20">
         {images.map((_, i) => (
           <div
             key={i}
-            className={`w-3.5 h-3.5 rounded-full transition ${
-              i === currentImageIndex ? "bg-white shadow-md scale-125" : "bg-white/40"
+            className={`w-3.5 h-3.5 rounded-full duration-300 ${
+              i === currentImageIndex
+                ? "bg-white shadow-md scale-125"
+                : "bg-white/40"
             }`}
-          ></div>
+          />
         ))}
       </div>
     </div>

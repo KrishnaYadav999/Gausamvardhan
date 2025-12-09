@@ -8,6 +8,7 @@ import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "../components/Filter";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
+import VideoAdvertiseList from "./VideoAdvertiseList";
 
 /* ---------------------------------------------------
     PRODUCT CARD (Ghee UI Applied)
@@ -229,9 +230,9 @@ export default function AgarbattiCategoryProduct() {
 
           {/* Drawer */}
           {filterOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex z-[999]">
               <div className="flex-1" onClick={() => setFilterOpen(false)} />
-              <div className="w-72 bg-white h-full shadow-lg p-4 mr-4 overflow-y-auto">
+              <div className="w-72 bg-white h-full shadow-lg p-4  overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Filters</h3>
                   <button onClick={() => setFilterOpen(false)}>
@@ -270,6 +271,7 @@ export default function AgarbattiCategoryProduct() {
           </div>
         </div>
       </div>
+         <div> <VideoAdvertiseList /> </div>
     </div>
   );
 }

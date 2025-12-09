@@ -21,13 +21,20 @@ export default function AdminGanpatiUpdateDelete() {
     packs: [{ name: "", price: "" }],
     reviews: [{ name: "", rating: "", comment: "", images: [] }],
     moreAboutProduct: { name: "", description: "", images: [] },
+
+    // ⭐ Coupon Fields ⭐
+    couponTitle: "",
+    couponDescription: "",
+    couponDiscount: "",
+    couponCode: "",
+    couponExpiry: "",
   };
 
   const [formData, setFormData] = useState(defaultForm);
 
-  // ------------------------------------------------------
-  // Fetch products + categories
-  // ------------------------------------------------------
+  // -------------------------------------------
+  // LOAD PRODUCTS AND CATEGORIES
+  // -------------------------------------------
   useEffect(() => {
     const load = async () => {
       try {
@@ -35,6 +42,7 @@ export default function AdminGanpatiUpdateDelete() {
           axios.get("/api/ganpati/all"),
           axios.get("/api/categories"),
         ]);
+console.log("Products API response:", prods.data); // 
         setProducts(prods.data);
         setCategories(cats.data);
       } catch (err) {
@@ -42,60 +50,79 @@ export default function AdminGanpatiUpdateDelete() {
       }
       setLoading(false);
     };
+
     load();
   }, []);
 
-  // ------------------------------------------------------
-  // Fill form when clicking product
-  // ------------------------------------------------------
+  // -------------------------------------------
+  // START EDIT — SHOW ALL EXISTING FIELDS + COUPON
+  // -------------------------------------------
   const startEdit = (p) => {
     setEditingProduct(p);
+const firstCoupon = p.coupons?.[0] || {};
     setFormData({
-      title: p.title,
-      description: p.description,
-      keyBenefits: p.keyBenefits.join(", "),
-      ingredients: p.ingredients.join(", "),
-      quantity: p.quantity,
-      stockQuantity: p.stockQuantity,
-      stock: p.stock,
+      title: p.title || "",
+      description: p.description || "",
+      keyBenefits: p.keyBenefits?.join(", ") || "",
+      ingredients: p.ingredients?.join(", ") || "",
+      quantity: p.quantity || "",
+      stockQuantity: p.stockQuantity || "",
+      stock: p.stock ?? true,
       category: p.category?._id || "",
       images: p.images || [],
       videoUrl: p.videoUrl || "",
       packs: p.packs?.length ? p.packs : [{ name: "", price: "" }],
+
       reviews: p.reviews?.length
         ? p.reviews.map((r) => ({
-            name: r.name,
-            rating: r.rating,
-            comment: r.comment,
+            name: r.name || "",
+            rating: r.rating || "",
+            comment: r.comment || "",
             images: r.images || [],
           }))
         : [{ name: "", rating: "", comment: "", images: [] }],
+
       moreAboutProduct: {
         name: p.moreAboutProduct?.name || "",
         description: p.moreAboutProduct?.description || "",
         images: p.moreAboutProduct?.images || [],
       },
+
+      // ⭐ Existing coupon load ⭐
+      couponTitle: firstCoupon.title || "",
+  couponDescription: firstCoupon.description || "",
+  couponDiscount: firstCoupon.discountValue || "",
+  couponCode: firstCoupon.code || "",
+  couponExpiry: firstCoupon.expiryDate
+    ? new Date(firstCoupon.expiryDate).toISOString().split("T")[0]
+    : "",
     });
   };
 
-  // ------------------------------------------------------
-  // HANDLERS (same as create)
-  // ------------------------------------------------------
+  // BASIC INPUT
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handlePackChange = (index, field, value) => {
+  // PACK HANDLERS
+  const handlePackChange = (i, f, v) => {
     const arr = [...formData.packs];
-    arr[index][field] = value;
+    arr[i][f] = v;
     setFormData({ ...formData, packs: arr });
   };
 
   const addPack = () =>
-    setFormData({ ...formData, packs: [...formData.packs, { name: "", price: "" }] });
+    setFormData({
+      ...formData,
+      packs: [...formData.packs, { name: "", price: "" }],
+    });
 
   const removePack = (i) =>
-    setFormData({ ...formData, packs: formData.packs.filter((_, x) => x !== i) });
+    setFormData({
+      ...formData,
+      packs: formData.packs.filter((_, x) => x !== i),
+    });
 
+  // IMAGE HANDLERS
   const handleImageChange = (i, v) => {
     const arr = [...formData.images];
     arr[i] = v;
@@ -106,24 +133,34 @@ export default function AdminGanpatiUpdateDelete() {
     setFormData({ ...formData, images: [...formData.images, ""] });
 
   const removeImage = (i) =>
-    setFormData({ ...formData, images: formData.images.filter((_, x) => x !== i) });
+    setFormData({
+      ...formData,
+      images: formData.images.filter((_, x) => x !== i),
+    });
 
-  // Reviews
-  const handleReviewChange = (i, field, v) => {
+  // REVIEWS
+  const handleReviewChange = (i, f, v) => {
     const arr = [...formData.reviews];
-    arr[i][field] = v;
+    arr[i][f] = v;
     setFormData({ ...formData, reviews: arr });
   };
 
   const addReview = () =>
     setFormData({
       ...formData,
-      reviews: [...formData.reviews, { name: "", rating: "", comment: "", images: [] }],
+      reviews: [
+        ...formData.reviews,
+        { name: "", rating: "", comment: "", images: [] },
+      ],
     });
 
   const removeReview = (i) =>
-    setFormData({ ...formData, reviews: formData.reviews.filter((_, x) => x !== i) });
+    setFormData({
+      ...formData,
+      reviews: formData.reviews.filter((_, x) => x !== i),
+    });
 
+  // REVIEW IMAGES
   const handleReviewImageChange = (r, img, v) => {
     const arr = [...formData.reviews];
     arr[r].images[img] = v;
@@ -142,10 +179,11 @@ export default function AdminGanpatiUpdateDelete() {
     setFormData({ ...formData, reviews: arr });
   };
 
-  // More about
+  // MORE ABOUT PRODUCT
   const handleMoreAboutImageChange = (i, v) => {
     const arr = [...formData.moreAboutProduct.images];
     arr[i] = v;
+
     setFormData({
       ...formData,
       moreAboutProduct: { ...formData.moreAboutProduct, images: arr },
@@ -170,47 +208,74 @@ export default function AdminGanpatiUpdateDelete() {
       },
     });
 
-  // ------------------------------------------------------
-  // UPDATE
-  // ------------------------------------------------------
+  // -----------------------------------------
+  // UPDATE API
+  // -----------------------------------------
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    if (!editingProduct) return alert("Select a product to update!");
+    if (!editingProduct) return alert("Select a product!");
 
     const payload = {
       ...formData,
-      keyBenefits: formData.keyBenefits.split(",").map((x) => x.trim()).filter(Boolean),
-      ingredients: formData.ingredients.split(",").map((x) => x.trim()).filter(Boolean),
+
+      keyBenefits: formData.keyBenefits
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean),
+
+      ingredients: formData.ingredients
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean),
+
       images: formData.images.filter((x) => x.trim() !== ""),
+
       packs: formData.packs.filter((p) => p.name && p.price),
+
       reviews: formData.reviews.map((r) => ({
         ...r,
         images: r.images.filter((x) => x.trim() !== ""),
       })),
+ coupons: formData.couponCode
+    ? [
+        {
+          code: formData.couponCode,
+          discountType: "flat",
+          discountValue: Number(formData.couponDiscount),
+          title: formData.couponTitle,
+          description: formData.couponDescription,
+          expiryDate: formData.couponExpiry,
+          isPermanent: false,
+        },
+      ]
+    : [],
       moreAboutProduct: {
         name: formData.moreAboutProduct.name,
         description: formData.moreAboutProduct.description,
-        images: formData.moreAboutProduct.images.filter((x) => x.trim() !== ""),
+        images: formData.moreAboutProduct.images.filter(
+          (x) => x.trim() !== ""
+        ),
       },
+      
     };
 
     try {
       await axios.put(`/api/ganpati/${editingProduct._id}`, payload);
-      alert("Product updated!");
 
-      // refresh list
-      const res = await axios.get("/api/ganpati/all");
-      setProducts(res.data);
+      alert("Product Updated Successfully!");
+
+      const updated = await axios.get("/api/ganpati/all");
+      setProducts(updated.data);
     } catch (err) {
       console.log(err);
       alert("Update failed");
     }
   };
 
-  // ------------------------------------------------------
-  // DELETE
-  // ------------------------------------------------------
+  // -----------------------------------------
+  // DELETE PRODUCT
+  // -----------------------------------------
   const deleteProduct = async (id) => {
     if (!window.confirm("Delete this product?")) return;
 
@@ -230,31 +295,32 @@ export default function AdminGanpatiUpdateDelete() {
     }
   };
 
-  // ------------------------------------------------------
-  // RENDER UI
-  // ------------------------------------------------------
+  // -----------------------------------------
+  // UI
+  // -----------------------------------------
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
     <div className="flex gap-6 p-6">
-
-      {/* LEFT SIDE – PRODUCT LIST */}
+      {/* LEFT LIST */}
       <div className="w-1/3 bg-white p-4 rounded-xl shadow border">
         <h2 className="text-xl font-bold mb-3">All Ganpati Products</h2>
 
         {products.map((p) => (
           <div
             key={p._id}
+            onClick={() => startEdit(p)}
             className={`p-3 border rounded-lg mb-2 cursor-pointer ${
               editingProduct?._id === p._id ? "bg-blue-100" : "bg-gray-50"
             }`}
           >
-            <div onClick={() => startEdit(p)}>
-              <p className="font-bold">{p.title}</p>
-            </div>
+            <p className="font-bold">{p.title}</p>
 
             <button
-              onClick={() => deleteProduct(p._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteProduct(p._id);
+              }}
               className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm mt-2"
             >
               Delete
@@ -263,25 +329,21 @@ export default function AdminGanpatiUpdateDelete() {
         ))}
       </div>
 
-      {/* RIGHT SIDE – EDIT FORM (same UI as create) */}
+      {/* RIGHT FORM */}
       <div className="w-2/3">
         {!editingProduct ? (
           <p className="text-lg font-semibold text-gray-600">
-            Select a product from the left to edit
+            Select product to edit
           </p>
         ) : (
-          <form onSubmit={handleUpdate} className="space-y-4 bg-white p-6 rounded-xl shadow border">
-
-            <h2 className="text-2xl font-bold mb-4">Update Product</h2>
-
-            {/* 🔵 COPY–PASTE YOUR FULL FORM JSX HERE */}
-            {/* 
-                EXACT SAME JSX FROM CREATE —  
-                Just replace handleSubmit → handleUpdate
-            */}
+          <form
+            onSubmit={handleUpdate}
+            className="space-y-4 bg-white p-6 rounded-xl shadow border"
+          >
+            <h2 className="text-2xl font-bold mb-4">Update Ganpati Product</h2>
 
             {/* BASIC FIELDS */}
-            {[ 
+            {[
               { label: "Title", name: "title" },
               { label: "Description", name: "description", type: "textarea" },
               { label: "Key Benefits", name: "keyBenefits" },
@@ -292,6 +354,7 @@ export default function AdminGanpatiUpdateDelete() {
             ].map((f) => (
               <div key={f.name}>
                 <label className="font-medium">{f.label}</label>
+
                 {f.type === "textarea" ? (
                   <textarea
                     name={f.name}
@@ -311,6 +374,38 @@ export default function AdminGanpatiUpdateDelete() {
               </div>
             ))}
 
+            {/* ⭐ COUPON DETAILS ⭐ */}
+            <h3 className="text-lg font-bold mt-4">Coupon Details</h3>
+
+         
+
+
+            <input
+              type="number"
+              name="couponDiscount"
+              value={formData.couponDiscount}
+              onChange={handleChange}
+              placeholder="Discount %"
+              className="w-full p-2 border rounded-lg"
+            />
+
+            <input
+              type="text"
+              name="couponCode"
+              value={formData.couponCode}
+              onChange={handleChange}
+              placeholder="Coupon Code"
+              className="w-full p-2 border rounded-lg"
+            />
+
+            <input
+              type="date"
+              name="couponExpiry"
+              value={formData.couponExpiry}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg"
+            />
+
             {/* CATEGORY */}
             <div>
               <label className="font-medium">Category</label>
@@ -321,6 +416,7 @@ export default function AdminGanpatiUpdateDelete() {
                 className="w-full p-2 border rounded-lg"
               >
                 <option value="">-- Select --</option>
+
                 {categories.map((c) => (
                   <option key={c._id} value={c._id}>
                     {c.name}
@@ -332,6 +428,7 @@ export default function AdminGanpatiUpdateDelete() {
             {/* IMAGES */}
             <div>
               <label className="font-medium">Main Images</label>
+
               {formData.images.map((img, i) => (
                 <div key={i} className="flex gap-2 mb-2">
                   <input
@@ -339,6 +436,7 @@ export default function AdminGanpatiUpdateDelete() {
                     onChange={(e) => handleImageChange(i, e.target.value)}
                     className="flex-1 p-2 border rounded-lg"
                   />
+
                   <button
                     type="button"
                     onClick={() => removeImage(i)}
@@ -348,7 +446,12 @@ export default function AdminGanpatiUpdateDelete() {
                   </button>
                 </div>
               ))}
-              <button type="button" onClick={addImage} className="bg-green-600 text-white px-3 py-1 rounded-lg">
+
+              <button
+                type="button"
+                onClick={addImage}
+                className="bg-green-600 text-white px-3 py-1 rounded-lg"
+              >
                 Add Image
               </button>
             </div>
@@ -356,6 +459,7 @@ export default function AdminGanpatiUpdateDelete() {
             {/* PACKS */}
             <div>
               <label className="font-medium">Packs</label>
+
               {formData.packs.map((p, i) => (
                 <div key={i} className="flex gap-2 mb-2">
                   <input
@@ -364,13 +468,17 @@ export default function AdminGanpatiUpdateDelete() {
                     placeholder="Name"
                     className="p-2 border rounded-lg flex-1"
                   />
+
                   <input
                     value={p.price}
-                    onChange={(e) => handlePackChange(i, "price", e.target.value)}
+                    onChange={(e) =>
+                      handlePackChange(i, "price", e.target.value)
+                    }
                     placeholder="Price"
                     type="number"
                     className="p-2 border rounded-lg w-32"
                   />
+
                   <button
                     type="button"
                     onClick={() => removePack(i)}
@@ -380,7 +488,12 @@ export default function AdminGanpatiUpdateDelete() {
                   </button>
                 </div>
               ))}
-              <button type="button" onClick={addPack} className="bg-green-600 text-white px-3 py-1 rounded-lg">
+
+              <button
+                type="button"
+                onClick={addPack}
+                className="bg-green-600 text-white px-3 py-1 rounded-lg"
+              >
                 Add Pack
               </button>
             </div>
@@ -388,34 +501,47 @@ export default function AdminGanpatiUpdateDelete() {
             {/* REVIEWS */}
             <div>
               <label className="font-medium">Reviews</label>
+
               {formData.reviews.map((r, i) => (
                 <div key={i} className="border p-2 rounded-lg mb-3">
                   <input
                     value={r.name}
-                    onChange={(e) => handleReviewChange(i, "name", e.target.value)}
+                    onChange={(e) =>
+                      handleReviewChange(i, "name", e.target.value)
+                    }
                     placeholder="Name"
                     className="w-full p-2 border rounded-lg mb-1"
                   />
+
                   <input
                     value={r.rating}
-                    onChange={(e) => handleReviewChange(i, "rating", e.target.value)}
+                    onChange={(e) =>
+                      handleReviewChange(i, "rating", e.target.value)
+                    }
                     placeholder="Rating"
                     type="number"
                     className="w-full p-2 border rounded-lg mb-1"
                   />
+
                   <textarea
                     value={r.comment}
-                    onChange={(e) => handleReviewChange(i, "comment", e.target.value)}
+                    onChange={(e) =>
+                      handleReviewChange(i, "comment", e.target.value)
+                    }
                     placeholder="Comment"
                     className="w-full p-2 border rounded-lg mb-1"
                   />
+
                   {r.images.map((img, imgI) => (
                     <div key={imgI} className="flex gap-2 mb-1">
                       <input
                         value={img}
-                        onChange={(e) => handleReviewImageChange(i, imgI, e.target.value)}
+                        onChange={(e) =>
+                          handleReviewImageChange(i, imgI, e.target.value)
+                        }
                         className="flex-1 p-2 border rounded-lg"
                       />
+
                       <button
                         type="button"
                         onClick={() => removeReviewImage(i, imgI)}
@@ -425,6 +551,7 @@ export default function AdminGanpatiUpdateDelete() {
                       </button>
                     </div>
                   ))}
+
                   <button
                     type="button"
                     onClick={() => addReviewImage(i)}
@@ -452,7 +579,7 @@ export default function AdminGanpatiUpdateDelete() {
               </button>
             </div>
 
-            {/* MORE ABOUT */}
+            {/* MORE ABOUT PRODUCT */}
             <div>
               <label className="font-medium">More About Product</label>
 
@@ -490,9 +617,12 @@ export default function AdminGanpatiUpdateDelete() {
                 <div key={i} className="flex gap-2 mb-1">
                   <input
                     value={img}
-                    onChange={(e) => handleMoreAboutImageChange(i, e.target.value)}
+                    onChange={(e) =>
+                      handleMoreAboutImageChange(i, e.target.value)
+                    }
                     className="flex-1 p-2 border rounded-lg"
                   />
+
                   <button
                     type="button"
                     onClick={() => removeMoreAboutImage(i)}
@@ -517,13 +647,17 @@ export default function AdminGanpatiUpdateDelete() {
               <input
                 type="checkbox"
                 checked={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    stock: e.target.checked,
+                  })
+                }
                 className="w-4 h-4"
               />
               <label className="font-medium">In Stock</label>
             </div>
 
-            {/* UPDATE BUTTON */}
             <button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-lg font-semibold"

@@ -18,7 +18,7 @@ export default function Footer() {
         className="absolute bottom-0 left-0 w-full h-[230px] bg-bottom bg-cover bg-no-repeat opacity-90 animate-fadeIn"
         style={{
           backgroundImage:
-            "url('https://res.cloudinary.com/dkmxeiyvp/image_upload_placeholder')",
+            "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1764588639/33b5dd6c-b692-4370-a049-45316258f599.png')",
         }}
       />
 
@@ -41,7 +41,7 @@ export default function Footer() {
                   className="w-24 rounded-lg object-cover"
                   alt="side-img"
                 />
-                <span className="text-green-800 text-sm mt-1 font-semibold">
+                <span className="text-[#5F893F] text-sm mt-[87px] font-semibold absolute">
                   Made in India
                 </span>
               </div>
@@ -72,7 +72,7 @@ export default function Footer() {
             </div>
 
             {/* Social */}
-            <div className="flex gap-6 mt-8 text-green-800 text-2xl">
+            <div className="flex gap-6 mt-8 text-white text-2xl">
               <a
                 href="https://www.instagram.com/gau.samvardhan"
                 target="_blank"
@@ -127,20 +127,20 @@ export default function Footer() {
                 href="mailto:info.siddharthmep@gmail.com"
                 className="underline text-green-600"
               >
-                info.siddharthmep@gmail.com
+                customercare@gausamvardhan.com
               </a>
             </p>
 
             <p className="mt-1">
               <span className="font-medium text-green-800">Phone:</span>{" "}
               <a href="tel:+918097675222" className="underline text-green-600">
-                +91 8097675222
+                +91 9326539055
               </a>
             </p>
           </div>
         </div>
 
-        <div className="mt-20 border-t pt-6 text-center text-sm text-green-600 animate-fadeUp font-light">
+        <div className="mt-20 border-t pt-6 text-center text-sm text-white animate-fadeUp font-light">
           © {new Date().getFullYear()} SIDDHARTH MEP PRIVATE LIMITED
           (Gausamvardhan). All Rights Reserved.
         </div>

@@ -8,6 +8,7 @@ import Filter from "./Filter";
 import AcharAdvertizeBanner from "../components/AcharAdvertizeBanner";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
+import VideoAdvertiseList from "./VideoAdvertiseList";
 
 /* ---------------------------------------------------
     CARD COMPONENT
@@ -327,7 +328,7 @@ export default function CategoryProducts() {
 
             {/* MOBILE FILTER */}
             {filterOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex z-[999]">
                 <div
                   className="flex-1"
                   onClick={() => setFilterOpen(false)}
@@ -372,6 +373,7 @@ export default function CategoryProducts() {
             </div>
           </div>
         </div>
+          <div> <VideoAdvertiseList /> </div>
       </div>
     </>
   );

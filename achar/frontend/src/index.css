@@ -37,3 +37,18 @@ h1,h2,h3,h4,h5,h6 {
 /* Hide scrollbar */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Hide Navbar & Footer when Admin Page is Active */
+.no-navbar-footer header,
+.no-navbar-footer footer {
+  display: none !important;
+}
+
+input[type="range"].range-thumb::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f97316;
+  cursor: pointer;
+  appearance: none;
+}

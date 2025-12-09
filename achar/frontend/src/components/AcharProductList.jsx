@@ -5,7 +5,7 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 /* ---------------------------------------------------
@@ -251,7 +251,6 @@ const AcharProductList = () => {
 
   return (
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
-      <Toaster />
 
       {/* 🌿 HERO - Farming Nature Banner */}
       <div className="relative w-full mb-6">

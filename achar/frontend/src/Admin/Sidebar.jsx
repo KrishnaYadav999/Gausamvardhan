@@ -1,132 +1,123 @@
-import React, { useState, useEffect } from "react";
-import { GiCampfire } from "react-icons/gi";
-import { Sparkles, Gift, TreePine, Sun, Menu } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
-
-const themeOptions = [
-  { id: "chrome", name: "Chrome", icon: <span className="text-blue-400 text-lg">🖥️</span> },
-  { id: "diwali", name: "Diwali", icon: <GiCampfire className="text-yellow-400" /> },
-  { id: "newyear", name: "New Year", icon: <Sparkles className="text-cyan-400" /> },
-  { id: "christmas", name: "Christmas", icon: <TreePine className="text-green-400" /> },
-  { id: "pongal", name: "Pongal", icon: <Sun className="text-orange-400" /> },
-  { id: "rakhi", name: "Rakhi", icon: <Gift className="text-pink-400" /> },
-];
+import React, { useState } from "react";
+import {
+  Menu,
+  UserPlus,
+  MapPin,
+  Boxes,
+  Users,
+  LayoutDashboard,
+  BadgePercent,
+  Image,
+  Video,
+  ShoppingBag,
+  Settings,
+} from "lucide-react";
 
 const Sidebar = ({ setActive }) => {
   const [open, setOpen] = useState(true);
-  const { theme, setTheme, themes } = useTheme();
 
-  useEffect(() => {
-    localStorage.setItem("adminTheme", theme);
-  }, [theme]);
+  // Track active menu
+  const [activeItem, setActiveItem] = useState("");
 
-  const currentGradient = themes[theme]?.gradient || "from-[#2E0057] via-[#4B0082] to-[#5E17EB]";
-
+  // Menu item + icons mapping
   const menuItems = [
-    "WORKER CREATE",
-    "WORKER TRACKING",
-    "STOCK QUANTITY",
-    "ALL USER",
-    "USER ORDERS",
-    "BANNER",
-    "SMALL BANNER",
-    "ACHAR CATEGORY",
-    "ACHAR PRODUCT",
-    "ACHAR PRODUCT DELETE UPDATE",
-    "GHEE PRODUCT CREATE",
-    "GHEE PRODUCT UPDATE DELETE",
-    "MASALA PRODUCT CREATE",
-    "MASALA PRODUCT UPDATE DELETE",
-    "OIL PRODUCT CREATE",
-    "OIL PRODUCT UPDATE DELETE",
-    "ADMINAGARBATICREATE",
-    "ADMINAGARBATTIUPDATEDELETE",
-    "ADMINCREATEADVERTIZE",
-    "VIDEOADVERTIZEUPDATEDELETE",
-    "adminganpaticreate",
-    "adminganpatimanage",
-    "cupcreate",
-    "DASHBOARD",
-    "USERS",
+    { label: "DASHBOARD", icon: <LayoutDashboard size={18} /> },
+    { label: "WORKER CREATE", icon: <UserPlus size={18} /> },
+    { label: "WORKER TRACKING", icon: <MapPin size={18} /> },
+    { label: "STOCK QUANTITY", icon: <Boxes size={18} /> },
+    { label: "ALL USER", icon: <Users size={18} /> },
+    { label: "USER ORDERS", icon: <ShoppingBag size={18} /> },
+    { label: "BANNER", icon: <Image size={18} /> },
+    { label: "SMALL BANNER", icon: <Image size={18} /> },
+    { label: "ACHAR CATEGORY", icon: <BadgePercent size={18} /> },
+    { label: "ACHAR PRODUCT", icon: <BadgePercent size={18} /> },
+    { label: "ACHAR PRODUCT DELETE UPDATE", icon: <Settings size={18} /> },
+    { label: "GHEE PRODUCT CREATE", icon: <BadgePercent size={18} /> },
+    { label: "GHEE PRODUCT UPDATE DELETE", icon: <Settings size={18} /> },
+    { label: "MASALA PRODUCT CREATE", icon: <BadgePercent size={18} /> },
+    { label: "MASALA PRODUCT UPDATE DELETE", icon: <Settings size={18} /> },
+    { label: "OIL PRODUCT CREATE", icon: <BadgePercent size={18} /> },
+    { label: "OIL PRODUCT UPDATE DELETE", icon: <Settings size={18} /> },
+    { label: "ADMINAGARBATICREATE", icon: <BadgePercent size={18} /> },
+    { label: "ADMINAGARBATTIUPDATEDELETE", icon: <Settings size={18} /> },
+    { label: "ADMINCREATEADVERTIZE", icon: <Video size={18} /> },
+    { label: "VIDEOADVERTIZEUPDATEDELETE", icon: <Video size={18} /> },
+    { label: "adminganpaticreate", icon: <Settings size={18} /> },
+    { label: "adminganpatimanage", icon: <Settings size={18} /> },
+    { label: "cupcreate", icon: <BadgePercent size={18} /> },
+    { label: "USERS", icon: <Users size={18} /> },
   ];
+
+  const handleClick = (label) => {
+    const key = label.toLowerCase().replace(/\s+/g, "");
+    setActive(key);
+    setActiveItem(key);
+  };
 
   return (
     <div
-      className={`relative h-screen transition-all duration-300 ${open ? "w-64" : "w-16"} 
-        text-white flex flex-col justify-between shadow-2xl`}
-      style={{
-        background: `linear-gradient(180deg, ${currentGradient.replace(/from-|via-|to-/g, "")})`,
-        borderRight: "3px solid #FFD700",
-      }}
+      className={`
+        fixed top-0 left-0 h-screen bg-white border-r shadow-lg
+        transition-all duration-300 z-[1000]
+        ${open ? "w-64" : "w-20"}
+        overflow-y-auto
+      `}
     >
       {/* Toggle Button */}
       <button
-        className="absolute top-3 right-3 text-yellow-400 md:hidden"
         onClick={() => setOpen(!open)}
+        className="absolute top-3 right-3 text-gray-600 hover:text-black"
       >
-        <Menu size={24} />
+        <Menu size={22} />
       </button>
 
-      <div className="mt-4 px-2 flex-1 overflow-y-auto">
-        {/* Header */}
+      <div className="px-3 py-5 h-full">
         {open && (
-          <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-2 text-[#FFD700] drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">
-            <GiCampfire className="text-yellow-400 animate-glow" /> ADMIN PANEL
+          <h2 className="text-xl font-semibold text-center mb-6 tracking-wide">
+            Admin
           </h2>
         )}
 
-        {/* Theme Selector */}
-        {open && (
-          <div className="mb-4 bg-white/10 p-4 rounded-2xl border border-yellow-400/40 shadow-lg backdrop-blur-md">
-            <h3 className="text-yellow-300 font-semibold text-sm mb-3 uppercase tracking-wider flex items-center gap-2">
-              🎨 Select Theme
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {themeOptions.map((t) => {
-                const isActive = theme === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setTheme(t.id)}
-                    className={`
-                      flex items-center justify-center gap-2 p-3 rounded-xl border transition-all
-                      ${isActive 
-                        ? "bg-gradient-to-br from-yellow-400 to-yellow-200 text-[#2E0057] shadow-xl scale-105 animate-pulse" 
-                        : "bg-white/10 hover:bg-white/20 text-white border-white/20"}
-                      transform duration-300
-                    `}
-                  >
-                    <div className="text-lg">{t.icon}</div>
-                    <span className="text-xs font-semibold">{t.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <ul className="space-y-1 pb-10">
+          {menuItems.map((item) => {
+            const key = item.label.toLowerCase().replace(/\s+/g, "");
+            const isActive = activeItem === key;
 
-        {/* Menu Items */}
-        <ul className="space-y-2">
-          {menuItems.map((item) => (
-            <li
-              key={item}
-              onClick={() => setActive(item.toLowerCase().replace(/\s+/g, ""))}
-              className="cursor-pointer px-4 py-2 rounded-md bg-[#ffffff0d] hover:bg-[#FFD700] hover:text-[#2E0057] font-semibold transition-all duration-300 border border-transparent hover:border-yellow-400 shadow-md hover:shadow-[0_0_12px_rgba(255,215,0,0.8)]"
-            >
-              {open ? item : item[0]}
-            </li>
-          ))}
+            return (
+              <li
+                key={item.label}
+                onClick={() => handleClick(item.label)}
+                className={`relative flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer
+                  font-medium text-sm transition group
+                  
+                  ${isActive ? "bg-green-500 text-white shadow-md" : "hover:bg-gray-200"}
+                `}
+              >
+                {/* Active left border */}
+                {isActive && (
+                  <span className="absolute left-0 top-0 h-full w-1 bg-green-800 rounded-r-md"></span>
+                )}
+
+                {/* Icon */}
+                <span className="min-w-[20px]">{item.icon}</span>
+
+                {/* Label */}
+                {open && <span>{item.label}</span>}
+
+                {/* Tooltip when closed */}
+                {!open && (
+                  <span
+                    className="absolute left-20 bg-black text-white text-xs rounded-md px-2 py-1
+                    opacity-0 group-hover:opacity-100 transition-all ml-2 whitespace-nowrap"
+                  >
+                    {item.label}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
-
-      {/* Decorative Diyas */}
-      {open && (
-        <div className="flex justify-center gap-4 mt-8">
-          <GiCampfire className="text-yellow-300 text-3xl animate-glow" />
-          <GiCampfire className="text-yellow-400 text-3xl animate-glow delay-150" />
-          <GiCampfire className="text-yellow-500 text-3xl animate-glow delay-300" />
-        </div>
-      )}
     </div>
   );
 };

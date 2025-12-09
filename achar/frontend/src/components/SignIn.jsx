@@ -29,10 +29,9 @@ const SignIn = () => {
     try {
       const googleToken = response.credential;
 
-      const res = await axios.post(
-        "/googleauth/google",
-        { token: googleToken }
-      );
+      const res = await axios.post("/googleauth/google", {
+        token: googleToken,
+      });
 
       loginUser(res.data.user, res.data.token);
 
@@ -107,9 +106,10 @@ const SignIn = () => {
       <Toaster />
 
       {/* FULL CARD */}
-      <div className="flex flex-col md:flex-row w-full max-w-4xl h-auto md:h-[560px] rounded-3xl
-      shadow-[0_8px_30px_rgba(0,0,0,0.12)] overflow-hidden bg-white">
-
+      <div
+        className="flex flex-col md:flex-row w-full max-w-4xl h-auto md:h-[560px] rounded-3xl
+      shadow-[0_8px_30px_rgba(0,0,0,0.12)] overflow-hidden bg-white"
+      >
         {/* LEFT IMAGE (ATTACHED) */}
         <div className="w-full md:w-1/2 h-64 md:h-full">
           <img
@@ -123,15 +123,13 @@ const SignIn = () => {
 
         {/* RIGHT FORM CARD */}
         <div className="w-full md:w-1/2 bg-white/80 backdrop-blur-xl p-10 flex flex-col justify-center">
-          
           {error && <p className="text-red-600 mb-4">{error}</p>}
 
-          <h2 className="text-4xl font-extrabold text-green-700 mb-6 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-700 mb-6 tracking-tight">
             Create Account
           </h2>
 
           <form onSubmit={handleSignup} className="space-y-6">
-
             {/* NAME */}
             <div className="relative">
               <FaUser className="absolute top-3.5 left-3 text-green-500 text-lg" />
@@ -199,7 +197,10 @@ const SignIn = () => {
           </form>
 
           {/* GOOGLE LOGIN BUTTON */}
-          <div id="googleLoginButton" className="mt-6 flex justify-center"></div>
+          <div
+            id="googleLoginButton"
+            className="mt-6 flex justify-center"
+          ></div>
         </div>
       </div>
     </div>

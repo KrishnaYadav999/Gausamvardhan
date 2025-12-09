@@ -7,6 +7,7 @@ import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
+import VideoAdvertiseList from "./VideoAdvertiseList";
 
 /* ===================================================
    CARD COMPONENT
@@ -282,7 +283,7 @@ export default function GanpatiCategoryProduct() {
 
         {/* Mobile filter btn */}
         <button
-          className="md:hidden flex items-center gap-2 px-4 py-2 
+          className="md:hidden flex items-center gap-2 px-4 py-2
           text-[0.9rem] bg-orange-600 text-white rounded-lg shadow"
           onClick={() => setFilterOpen(true)}
         >
@@ -302,8 +303,8 @@ export default function GanpatiCategoryProduct() {
         </div>
 
         {/* Mobile Filter Drawer */}
-        {filterOpen && (
-          <div className="fixed inset-0 z-50 flex bg-black bg-opacity-50">
+        {filterOpen && ( 
+          <div className="fixed inset-0 flex bg-black bg-opacity-50 z-[999]">
             <div className="flex-1" onClick={() => setFilterOpen(false)}></div>
 
             <div className="w-72 bg-white p-5 overflow-y-auto shadow-lg">
@@ -343,6 +344,7 @@ export default function GanpatiCategoryProduct() {
           )}
         </div>
       </div>
+         <div> <VideoAdvertiseList /> </div>
     </div>
   );
 }

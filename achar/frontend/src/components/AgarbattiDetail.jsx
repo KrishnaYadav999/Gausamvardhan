@@ -9,6 +9,8 @@ import Features from "./Features";
 import { Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import PoojaEssentialsCustomerReview from "./PoojaEssentialsCustomerReview";
+import Certificate from "./Certificate";
+import VideoAdvertiseList from "./VideoAdvertiseList"
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -407,6 +409,7 @@ const AgarbattiProductDetail = () => {
                 <p className="mt-4 text-gray-700 text-[0.95rem]">
                   {product.description || "Premium handcrafted agarbatti."}
                 </p>
+                 <Certificate />
 
                 <div className="mt-6 flex items-end gap-4">
                   <div>
@@ -621,6 +624,7 @@ const AgarbattiProductDetail = () => {
       </div>
       <div>
         <PoojaEssentialsCustomerReview/>
+        <VideoAdvertiseList />
       </div>
     </>
   );

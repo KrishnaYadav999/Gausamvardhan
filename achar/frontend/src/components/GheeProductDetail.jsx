@@ -11,6 +11,7 @@ import ImageZoom from "./ImageZoom";
 import Certificate from "./Certificate";
 import { Helmet } from "react-helmet-async";
 import GheeCustomerReview from "./GheeCustomerReview";
+import VideoAdvertiseList from "./VideoAdvertiseList"
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png"; // use same hero or change
 
@@ -513,6 +514,7 @@ const GheeProductDetail = () => {
                     product.tagline ||
                     "Handcrafted, fresh & delicious ghee."}
                 </p>
+                            <Certificate />
 
                 <div className="mt-6 flex items-end gap-4">
                   <div>
@@ -664,9 +666,6 @@ const GheeProductDetail = () => {
                       <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
                         {rev.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
-
-                      <Certificate />
-
                       <div>
                         <div className="font-medium text-gray-900 text-sm">
                           {rev.name}
@@ -746,6 +745,7 @@ const GheeProductDetail = () => {
       </div>
       <div>
         <GheeCustomerReview/>
+        <VideoAdvertiseList/>
       </div>
     </>
   );

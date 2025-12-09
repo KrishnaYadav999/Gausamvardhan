@@ -25,26 +25,25 @@ import AdminGanpatiCreate from "./AdminGanpatiCreate";
 import AdminCupCreate from "./AdminCupCreate";
 import AdminGanpatiManage from "./AdminGanpatiManage";
 
-
 const Admin = () => {
   const [activeComponent, setActiveComponent] = useState("dashboard");
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("adminTheme") || "diwali";
-  });
-
   useEffect(() => {
-    localStorage.setItem("adminTheme", theme);
-  }, [theme]);
+    document.body.classList.add("no-navbar-footer");
+
+    return () => {
+      document.body.classList.remove("no-navbar-footer");
+    };
+  }, []);
 
   const renderComponent = () => {
     switch (activeComponent) {
-      case "stockquantity":
-        return <AdminStockAlert />;
       case "workercreate":
         return <WorkerAdminCreateUser />;
       case "workertracking":
         return <AdminWorkerTracking />;
+      case "stockquantity":
+        return <AdminStockAlert />;
       case "alluser":
         return <AdminUserAllData />;
       case "userorders":
@@ -79,47 +78,53 @@ const Admin = () => {
         return <AdminVideoAdvertiseCreate />;
       case "videoadvertizeupdatedelete":
         return <AdminAdvertiseDeleteUpdate />;
-     case "adminganpaticreate":
-  return <AdminGanpatiCreate />;
-       case "adminganpatimanage":
-  return <AdminGanpatiManage />;
-       case "cupcreate":
-  return <AdminCupCreate />;
+      case "adminganpaticreate":
+        return <AdminGanpatiCreate />;
+      case "adminganpatimanage":
+        return <AdminGanpatiManage />;
+      case "cupcreate":
+        return <AdminCupCreate />;
       case "dashboard":
-        return (
-          <div className="p-6">
-            <ProAdminDashboard />
-          </div>
-        );
-      case "users":
-        return <AdminUserAllData />;
+        return <ProAdminDashboard />;
       default:
-        return (
-          <div className="p-6">
-            <div className="bg-gradient-to-br from-purple-800 to-purple-600 text-yellow-100 p-8 rounded-2xl shadow-xl text-center text-2xl font-bold">
-              Welcome
-            </div>
-          </div>
-        );
+        return <div className="text-center text-xl p-6">Welcome</div>;
     }
   };
 
-  const themeGradients = {
-    diwali: "from-[#2E0057] via-[#4B0082] to-[#5E17EB]",
-    newyear: "from-[#000428] via-[#004e92] to-[#000428]",
-    christmas: "from-[#145A32] via-[#0B5345] to-[#145A32]",
-    pongal: "from-[#ffb347] via-[#ffcc33] to-[#ffb347]",
-    rakhi: "from-[#8E2DE2] via-[#C779D0] to-[#8E2DE2]",
-  };
-
   return (
-    <div
-      className={`flex min-h-screen bg-gradient-to-br ${
-        themeGradients[theme] || themeGradients["diwali"]
-      } transition-all duration-700`}
-    >
-      <Sidebar setActive={setActiveComponent} setTheme={setTheme} />
-      <div className="flex-1 p-6 overflow-y-auto">{renderComponent()}</div>
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+      {/* Sidebar */}
+      <Sidebar setActive={setActiveComponent} />
+
+      {/* Main Content */}
+      <div className="flex-1 min-h-screen overflow-y-auto backdrop-blur-xl">
+        {/* Header */}
+        <header
+          className="
+          h-16 bg-white/70 backdrop-blur-md 
+          shadow-md flex items-center px-6 sticky top-0 z-50 
+          border-b border-gray-200/70
+        "
+        >
+          <h1 className="font-semibold tracking-wide text-gray-800 text-lg">
+            {activeComponent.toUpperCase()}
+          </h1>
+        </header>
+
+        {/* Page Body */}
+        <div className="p-6">
+          <div
+            className="
+              bg-white/80 backdrop-blur-md 
+              rounded-2xl shadow-xl p-6 min-h-[80vh]
+              border border-gray-200/60
+              transition-all duration-300 hover:shadow-2xl
+            "
+          >
+            {renderComponent()}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

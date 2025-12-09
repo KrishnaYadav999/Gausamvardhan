@@ -19,10 +19,8 @@ const searchItems = [
 ];
 
 const menuItems = [
-  { title: "achar", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-06.png?v=1753598784&width=360" },
+  { title: "Achar", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-06.png?v=1753598784&width=360" },
   { title: "Ghee", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-03.png?v=1753598766" },
-  { title: "Masala", icon: "https://i.pinimg.com/736x/a3/fe/cd/a3fecda6516301b910738bac76c9e209.jpg" },
-  { title: "OIL", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-05.png?v=1753598779" },
   { title: "Ganpati", icon: "https://i.pinimg.com/1200x/53/fd/bd/53fdbd0797322c9a2280321b51cd5548.jpg" },
   { title: "PoojaEssentials", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-01.png?v=1753598791&width=360" },
 ];
@@ -44,20 +42,18 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
 
   const categoryRoutes = {
-  Achar: "/achar-category/achar",
-  Ghee: "/ghee/ghee",
-  Masala: "/masala-category/masala",
-  OIL: "/oil/category/oil",
-  Ganpati: "/ganpati-category/ganpati",
-  PoojaEssentials: "/agarbatti-category/pooja-essentials",
-  
-};
+    Achar: "/achar-category/achar",
+    Ghee: "/ghee/ghee",
+    Ganpati: "/ganpati-category/ganpati",
+    PoojaEssentials: "/agarbatti-category/pooja-essentials",
+  };
 
-const handleMenuRedirect = (item) => {
-  setMobileMenu(false);
-  const url = categoryRoutes[item.title];
-  if (url) navigate(url);
-};
+  const handleMenuRedirect = (item) => {
+    setMobileMenu(false);
+    const url = categoryRoutes[item.title];
+    if (url) navigate(url);
+  };
+
   /** Drawer Animation */
   useEffect(() => {
     if (!drawerRef.current) return;
@@ -82,7 +78,6 @@ const handleMenuRedirect = (item) => {
   }, [showSearch]);
 
   /** Placeholder animation */
-  /** Placeholder animation */
   useEffect(() => {
     if (!desktopInputRef.current) return;
 
@@ -95,7 +90,7 @@ const handleMenuRedirect = (item) => {
       for (let i = 0; i <= text.length; i++) {
         timeline.call(
           () => {
-            if (input) input.placeholder = text.slice(0, i); // NULL SAFE
+            if (input) input.placeholder = text.slice(0, i);
           },
           null,
           "+=0.06"
@@ -108,7 +103,7 @@ const handleMenuRedirect = (item) => {
       for (let i = text.length; i >= 0; i--) {
         timeline.call(
           () => {
-            if (input) input.placeholder = text.slice(0, i); // NULL SAFE
+            if (input) input.placeholder = text.slice(0, i);
           },
           null,
           "+=0.04"
@@ -118,9 +113,7 @@ const handleMenuRedirect = (item) => {
       timeline.to({}, { duration: 0.4 });
     });
 
-    return () => {
-      timeline.kill(); // Prevent running after unmount
-    };
+    return () => timeline.kill();
   }, []);
 
   /** SEARCH WORKING */
@@ -135,12 +128,8 @@ const handleMenuRedirect = (item) => {
 
       try {
         const [gheeRes, masalaRes, oilRes, productRes] = await Promise.all([
-          axios.get(
-            `/api/ghee-products/search/${encodeURIComponent(searchQuery)}`
-          ),
-          axios.get(
-            `/api/masala-products/search/${encodeURIComponent(searchQuery)}`
-          ),
+          axios.get(`/api/ghee-products/search/${encodeURIComponent(searchQuery)}`),
+          axios.get(`/api/masala-products/search/${encodeURIComponent(searchQuery)}`),
           axios.get(`/api/oils/search/${encodeURIComponent(searchQuery)}`),
           axios.get(`/api/products/search/${encodeURIComponent(searchQuery)}`),
         ]);
@@ -170,10 +159,8 @@ const handleMenuRedirect = (item) => {
     setShowSearch(false);
     setMobileMenu(false);
 
-    if (item.type === "Ghee")
-      navigate(`/ghee-product/${item.slug}/${item._id}`);
-    if (item.type === "Masala")
-      navigate(`/masala-product/${item.slug}/${item._id}`);
+    if (item.type === "Ghee") navigate(`/ghee-product/${item.slug}/${item._id}`);
+    if (item.type === "Masala") navigate(`/masala-product/${item.slug}/${item._id}`);
     if (item.type === "Oil") navigate(`/oil-product/${item.slug}/${item._id}`);
     if (item.type === "Product")
       navigate(`/products/${item.category?.slug || "default"}/${item._id}`);
@@ -250,6 +237,7 @@ const handleMenuRedirect = (item) => {
 
             {/* RIGHT SIDE ICONS */}
             <div className="flex items-center space-x-6">
+
               {/* Mobile Search */}
               <button
                 onClick={() => setShowSearch(!showSearch)}
@@ -258,28 +246,19 @@ const handleMenuRedirect = (item) => {
                 <CiSearch />
               </button>
 
-              {/* SIGN IN — ALWAYS SHOW */}
+              {/* SIGN IN */}
               {!user ? (
-                <Link
-                  to="/signin"
-                  className="text-green-400 text-2xl flex items-center"
-                >
+                <Link to="/signin" className="text-green-400 text-2xl">
                   <CiUser />
                 </Link>
               ) : (
-                <Link
-                  to="/profile"
-                  className="text-green-400 text-2xl flex items-center"
-                >
+                <Link to="/profile" className="text-green-400 text-2xl">
                   <PiUserCheckLight />
                 </Link>
               )}
 
               {/* CART */}
-              <Link
-                to="/cart"
-                className="flex items-center gap-3 text-green-400 text-2xl relative"
-              >
+              <Link to="/cart" className="flex items-center gap-3 text-green-400 text-2xl relative">
                 <div className="relative">
                   <IoCartSharp />
                   <span className="absolute -top-2 -right-2 bg-[#008031] text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center">
@@ -307,7 +286,7 @@ const handleMenuRedirect = (item) => {
                 />
 
                 {searchQuery && (
-                  <div className="bg-white shadow-md  mt-1 border max-h-60 overflow-y-auto">
+                  <div className="bg-white shadow-md mt-1 border max-h-60 overflow-y-auto">
                     {renderSearchResults()}
                   </div>
                 )}
@@ -317,54 +296,123 @@ const handleMenuRedirect = (item) => {
         </div>
       </nav>
 
-      {/* MOBILE DRAWER */}
-    {/* MOBILE DRAWER */}
-<div
-  ref={drawerRef}
-  className="fixed top-0 left-0 w-[80%] h-full bg-white shadow-xl z-[9999] p-6 -translate-x-full"
->
-  <button
-    onClick={() => setMobileMenu(false)}
-    className="absolute top-4 right-4 text-xl text-gray-400"
-  >
-    <FaTimes />
-  </button>
-
-  <h2 className="text-lg font-bold mb-6 text-[#008031]">
-    All Categories
-  </h2>
-
-  <div className="grid grid-cols-2 gap-6">
-    {menuItems.map((item, index) => (
-      <div
-        key={index}
-        onClick={() => handleMenuRedirect(item)}
-        className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
-      >
-        <img
-          src={item.icon}
-          className="w-12 h-12 object-contain mb-2"
-          alt={item.title}
+      {/* BACKDROP */}
+      {mobileMenu && (
+        <div
+          onClick={() => setMobileMenu(false)}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] transition-opacity duration-300"
         />
-        <p className="text-sm font-medium text-gray-700 text-center">
-          {item.title}
-        </p>
+      )}
+
+      {/* MOBILE DRAWER */}
+      <div
+        ref={drawerRef}
+        className={`fixed top-0 left-0 h-full w-[80%] max-w-[330px] bg-[#FAFDF9] 
+          shadow-2xl z-[9999] p-7 rounded-r-[32px] overflow-y-auto
+          transform transition-transform duration-300 ease-[cubic-bezier(.25,.8,.25,1)]
+          ${mobileMenu ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {/* CLOSE BUTTON */}
+        <button
+          onClick={() => setMobileMenu(false)}
+          className="absolute top-5 right-5 text-2xl text-[#3C6E4E] hover:text-[#265F3D] transition"
+        >
+          <FaTimes />
+        </button>
+
+        {/* SECTION WRAPPER */}
+        <div className="mt-2">
+
+          {/* SHOP ALL */}
+          <div
+            onClick={() => navigate("/all-products")}
+            className="text-[#144B32] font-semibold text-[17px] tracking-wide py-3 cursor-pointer"
+          >
+            SHOP ALL
+          </div>
+
+          <div className="border-b border-[#DDE7DD] my-1"></div>
+
+          {/* MEMBERSHIP */}
+          <div
+            onClick={() => navigate("/membership")}
+            className="flex items-center gap-2 cursor-pointer py-4"
+          >
+            <span className="bg-[#144B32] text-white font-semibold text-[11px] px-3 py-1 rounded-md tracking-wider shadow-sm">
+              COLLECTIVE
+            </span>
+
+            <span className="text-[#85772B] font-semibold text-sm tracking-wide">
+              MEMBERSHIP
+            </span>
+          </div>
+
+          <div className="border-b border-[#DDE7DD] mb-2"></div>
+
+          {/* NEW LINKS */}
+          <div className="py-4">
+            <Link
+              to="/"
+              onClick={() => setMobileMenu(false)}
+              className="text-[#144B32] font-semibold tracking-wide text-[15px]"
+            >
+              Gausamvardhan Organic & Handcrafted
+            </Link>
+          </div>
+
+          <div className="border-b border-[#DDE7DD]"></div>
+
+          <div className="py-4">
+            <Link
+              to="/about-us"
+              onClick={() => setMobileMenu(false)}
+              className="text-[#144B32] font-semibold tracking-wide text-[15px]"
+            >
+              About Us
+            </Link>
+          </div>
+
+          <div className="border-b border-[#DDE7DD]"></div>
+
+          <div className="py-4">
+            <Link
+              to="/contact"
+              onClick={() => setMobileMenu(false)}
+              className="text-[#144B32] font-semibold tracking-wide text-[15px]"
+            >
+              Contact Us
+            </Link>
+          </div>
+
+          <div className="border-b border-[#DDE7DD]"></div>
+        </div>
+
+        {/* CATEGORY GRID */}
+        <div className="grid grid-cols-2 gap-5 mt-7">
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              onClick={() => handleMenuRedirect(item)}
+              className="
+                flex flex-col items-center p-4 rounded-xl 
+                bg-white border border-[#E9F0E9] 
+                hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer
+              "
+            >
+              <img
+                src={item.icon}
+                className="w-12 h-12 object-contain mb-2"
+                alt={item.title}
+              />
+              <p className="text-sm font-medium text-[#144B32] text-center tracking-wide">
+                {item.title}
+              </p>
+            </div>
+          ))}
+        </div>
+
       </div>
-    ))}
-  </div>
-
-  <div
-    onClick={() => {
-      setMobileMenu(false);
-      navigate("/all-products");
-    }}
-    className="mt-6 text-[#008031] font-semibold cursor-pointer"
-  >
-    SHOP ALL →
-  </div>
-</div>
-
-      
     </>
   );
 };

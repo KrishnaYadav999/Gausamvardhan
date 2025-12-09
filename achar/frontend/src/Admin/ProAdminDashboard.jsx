@@ -17,6 +17,8 @@ import {
 } from "recharts";
 import { format, subDays } from "date-fns";
 
+// Base API URL from env
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 const getAuthConfig = () => ({ withCredentials: true });
 
 const COLORS = [
@@ -30,7 +32,7 @@ const COLORS = [
   "#ec4899",
 ];
 
-// ✅ Reusable Accordion Component
+// Accordion component
 const Accordion = ({ title, children, defaultOpen = false }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -72,20 +74,18 @@ export default function ProAdminDashboard() {
     to: new Date(),
   });
 
-  // ✅ Load all data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       setError(null);
-
       try {
         const [ordersRes, p1, p2, p3, p4, cats] = await Promise.all([
-          axios.get("/api/orders", getAuthConfig()),
-          axios.get("/api/products", getAuthConfig()),
-          axios.get("/api/ghee-products", getAuthConfig()),
-          axios.get("/api/masala-products", getAuthConfig()),
-          axios.get("/api/oils", getAuthConfig()),
-          axios.get("/api/categories", getAuthConfig()),
+          axios.get(`${API_BASE}/api/admin/orders`, getAuthConfig()),
+          axios.get(`${API_BASE}/api/products`, getAuthConfig()),
+          axios.get(`${API_BASE}/api/ghee-products`, getAuthConfig()),
+          axios.get(`${API_BASE}/api/masala-products`, getAuthConfig()),
+          axios.get(`${API_BASE}/api/oils`, getAuthConfig()),
+          axios.get(`${API_BASE}/api/categories`, getAuthConfig()),
         ]);
 
         const mergedProducts = [
@@ -109,10 +109,11 @@ export default function ProAdminDashboard() {
     loadData();
   }, [refreshKey]);
 
-  // ✅ Compute Metrics
+  // Compute metrics
   const metrics = useMemo(() => {
     const filteredOrders = orders.filter((o) => {
       const created = new Date(o.createdAt || o.updatedAt || Date.now());
+      if (!dateRange.from || !dateRange.to) return true;
       return created >= dateRange.from && created <= dateRange.to;
     });
 
@@ -131,8 +132,8 @@ export default function ProAdminDashboard() {
     const productSales = {};
     filteredOrders.forEach((o) => {
       (o.products || []).forEach((p) => {
-        const id = p._id || p.name;
-        const name = p.name || "Unknown";
+        const id = p._id || p.name || Math.random().toString();
+        const name = p.name || p.title || "Unnamed Product";
         const qty = Number(p.quantity || 1);
         const price = Number(p.price || 0);
         productSales[id] = productSales[id] || { name, qty: 0, revenue: 0 };
@@ -183,7 +184,6 @@ export default function ProAdminDashboard() {
     };
   }, [orders, allProducts, dateRange]);
 
-  // ✅ Loading & Error States
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen text-gray-500">
@@ -204,7 +204,6 @@ export default function ProAdminDashboard() {
       </div>
     );
 
-  // ✅ Dashboard UI
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
       <motion.h1
@@ -215,9 +214,9 @@ export default function ProAdminDashboard() {
         🧭 Admin Dashboard
       </motion.h1>
 
-      {/* 📅 Accordion 1 — Date Range & Summary */}
+      {/* Date Range & Summary */}
       <Accordion title="📅 Date Range & Summary" defaultOpen>
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6 items-end">
           <div>
             <label className="text-sm text-gray-500 block mb-1">From</label>
             <input
@@ -241,14 +240,16 @@ export default function ProAdminDashboard() {
             />
           </div>
           <button
-            onClick={() => setDateRange({ from: subDays(new Date(), 30), to: new Date() })}
-            className="bg-gray-200 px-3 py-2 rounded hover:bg-gray-300 self-end"
+            onClick={() =>
+              setDateRange({ from: subDays(new Date(), 30), to: new Date() })
+            }
+            className="bg-gray-200 px-3 py-2 rounded hover:bg-gray-300"
           >
             Last 30 Days
           </button>
           <button
             onClick={() => setRefreshKey((k) => k + 1)}
-            className="bg-emerald-500 text-white px-4 py-2 rounded self-end"
+            className="bg-emerald-500 text-white px-4 py-2 rounded"
           >
             Refresh
           </button>
@@ -261,7 +262,9 @@ export default function ProAdminDashboard() {
           </div>
           <div className="p-4 bg-white rounded-lg shadow text-center">
             <h3 className="text-gray-500">Total Revenue</h3>
-            <p className="text-2xl font-bold">₹{metrics.totalRevenue.toFixed(2)}</p>
+            <p className="text-2xl font-bold">
+              ₹{metrics.totalRevenue.toFixed(2)}
+            </p>
           </div>
           <div className="p-4 bg-white rounded-lg shadow text-center">
             <h3 className="text-gray-500">Low Stock</h3>
@@ -270,7 +273,7 @@ export default function ProAdminDashboard() {
         </div>
       </Accordion>
 
-      {/* 📈 Accordion 2 — Sales & Revenue Charts */}
+      {/* Revenue & Orders Charts */}
       <Accordion title="📈 Sales & Revenue Charts" defaultOpen>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-4 rounded-xl shadow">
@@ -291,81 +294,111 @@ export default function ProAdminDashboard() {
 
           <div className="bg-white p-4 rounded-xl shadow">
             <h3 className="font-semibold mb-3">Orders by Status</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={Object.entries(metrics.ordersByStatus).map(([name, value]) => ({
-                    name,
-                    value,
-                  }))}
-                  outerRadius={80}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  dataKey="value"
-                >
-                  {Object.keys(metrics.ordersByStatus).map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {Object.keys(metrics.ordersByStatus).length ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={Object.entries(metrics.ordersByStatus).map(
+                      ([name, value]) => ({ name, value })
+                    )}
+                    outerRadius={80}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    dataKey="value"
+                  >
+                    {Object.keys(metrics.ordersByStatus).map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Legend />
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-gray-400 py-10">No orders data</p>
+            )}
           </div>
         </div>
       </Accordion>
 
-      {/* 📊 Accordion 3 — Product Insights */}
+      {/* Product Insights */}
       <Accordion title="📊 Product Insights">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-4 rounded-xl shadow">
             <h3 className="font-semibold mb-3">Top Selling Products</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={metrics.topSelling}>
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="qty" fill="#60a5fa" />
-              </BarChart>
-            </ResponsiveContainer>
+            {metrics.topSelling.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={metrics.topSelling}>
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    interval={0}
+                    angle={-20}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="qty" fill="#60a5fa" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-gray-400 py-10">No sales data</p>
+            )}
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow">
             <h3 className="font-semibold mb-3">Low Stock Products</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={metrics.lowStock.map((p) => ({
-                  name: p.name || p.title || "Unknown",
-                  stock: p.stockQuantity || 0,
-                }))}
-              >
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="stock" fill="#f97316" />
-              </BarChart>
-            </ResponsiveContainer>
+            {metrics.lowStock.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={metrics.lowStock.map((p) => ({
+                    name: p.name || p.title || "Unknown",
+                    stock: p.stockQuantity || 0,
+                  }))}
+                >
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    interval={0}
+                    angle={-20}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="stock" fill="#f97316" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-gray-400 py-10">No low stock data</p>
+            )}
           </div>
         </div>
       </Accordion>
 
-      {/* 💸 Accordion 4 — Category Analytics */}
+      {/* Revenue by Category */}
       <Accordion title="💸 Revenue by Category">
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={metrics.categoryRevenueData}
-              outerRadius={100}
-              fill="#8884d8"
-              dataKey="value"
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
-            >
-              {metrics.categoryRevenueData.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
-              ))}
-            </Pie>
-            <Legend />
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+        {metrics.categoryRevenueData.length ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={metrics.categoryRevenueData}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(1)}%`
+                }
+              >
+                {metrics.categoryRevenueData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <Legend />
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-center text-gray-400 py-10">No category data</p>
+        )}
       </Accordion>
     </div>
   );

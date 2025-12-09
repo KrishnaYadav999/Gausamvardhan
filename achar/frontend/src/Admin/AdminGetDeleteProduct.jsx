@@ -30,6 +30,7 @@ const AdminGetDeleteProduct = () => {
     moreAboutThisPack: { header: "", description: "", images: [] },
     reviews: [],
     moreAboutProduct: [],
+    coupons: [], 
   });
 
   // Fetch all products
@@ -89,6 +90,7 @@ const AdminGetDeleteProduct = () => {
       },
       reviews: product.reviews || [],
       moreAboutProduct: product.moreAboutProduct || [],
+       coupons: product.coupons || [],
     });
   };
 
@@ -152,6 +154,29 @@ const AdminGetDeleteProduct = () => {
     setEditForm({ ...editForm, moreAboutProduct: updated });
   };
 
+  const addCoupon = () => {
+    setEditForm({
+      ...editForm,
+      coupons: [
+        ...editForm.coupons,
+        {
+          code: "",
+          discountType: "percentage",
+          discountValue: 0,
+          isPermanent: false,
+          expiryDate: "",
+          usageLimit: "",
+          isActive: true,
+        },
+      ],
+    });
+  };
+
+  const removeCoupon = (idx) => {
+    const newCoupons = [...editForm.coupons];
+    newCoupons.splice(idx, 1);
+    setEditForm({ ...editForm, coupons: newCoupons });
+  };
   // Save update
   const handleUpdate = async (id) => {
     try {
@@ -178,6 +203,7 @@ const AdminGetDeleteProduct = () => {
 
       {/* Search Bar */}
       <div className="mb-4">
+        
         <input
           type="text"
           placeholder="Search products..."
@@ -392,6 +418,124 @@ const AdminGetDeleteProduct = () => {
                   >
                     + Add More
                   </button>
+{/* ------------------ COUPONS SECTION ------------------ */}
+<h3 className="font-semibold mt-3 text-lg">Coupons</h3>
+
+{editForm.coupons.map((coupon, idx) => (
+  <div key={idx} className="border p-3 rounded mb-3 bg-white shadow-sm">
+
+    <input
+      type="text"
+      name="code"
+      placeholder="Coupon Code"
+      value={coupon.code}
+      onChange={(e) => {
+        const updated = [...editForm.coupons];
+        updated[idx].code = e.target.value;
+        setEditForm({ ...editForm, coupons: updated });
+      }}
+      className="border px-2 py-1 rounded w-full mb-2"
+    />
+
+    <select
+      name="discountType"
+      value={coupon.discountType}
+      onChange={(e) => {
+        const updated = [...editForm.coupons];
+        updated[idx].discountType = e.target.value;
+        setEditForm({ ...editForm, coupons: updated });
+      }}
+      className="border px-2 py-1 rounded w-full mb-2"
+    >
+      <option value="percentage">Percentage (%)</option>
+      <option value="flat">Flat (₹)</option>
+    </select>
+
+    <input
+      type="number"
+      name="discountValue"
+      placeholder="Discount Value"
+      value={coupon.discountValue}
+      onChange={(e) => {
+        const updated = [...editForm.coupons];
+        updated[idx].discountValue = e.target.value;
+        setEditForm({ ...editForm, coupons: updated });
+      }}
+      className="border px-2 py-1 rounded w-full mb-2"
+    />
+
+    {/* Permanent or Expiry? */}
+    <label className="flex items-center gap-2 mb-2">
+      <input
+        type="checkbox"
+        checked={coupon.isPermanent}
+        onChange={() => {
+          const updated = [...editForm.coupons];
+          updated[idx].isPermanent = !updated[idx].isPermanent;
+          setEditForm({ ...editForm, coupons: updated });
+        }}
+      />
+      Permanent Coupon (No Expiry)
+    </label>
+
+    {!coupon.isPermanent && (
+      <input
+        type="date"
+        name="expiryDate"
+        value={coupon.expiryDate}
+        onChange={(e) => {
+          const updated = [...editForm.coupons];
+          updated[idx].expiryDate = e.target.value;
+          setEditForm({ ...editForm, coupons: updated });
+        }}
+        className="border px-2 py-1 rounded w-full mb-2"
+      />
+    )}
+
+    <input
+      type="number"
+      name="usageLimit"
+      placeholder="Usage Limit"
+      value={coupon.usageLimit}
+      onChange={(e) => {
+        const updated = [...editForm.coupons];
+        updated[idx].usageLimit = e.target.value;
+        setEditForm({ ...editForm, coupons: updated });
+      }}
+      className="border px-2 py-1 rounded w-full mb-2"
+    />
+
+    <label className="flex items-center gap-2 mb-2">
+      <input
+        type="checkbox"
+        checked={coupon.isActive}
+        onChange={() => {
+          const updated = [...editForm.coupons];
+          updated[idx].isActive = !updated[idx].isActive;
+          setEditForm({ ...editForm, coupons: updated });
+        }}
+      />
+      Active Coupon
+    </label>
+
+    {/* Remove Button */}
+    <button
+      onClick={() => removeCoupon(idx)}
+      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+    >
+      Remove Coupon
+    </button>
+  </div>
+))}
+
+{/* Add New Coupon Button */}
+<button
+  onClick={addCoupon}
+  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mt-2"
+>
+  + Add New Coupon
+</button>
+{/* ----------------------------------------------------- */}
 
                   {/* Reviews */}
                   <h3 className="font-semibold mt-3">Reviews</h3>
@@ -475,6 +619,7 @@ const AdminGetDeleteProduct = () => {
                       Delete
                     </button>
                   </div>
+                  
                 </>
               )}
             </li>
@@ -489,6 +634,7 @@ const AdminGetDeleteProduct = () => {
               </button>
             </div>
           )}
+          
         </ul>
       )}
     </div>

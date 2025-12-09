@@ -7,6 +7,7 @@ import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "../components/Filter";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
+import VideoAdvertiseList from "./VideoAdvertiseList";
 
 /* ---------------------------------------------------
     PRODUCT CARD
@@ -314,7 +315,7 @@ export default function GheeCategoryProduct() {
 
           {/* MOBILE FILTER DRAWER */}
           {filterOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex z-50">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex z-[999]">
               <div
                 className="flex-1"
                 onClick={() => setFilterOpen(false)}
@@ -359,6 +360,7 @@ export default function GheeCategoryProduct() {
           </div>
         </div>
       </div>
+         <div> <VideoAdvertiseList /> </div>
     </div>
   );
 }

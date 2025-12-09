@@ -14,19 +14,19 @@ const Certificate = () => {
   ];
 
   return (
-    <div className="py-8 px-4">
+    <div className="py-6 px-4">
       <h2 className="text-lg font-semibold mb-4">Certificates</h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
         {certificates.map((item, index) => (
           <div
             key={index}
-            className="rounded-lg overflow-hidden"
+            className="rounded-lg overflow-hidden flex justify-center items-center"
           >
             <img
               src={item.img}
               alt={`Certificate ${index + 1}`}
-              className="w-full h-24 object-contain"
+              className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
             />
           </div>
         ))}

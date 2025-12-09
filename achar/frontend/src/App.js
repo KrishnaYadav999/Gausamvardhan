@@ -22,7 +22,7 @@ import GheeProductList from "./components/GheeProductList";
 import Footer from "./components/Footer";
 import MasalaCategoryProduct from "./components/MasalaCategoryProduct";
 import MasalaProductDetail from "./components/MasalaProductDetail";
-import MasalaProductList from "./components/MasalaProductList";
+// import MasalaProductList from "./components/MasalaProductList";
 import Ads from "./components/Ads";
 import NavbarDropdown from "./components/NavbarDropdown";
 import Chat from "./components/Chat";
@@ -31,7 +31,7 @@ import OilProductDetail from "./components/OilProductDetail";
 import ServicesNav from "./components/ServicesNav";
 import ScrollToTop from "./components/ScrollToTop";
 import SmoothScroll from "./components/SmoothScroll";
-import OilProductList from "./components/OilProductList";
+// import OilProductList from "./components/OilProductList";
 import ProceedToCheckout from "./components/ProceedToCheckout";
 import Invoice from "./components/Invoice";
 import OrderTracking from "./components/OrderTracking";
@@ -58,6 +58,8 @@ import AboutUS from "./components/AboutUS";
 import Products from "./components/Products";
 import Developer from "./components/Developer";
 import HomeCertificates from "./components/HomeCertificates";
+import GausamvardhanOrganicHandcrafted from "./components/GausamvardhanOrganicHandcrafted";
+import JoinCollective from "./components/JoinCollective";
 // import CupCategoryProduct from "./components/CupCategoryProduct";
 // import CupDetail from "./components/CupDetail";
 // import CupProductList from "./components/CupProductList";
@@ -174,8 +176,8 @@ function App() {
               <AgarbattiProductList />
               <GheeProductList />
               <ServicesNav />
-              <MasalaProductList />
-              <OilProductList />
+              {/* <MasalaProductList /> */}
+              {/* <OilProductList /> */}
               <HomeCertificates />
               <VideoAdvertiseList />
             </div>
@@ -242,6 +244,8 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
 
         <Route path="/developer" element={<Developer />} />
+        <Route path="/GausamvardhanOrganicHandcrafted" element={<GausamvardhanOrganicHandcrafted />} />
+        <Route path="/JoinCollective" element={<JoinCollective />} />
 
       </Routes>
 

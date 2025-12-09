@@ -10,6 +10,8 @@ import { Star } from "lucide-react";
 import Certificate from "./Certificate";
 import { Helmet } from "react-helmet-async";
 import AcharCustomerReview from "./AcharCustomerReview";
+import VideoAdvertiseList from "./VideoAdvertiseList"
+
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -360,12 +362,12 @@ const AcharProductDetail = () => {
 
                   <div className="flex items-start space-x-3">
                     <div className="w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center font-semibold text-yellow-700">
-                      G
+                      A
                     </div>
                     <div>
-                      <div className="font-medium">Ghee Rich</div>
+                      <div className="font-medium">Achar</div>
                       <div className="text-xs text-gray-600">
-                        Made with A2 Gir cow ghee
+                        Home Made Achar
                       </div>
                     </div>
                   </div>
@@ -686,6 +688,7 @@ const AcharProductDetail = () => {
           )}
         </div>
         <AcharCustomerReview />
+        <VideoAdvertiseList />
       </div>
     </>
   );
