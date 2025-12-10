@@ -43,7 +43,7 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
     e.stopPropagation();
 
     addToCart({
-       ...product,
+      ...product,
       productName: product.title,
       selectedWeight,
       quantity: 1,
@@ -220,70 +220,70 @@ const GheeProductList = ({ limit }) => {
 
   return (
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
-     
-
-       <div className="relative w-full mb-6">
-             {/* Full Background Image */}
-             <div
-               className="
+      <div className="relative w-full mb-6">
+        {/* Full Background Image */}
+        <div
+          className="
            relative w-full 
            h-[120px] sm:h-[140px] md:h-[160px] lg:h-[170px]
            bg-cover bg-center
          "
-               style={{
-                 backgroundImage:
-                   "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1765003639/Untitled_design_1_jcllwz.png')",
-                 backgroundPosition: "center top",
-               }}
-             ></div>
-     
-             {/* CONTENT - Image + Title + Button */}
-             <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6">
-               {/* Product Icon + Title */}
-               <div className="flex items-center gap-3 sm:gap-4 drop-shadow-xl">
-                 <h2
-                   className="
+          style={{
+            backgroundImage:
+              "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1765003639/Untitled_design_1_jcllwz.png')",
+            backgroundPosition: "center top",
+          }}
+        ></div>
+
+        {/* CONTENT - Image + Title + Button */}
+        <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-6">
+          {/* Product Icon + Title */}
+          <div className="flex items-center gap-3 sm:gap-4 drop-shadow-xl">
+            <h2
+              className="
                text-xl sm:text-2xl md:text-3xl lg:text-4xl 
                font-extrabold text-emerald-500 drop-shadow-lg
              "
-                   style={{ fontFamily: "Playfair Display" }}
-                 >
-                   Ghee
-                 </h2>
-               </div>
-     
-               {/* Shop More Button */}
-               <button
-                 className="
-             bg-green-600/90 hover:bg-green-700
-             text-white rounded-full font-semibold shadow-lg
-             px-3 py-1
-             sm:px-4 sm:py-1.5
-             md:px-5 md:py-2
-             transition-all
-             text-[10px] sm:text-[12px]
-           "
-                 style={{ fontFamily: "Poppins" }}
-               >
-                 Shop More →
-               </button>
-             </div>
-           </div>
-     
-           {/* SLIDER BUTTONS */}
-           <button
-             onClick={scrollLeft}
-             className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
-           >
-             <FaChevronLeft />
-           </button>
-     
-           <button
-             onClick={scrollRight}
-             className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
-           >
-             <FaChevronRight />
-           </button>
+              style={{ fontFamily: "Playfair Display" }}
+            >
+              Ghee
+            </h2>
+          </div>
+
+          {/* Shop More Button */}
+          <Link to="/ghee/ghee">
+            <button
+              className="
+      bg-green-600/90 hover:bg-green-700
+      text-white rounded-full font-semibold shadow-lg
+      px-3 py-1
+      sm:px-4 sm:py-1.5
+      md:px-5 md:py-2
+      transition-all
+      text-[10px] sm:text-[12px]
+    "
+              style={{ fontFamily: "Poppins" }}
+            >
+              Shop More →
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {/* SLIDER BUTTONS */}
+      <button
+        onClick={scrollLeft}
+        className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
+      >
+        <FaChevronLeft />
+      </button>
+
+      <button
+        onClick={scrollRight}
+        className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg p-3 rounded-full z-20"
+      >
+        <FaChevronRight />
+      </button>
 
       {/* SLIDER BUTTONS */}
       <button

@@ -118,40 +118,54 @@ const Navbar = () => {
 
   /** SEARCH WORKING */
   useEffect(() => {
-    if (!searchQuery) {
-      setSearchResults([]);
-      return;
+  if (!searchQuery) {
+    setSearchResults([]);
+    return;
+  }
+
+  const fetchSearch = async () => {
+    setLoading(true);
+
+    try {
+      const [
+        gheeRes,
+        masalaRes,
+        oilRes,
+        productRes,
+        ganpatiRes,
+        agarbattiRes
+      ] = await Promise.all([
+        axios.get(`/api/ghee-products/search/${encodeURIComponent(searchQuery)}`),
+        axios.get(`/api/masala-products/search/${encodeURIComponent(searchQuery)}`),
+        axios.get(`/api/oils/search/${encodeURIComponent(searchQuery)}`),
+        axios.get(`/api/products/search/${encodeURIComponent(searchQuery)}`),
+        // ⭐⭐ NEW GANPATI SEARCH ⭐⭐
+        axios.get(`/api/ganpati/search/${encodeURIComponent(searchQuery)}`),
+        axios.get(`/api/agarbatti/search/${encodeURIComponent(searchQuery)}`)
+      ]);
+
+      const allItems = [
+        ...gheeRes.data.map((i) => ({ ...i, type: "Ghee" })),
+        ...masalaRes.data.map((i) => ({ ...i, type: "Masala" })),
+        ...oilRes.data.map((i) => ({ ...i, type: "Oil" })),
+        ...productRes.data.map((i) => ({ ...i, type: "Product" })),
+        ...agarbattiRes.data.map((i) => ({ ...i, type: "Agarbatti" })),
+
+        // ⭐⭐ ADD GANPATI RESULTS ⭐⭐
+        ...ganpatiRes.data.map((i) => ({ ...i, type: "Ganpati" })),
+      ];
+
+      setSearchResults(allItems);
+    } catch (err) {
+      console.error("Search error:", err);
     }
 
-    const fetchSearch = async () => {
-      setLoading(true);
+    setLoading(false);
+  };
 
-      try {
-        const [gheeRes, masalaRes, oilRes, productRes] = await Promise.all([
-          axios.get(`/api/ghee-products/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`/api/masala-products/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`/api/oils/search/${encodeURIComponent(searchQuery)}`),
-          axios.get(`/api/products/search/${encodeURIComponent(searchQuery)}`),
-        ]);
-
-        const allItems = [
-          ...gheeRes.data.map((i) => ({ ...i, type: "Ghee" })),
-          ...masalaRes.data.map((i) => ({ ...i, type: "Masala" })),
-          ...oilRes.data.map((i) => ({ ...i, type: "Oil" })),
-          ...productRes.data.map((i) => ({ ...i, type: "Product" })),
-        ];
-
-        setSearchResults(allItems);
-      } catch (err) {
-        console.error("Search error:", err);
-      }
-
-      setLoading(false);
-    };
-
-    const delay = setTimeout(fetchSearch, 300);
-    return () => clearTimeout(delay);
-  }, [searchQuery]);
+  const delay = setTimeout(fetchSearch, 300);
+  return () => clearTimeout(delay);
+}, [searchQuery]);
 
   /** Redirect */
   const handleRedirect = (item) => {
@@ -159,11 +173,18 @@ const Navbar = () => {
     setShowSearch(false);
     setMobileMenu(false);
 
-    if (item.type === "Ghee") navigate(`/ghee-product/${item.slug}/${item._id}`);
-    if (item.type === "Masala") navigate(`/masala-product/${item.slug}/${item._id}`);
+    if (item.type === "Ghee")
+      navigate(`/ghee-product/${item.slug}/${item._id}`);
+    if (item.type === "Masala")
+      navigate(`/masala-product/${item.slug}/${item._id}`);
     if (item.type === "Oil") navigate(`/oil-product/${item.slug}/${item._id}`);
     if (item.type === "Product")
       navigate(`/products/${item.category?.slug || "default"}/${item._id}`);
+    if (item.type === "Ganpati")
+  navigate(`/ganpati-product/${item.slug}/${item._id}`);
+if (item.type === "Agarbatti")
+  navigate(`/agarbatti-product/${item.slug}/${item._id}`);
+
   };
 
   const handleSearchEnter = (e) => {
@@ -353,7 +374,7 @@ const Navbar = () => {
           {/* NEW LINKS */}
           <div className="py-4">
             <Link
-              to="/"
+              to="/GausamvardhanOrganicHandcrafted"
               onClick={() => setMobileMenu(false)}
               className="text-[#144B32] font-semibold tracking-wide text-[15px]"
             >
@@ -365,7 +386,7 @@ const Navbar = () => {
 
           <div className="py-4">
             <Link
-              to="/about-us"
+              to="/about"
               onClick={() => setMobileMenu(false)}
               className="text-[#144B32] font-semibold tracking-wide text-[15px]"
             >

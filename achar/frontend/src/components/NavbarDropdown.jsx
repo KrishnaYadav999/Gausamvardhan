@@ -84,7 +84,7 @@ const NavbarDropdown = () => {
         <div className="flex items-center gap-2 group cursor-pointer">
           <Link to="/about">
             <span className="text-[12px] tracking-wide group-hover:text-[#1A6F53]">
-              About
+              About us
             </span>
           </Link>
         </div>

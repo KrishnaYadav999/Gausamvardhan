@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const images = [
-  "https://i.pinimg.com/1200x/62/02/16/6202162f9e548efbd2cf04c7ca532252.jpg",
-  "https://i.pinimg.com/1200x/c1/14/77/c11477b0fe742bca11438e2b36eda749.jpg",
-  "https://i.pinimg.com/originals/78/fe/2b/78fe2bcd59ad949015135c8db05d4953.jpg",
-];
+  "https://res.cloudinary.com/dtvihyts8/image/upload/v1765353668/Gemini_Generated_Image_rxq6ilrxq6ilrxq6_yhcxn2.png",
+]
 
 const AcharAdvertizeBanner = () => {
   const [index, setIndex] = useState(0);

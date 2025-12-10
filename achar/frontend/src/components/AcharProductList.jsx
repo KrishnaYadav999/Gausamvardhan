@@ -3,7 +3,7 @@
 ----------------------------------------------------*/
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import toast from "react-hot-toast";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -251,7 +251,6 @@ const AcharProductList = () => {
 
   return (
     <div className="p-6 relative" style={{ fontFamily: "Inter" }}>
-
       {/* 🌿 HERO - Farming Nature Banner */}
       <div className="relative w-full mb-6">
         {/* Full Background Image */}
@@ -284,20 +283,22 @@ const AcharProductList = () => {
           </div>
 
           {/* Shop More Button */}
-          <button
-            className="
-        bg-green-600/90 hover:bg-green-700
-        text-white rounded-full font-semibold shadow-lg
-        px-3 py-1
-        sm:px-4 sm:py-1.5
-        md:px-5 md:py-2
-        transition-all
-        text-[10px] sm:text-[12px]
-      "
-            style={{ fontFamily: "Poppins" }}
-          >
-            Shop More →
-          </button>
+          <Link to="/achar-category/achar">
+            <button
+              className="
+      bg-green-600/90 hover:bg-green-700
+      text-white rounded-full font-semibold shadow-lg
+      px-3 py-1
+      sm:px-4 sm:py-1.5
+      md:px-5 md:py-2
+      transition-all
+      text-[10px] sm:text-[12px]
+    "
+              style={{ fontFamily: "Poppins" }}
+            >
+              Shop More →
+            </button>
+          </Link>
         </div>
       </div>
 
