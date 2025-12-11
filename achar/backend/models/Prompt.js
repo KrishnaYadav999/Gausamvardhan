@@ -1,10 +1,14 @@
+// models/Prompt.js
 import mongoose from "mongoose";
 
-const promptSchema = new mongoose.Schema({
-  prompt: { type: String, required: true, index: true },
-  response: { type: String, required: true },
-  tags: [{ type: String }],
-  createdAt: { type: Date, default: Date.now }
-});
+const PromptSchema = new mongoose.Schema(
+  {
+    prompt: { type: String, required: true, trim: true, unique: true },
+    response: { type: String, required: true },
+    tags: [{ type: String }],
+  },
+  { timestamps: true }
+);
 
-export default mongoose.model("Prompt", promptSchema);
+const Prompt = mongoose.models.Prompt || mongoose.model("Prompt", PromptSchema);
+export default Prompt;

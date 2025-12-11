@@ -1,38 +1,73 @@
+// controllers/chatController.js
 import Prompt from "../models/Prompt.js";
 import stringSimilarity from "string-similarity";
 
 /**
  * POST /api/chat
  * body: { message }
- * Finds the best matching stored prompt and returns its response.
+ * Returns:
+ *  - answer: string
+ *  - matchedPrompt: string | null
+ *  - score: number (best match score)
+ *  - suggestions: [{ prompt, response, score }]
  */
 export const chat = async (req, res) => {
   try {
     const { message } = req.body;
-    if (!message) return res.status(400).json({ error: "message required" });
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: "message required" });
+    }
 
     const prompts = await Prompt.find();
     if (!prompts.length) {
       return res.json({
-        answer: "I don't know yet. Backend training is required."
+        answer:
+          "मुझे अभी ट्रेनिंग की ज़रूरत है — डेटाबेस में कोई प्रम्प्ट नहीं मिला। आप नया सवाल जोड़ सकते हैं।",
+        suggestions: [],
       });
     }
 
     const pool = prompts.map((p) => p.prompt);
-    const { bestMatch } = stringSimilarity.findBestMatch(message, pool);
+    const matchData = stringSimilarity.findBestMatch(message, pool);
+    const bestMatch = matchData.bestMatch; // { target, rating }
 
-    const THRESHOLD = 0.45;
+    // Build top suggestions (sorted descending) excluding bestMatch target duplication
+    const similarities = matchData.ratings
+      .map((r, idx) => ({ prompt: r.target, score: r.rating }))
+      .sort((a, b) => b.score - a.score);
+
+    // Attach responses
+    const suggestions = [];
+    for (let i = 0; i < Math.min(5, similarities.length); i++) {
+      const s = similarities[i];
+      const p = prompts.find((x) => x.prompt === s.prompt);
+      if (p) {
+        suggestions.push({
+          prompt: p.prompt,
+          response: p.response,
+          score: Number(s.score.toFixed(4)),
+        });
+      }
+    }
+
+    const THRESHOLD = 0.45; // tune as needed
+
     if (bestMatch.rating >= THRESHOLD) {
       const matchedPrompt = prompts.find((p) => p.prompt === bestMatch.target);
       return res.json({
         answer: matchedPrompt.response,
         matchedPrompt: matchedPrompt.prompt,
-        score: bestMatch.rating
+        score: Number(bestMatch.rating.toFixed(4)),
+        suggestions, // still provide related suggestions
       });
     } else {
+      // Fallback helpful reply with suggestions
       return res.json({
-        answer: "Sorry, I don't have an answer for that yet.",
-        score: bestMatch.rating
+        answer:
+          "मुझे इसका सटीक जवाब अभी नहीं पता — नीचे कुछ संभावित सुझाव दें रहा हूँ। इनमे से किसी पर क्लिक कर के आगे बढ़ें, या नया प्रश्न add कर दें।",
+        matchedPrompt: null,
+        score: Number(bestMatch.rating.toFixed(4)),
+        suggestions,
       });
     }
   } catch (err) {
@@ -42,8 +77,8 @@ export const chat = async (req, res) => {
 };
 
 /**
- * (Optional) Manual training if needed
  * POST /api/train
+ * body: { prompt, response, tags }
  */
 export const train = async (req, res) => {
   try {
@@ -51,7 +86,14 @@ export const train = async (req, res) => {
     if (!prompt || !response) {
       return res.status(400).json({ error: "prompt and response are required" });
     }
-    const doc = new Prompt({ prompt, response, tags });
+    const exists = await Prompt.findOne({ prompt: prompt.trim() });
+    if (exists) {
+      exists.response = response;
+      if (tags) exists.tags = tags;
+      await exists.save();
+      return res.json({ success: true, prompt: exists, msg: "Updated existing prompt." });
+    }
+    const doc = new Prompt({ prompt: prompt.trim(), response, tags });
     await doc.save();
     return res.json({ success: true, prompt: doc });
   } catch (err) {
@@ -62,11 +104,10 @@ export const train = async (req, res) => {
 
 /**
  * GET /api/prompts
- * List saved prompts
  */
 export const listPrompts = async (req, res) => {
   try {
-    const prompts = await Prompt.find().sort({ createdAt: -1 }).limit(100);
+    const prompts = await Prompt.find().sort({ createdAt: -1 }).limit(500);
     res.json(prompts);
   } catch (err) {
     console.error(err);

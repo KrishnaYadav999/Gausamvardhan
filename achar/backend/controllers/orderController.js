@@ -8,10 +8,17 @@ import Product from "../models/Product.js";
 import OilProduct from "../models/oilProductModel.js";
 import MasalaProduct from "../models/MasalaProduct.js";
 import GheeProduct from "../models/GheeProduct.js";
-import AgarbattiProduct from "./../models/agarbattiModel.js"
-import GanpatiProduct from "../models/ganpatimodel.js"; 
+import AgarbattiProduct from "./../models/agarbattiModel.js";
+import GanpatiProduct from "../models/ganpatimodel.js";
 import { sendOrderToDelhivery } from "../utils/delhivery.js";
-import { sendPaymentSuccessMail,sendOrderCancelledMail, sendPaymentFailedMail } from "../utils/paymentMail.js";
+import {
+  sendPaymentSuccessMail,
+  sendOrderCancelledMail,
+  sendPaymentFailedMail,
+  sendOrderShippedMail,
+  sendOrderOutForDeliveryMail ,
+  sendOrderDeliveredMail,
+} from "../utils/paymentMail.js";
 
 dotenv.config();
 
@@ -36,14 +43,30 @@ export const createOrder = async (req, res) => {
 
     // ✅ Input validation
     if (!userId)
-      return res.status(400).json({ success: false, message: "User ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
     if (!Array.isArray(products) || products.length === 0)
-      return res.status(400).json({ success: false, message: "Products array is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Products array is required" });
     if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0)
-      return res.status(400).json({ success: false, message: "Total amount must be greater than 0" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Total amount must be greater than 0",
+        });
 
     // ✅ Validate shipping address
-    const requiredFields = ["name", "address", "city", "state", "pincode", "country"];
+    const requiredFields = [
+      "name",
+      "address",
+      "city",
+      "state",
+      "pincode",
+      "country",
+    ];
     for (const field of requiredFields) {
       if (!shippingAddress?.[field]) {
         return res.status(400).json({
@@ -67,20 +90,20 @@ export const createOrder = async (req, res) => {
     for (let i = 0; i < products.length; i++) {
       const p = products[i];
       if (!p.productType) {
-      const [masala, ghee, oil, normal, agarbatti] = await Promise.all([
-  MasalaProduct.findById(p.product),
-  GheeProduct.findById(p.product),
-  OilProduct.findById(p.product),
-  Product.findById(p.product),
-  AgarbattiProduct.findById(p.product), // added agarbatti
-  GanpatiProduct.findById(p.product),
-]);
-if (masala) p.productType = "MasalaProduct";
-else if (ghee) p.productType = "GheeProduct";
-else if (oil) p.productType = "OilProduct";
-else if (normal) p.productType = "Product";
-else if (agarbatti) p.productType = "AgarbattiProduct"; 
-else if (ganpati) p.productType = "GanpatiProduct";
+        const [masala, ghee, oil, normal, agarbatti] = await Promise.all([
+          MasalaProduct.findById(p.product),
+          GheeProduct.findById(p.product),
+          OilProduct.findById(p.product),
+          Product.findById(p.product),
+          AgarbattiProduct.findById(p.product), // added agarbatti
+          GanpatiProduct.findById(p.product),
+        ]);
+        if (masala) p.productType = "MasalaProduct";
+        else if (ghee) p.productType = "GheeProduct";
+        else if (oil) p.productType = "OilProduct";
+        else if (normal) p.productType = "Product";
+        else if (agarbatti) p.productType = "AgarbattiProduct";
+        else if (ganpati) p.productType = "GanpatiProduct";
       }
     }
 
@@ -92,38 +115,52 @@ else if (ganpati) p.productType = "GanpatiProduct";
       let prodData = null;
       switch (productType) {
         case "Product":
-          prodData = await Product.findById(product).select("productName productImages");
+          prodData = await Product.findById(product).select(
+            "productName productImages"
+          );
           break;
         case "OilProduct":
-          prodData = await OilProduct.findById(product).select("productName productImages");
+          prodData = await OilProduct.findById(product).select(
+            "productName productImages"
+          );
           break;
         case "MasalaProduct":
-          prodData = await MasalaProduct.findById(product).select("title images");
+          prodData = await MasalaProduct.findById(product).select(
+            "title images"
+          );
           break;
         case "GheeProduct":
           prodData = await GheeProduct.findById(product).select("title images");
           break;
-          case "AgarbattiProduct":
-  prodData = await AgarbattiProduct.findById(product).select("title images");
-  break;
-   case "GanpatiProduct": // ✅ added Ganpati
-    prodData = await GanpatiProduct.findById(product).select("title images");
-    break;
+        case "AgarbattiProduct":
+          prodData = await AgarbattiProduct.findById(product).select(
+            "title images"
+          );
+          break;
+        case "GanpatiProduct": // ✅ added Ganpati
+          prodData = await GanpatiProduct.findById(product).select(
+            "title images"
+          );
+          break;
       }
 
- products[i] = {
-  ...products[i],
-  name: name || prodData?.productName || prodData?.title || "Unnamed Product",
-  image:
-    image ||
-    prodData?.productImages?.[0] ||
-    prodData?.images?.[0] ||
-    "/no-image.png",
-   pack: products[i].pack || products[i].selectedPack || prodData?.pack || null,
-  weight: products[i].weight || prodData?.weight || null,
-  volume: products[i].volume || prodData?.volume || null,
-};
-
+      products[i] = {
+        ...products[i],
+        name:
+          name || prodData?.productName || prodData?.title || "Unnamed Product",
+        image:
+          image ||
+          prodData?.productImages?.[0] ||
+          prodData?.images?.[0] ||
+          "/no-image.png",
+        pack:
+          products[i].pack ||
+          products[i].selectedPack ||
+          prodData?.pack ||
+          null,
+        weight: products[i].weight || prodData?.weight || null,
+        volume: products[i].volume || prodData?.volume || null,
+      };
     }
 
     // 🧾 Generate Invoice & Serial Numbers
@@ -145,21 +182,21 @@ else if (ganpati) p.productType = "GanpatiProduct";
 
     if (!razorpayOrder?.id)
       throw new Error("Failed to create Razorpay order. Please try again.");
-const customerEmail = req.body.email || shippingAddress?.email || null;
+    const customerEmail = req.body.email || shippingAddress?.email || null;
     // 🧠 Save in DB
     const newOrder = await Order.create({
       orderNumber,
       invoiceNumber,
       serialNumber,
       user: userId,
-      userEmail: customerEmail,  
+      userEmail: customerEmail,
       products,
       totalAmount,
       shippingAddress,
       razorpayOrderId: razorpayOrder.id,
     });
 
-  try {
+    try {
       const delhiveryRes = await sendOrderToDelhivery(newOrder);
 
       // Optional: store Delhivery response in order
@@ -168,7 +205,10 @@ const customerEmail = req.body.email || shippingAddress?.email || null;
 
       console.log("✅ Delhivery response saved in order");
     } catch (delhiveryErr) {
-      console.error("⚠ Delhivery failed, but order is safe:", delhiveryErr.message);
+      console.error(
+        "⚠ Delhivery failed, but order is safe:",
+        delhiveryErr.message
+      );
       // Order is already saved, so even if Delhivery fails, no rollback
     }
 
@@ -228,7 +268,9 @@ export const verifyPayment = async (req, res) => {
     ).populate("user");
 
     if (!order)
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
 
     // -------------------------------------
     // 🔥 Reduce Stock For Each Product
@@ -260,20 +302,26 @@ export const verifyPayment = async (req, res) => {
       if (prodModel) {
         const prod = await prodModel.findById(item.product);
         if (prod) {
-          prod.stockQuantity = Math.max((prod.stockQuantity || 0) - item.quantity, 0);
+          prod.stockQuantity = Math.max(
+            (prod.stockQuantity || 0) - item.quantity,
+            0
+          );
           if (prod.stockQuantity === 0) prod.stock = false;
           await prod.save();
         }
       }
     }
 
-    console.log("💌 Sending payment success mail to:", order.user?.email || order.userEmail);
+    console.log(
+      "💌 Sending payment success mail to:",
+      order.user?.email || order.userEmail
+    );
 
     // -------------------------------------
     // 📩 Send Payment SUCCESS Email
     // -------------------------------------
     await sendPaymentSuccessMail(
-        order.user?.email || order.userEmail, 
+      order.user?.email || order.userEmail,
       order.user.name,
       order._id,
       order.totalAmount
@@ -284,7 +332,6 @@ export const verifyPayment = async (req, res) => {
       message: "Payment verified successfully",
       order,
     });
-
   } catch (err) {
     console.error("❌ Payment verification error:", err);
 
@@ -297,7 +344,6 @@ export const verifyPayment = async (req, res) => {
     });
   }
 };
-
 
 // ======================================================
 // 🚫 CANCEL ORDER
@@ -367,10 +413,35 @@ export const updateOrderStatus = async (req, res) => {
     ];
 
     if (!validStatuses.includes(status))
-      return res.status(400).json({ success: false, message: "Invalid status" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
 
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    const order = await Order.findById(orderId).populate("user");
+    if (!order)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+
+    const userEmail = order.user?.email || order.userEmail;
+    const userName =
+      order.user?.name || order.shippingAddress?.name || "Customer";
+
+    if (status === "shipped") {
+      await sendOrderShippedMail(userEmail, userName, order._id);
+    }
+
+    if (status === "outForDelivery" || status === "out-for-delivery") {
+      await sendOrderOutForDeliveryMail(userEmail, userName, order._id);
+    }
+
+    if (status === "delivered") {
+      await sendOrderDeliveredMail(userEmail, userName, order._id);
+    }
+
+    if (status === "cancelled") {
+      await sendOrderCancelledMail(userEmail, userName, order._id);
+    }
 
     order.status = status;
     await order.save();
@@ -416,7 +487,10 @@ export const getOrderById = async (req, res) => {
         select: "name email mobile",
       });
 
-    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    if (!order)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     res.json({ success: true, order });
   } catch (err) {
     console.error("Get order by ID error:", err);

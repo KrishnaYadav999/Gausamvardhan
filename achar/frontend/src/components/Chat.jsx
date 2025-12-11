@@ -1,3 +1,4 @@
+// client/src/components/Chat.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,38 +9,60 @@ const Chat = () => {
     { from: "bot", text: "Hello, I’m Gausam 🐄. How can I help you today?" }
   ]);
   const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState([]); // suggestions from last response
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, suggestions]);
+
+  const pushMessage = (msg) => {
+    setMessages((prev) => [...prev, msg]);
+  };
 
   const sendMessage = async (e) => {
     e?.preventDefault();
-    if (!input.trim()) return;
+    const text = input.trim();
+    if (!text) return;
 
-    const userMsg = { from: "user", text: input };
-    setMessages((prev) => [...prev, userMsg]);
+    const userMsg = { from: "user", text };
+    pushMessage(userMsg);
     setInput("");
+    setSuggestions([]);
 
     try {
-      const { data } = await axios.post("/api/chat", {
-        message: input,
-      });
+      const { data } = await axios.post("/api/chat", { message: text });
+      // show matched answer
       const botMsg = { from: "bot", text: data.answer || "No answer." };
-      setMessages((prev) => [...prev, botMsg]);
+      pushMessage(botMsg);
+
+      // set suggestions if available (exclude exact matched prompt)
+      if (Array.isArray(data.suggestions) && data.suggestions.length) {
+        // filter duplicate
+        const filtered = data.suggestions.filter(s => s.prompt !== data.matchedPrompt);
+        setSuggestions(filtered.slice(0, 4)); // keep top 4
+      } else {
+        setSuggestions([]);
+      }
     } catch (err) {
       console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        { from: "bot", text: "Server error." },
-      ]);
+      pushMessage({ from: "bot", text: "Server error. Try again later." });
     }
+  };
+
+  const onSuggestionClick = async (sugg) => {
+    // when user clicks a suggestion, send it as a new message
+    setInput(sugg.prompt);
+    // optional: auto-send immediately
+    // small delay to let input update
+    setTimeout(() => {
+      // emulate submit
+      document.getElementById("chat-send-btn")?.click();
+    }, 120);
   };
 
   return (
     <>
-      {/* Floating Button */}
       {!open && (
         <motion.div
           initial={{ scale: 0 }}
@@ -52,7 +75,6 @@ const Chat = () => {
         </motion.div>
       )}
 
-      {/* Chat Drawer */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -64,9 +86,7 @@ const Chat = () => {
           >
             {/* Header */}
             <div className="bg-green-600 text-white px-4 py-2 flex justify-between items-center">
-              <span className="font-semibold flex items-center gap-2">
-                🐄 Gausam
-              </span>
+              <span className="font-semibold flex items-center gap-2">🐄 Gausam</span>
               <button
                 onClick={() => setOpen(false)}
                 className="text-white font-bold hover:scale-110 transition"
@@ -84,16 +104,12 @@ const Chat = () => {
                     initial={{ opacity: 0, x: m.from === "user" ? 50 : -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`mb-2 flex ${
-                      m.from === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    transition={{ duration: 0.25 }}
+                    className={`mb-2 flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`${
-                        m.from === "user"
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-100 text-gray-900"
+                        m.from === "user" ? "bg-green-600 text-white" : "bg-gray-100 text-gray-900"
                       } px-3 py-2 rounded-lg max-w-[70%] shadow`}
                     >
                       {m.text}
@@ -101,6 +117,26 @@ const Chat = () => {
                   </motion.div>
                 ))}
               </AnimatePresence>
+
+              {/* Suggestions UI under messages */}
+              {suggestions.length > 0 && (
+                <div className="my-2">
+                  <div className="text-xs text-gray-500 mb-1">Suggestions:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {suggestions.map((s, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => onSuggestionClick(s)}
+                        className="text-sm px-2 py-1 border rounded-full hover:bg-gray-100"
+                        title={s.response}
+                      >
+                        {s.prompt.length > 30 ? s.prompt.slice(0, 30) + "..." : s.prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
 
@@ -113,6 +149,7 @@ const Chat = () => {
                 className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-green-300"
               />
               <button
+                id="chat-send-btn"
                 type="submit"
                 className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
               >

@@ -1,10 +1,12 @@
+// routes/chatRoutes.js
 import express from "express";
-import { chat, listPrompts } from "../controllers/chatController.js";
+import { chat, listPrompts, train } from "../controllers/chatController.js";
 import Prompt from "../models/Prompt.js";
 
 const router = express.Router();
 
 router.post("/chat", chat);
+router.post("/train", train);
 router.get("/prompts", listPrompts);
 
 // ✅ Seed multiple default prompts
