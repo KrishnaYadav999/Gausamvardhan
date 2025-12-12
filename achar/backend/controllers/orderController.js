@@ -19,6 +19,7 @@ import {
   sendOrderShippedMail,
   sendOrderOutForDeliveryMail ,
   sendOrderDeliveredMail,
+  sendCODOrderPlacedMail 
 } from "../utils/paymentMail.js";
 
 
@@ -166,68 +167,104 @@ export const createOrder = async (req, res) => {
     }
 
     // 🧾 Generate Invoice & Serial Numbers
-    const counter = await Counter.findOneAndUpdate(
-      { id: "order" },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    const serialNumber = counter.seq;
-    const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const invoiceNumber = `AMBGS-${String(serialNumber).padStart(4, "0")}`;
+  // 🧾 Generate Invoice & Serial Numbers
+const counter = await Counter.findOneAndUpdate(
+  { id: "order" },
+  { $inc: { seq: 1 } },
+  { new: true, upsert: true }
+);
 
-    // 💳 Create Razorpay Order
-    const razorpayOrder = await razorpay.orders.create({
-      amount: Math.round(totalAmount * 100),
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`,
-    });
+const serialNumber = counter.seq;
+const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+const invoiceNumber = `AMBGS-${String(serialNumber).padStart(4, "0")}`;
 
-    if (!razorpayOrder?.id)
-      throw new Error("Failed to create Razorpay order. Please try again.");
-    const customerEmail = req.body.email || shippingAddress?.email || null;
-    // 🧠 Save in DB
-    const paymentMethod = req.body.paymentMethod || "Online";
+// 💳 Create Razorpay Order
+const razorpayOrder = await razorpay.orders.create({
+  amount: Math.round(totalAmount * 100),
+  currency: "INR",
+  receipt: `receipt_${Date.now()}`,
+});
+
+if (!razorpayOrder?.id)
+  throw new Error("Failed to create Razorpay order. Please try again.");
+
+const customerEmail = req.body.email || shippingAddress?.email || null;
+
+// 🧠 Save Order in DB
+const paymentMethod = req.body.paymentMethod || "Online";
 const paymentStatus = paymentMethod === "COD" ? "Pending" : "Paid";
-    const newOrder = await Order.create({
-      orderNumber,
-      invoiceNumber,
-      serialNumber,
-      user: userId,
-      userEmail: customerEmail,
-      products,
-      totalAmount,
-      shippingAddress,
-        paymentMethod,  
-  paymentStatus, 
-      razorpayOrderId: razorpayOrder.id,
-    });
 
-    try {
-      const delhiveryRes = await sendOrderToDelhivery(newOrder);
+const newOrder = await Order.create({
+  orderNumber,
+  invoiceNumber,
+  serialNumber,
+  user: userId,
+  userEmail: customerEmail,
+  products,
+  totalAmount,
+  shippingAddress,
+  paymentMethod,
+  paymentStatus,
+  razorpayOrderId: razorpayOrder.id,
+});
 
-      // Optional: store Delhivery response in order
-      newOrder.delhiveryResponse = delhiveryRes;
-      await newOrder.save();
+// ===============================
+// 📩 SEND MAIL FOR COD ORDERS
+// ===============================
+if (paymentMethod === "COD") {
+  try {
+    // 🔥 FINAL email fallback logic
+    const finalEmail =
+      customerEmail ||
+      shippingAddress?.email ||
+      newOrder?.userEmail ||
+      newOrder?.user?.email;
 
-      console.log("✅ Delhivery response saved in order");
-    } catch (delhiveryErr) {
-      console.error(
-        "⚠ Delhivery failed, but order is safe:",
-        delhiveryErr.message
+    console.log("📧 Final email used for COD:", finalEmail);
+
+    if (!finalEmail) {
+      console.log("❌ No email found for COD order, skipping email send.");
+    } else {
+      await sendCODOrderPlacedMail(
+        finalEmail,
+        shippingAddress.name,
+        newOrder._id,
+        totalAmount
       );
-      // Order is already saved, so even if Delhivery fails, no rollback
+      console.log("📩 COD mail sent successfully!");
     }
+  } catch (err) {
+    console.log("❌ COD mail failed:", err.message);
+  }
+}
 
-    console.log("✅ Order created:", newOrder._id);
+// 🚚 Send order to Delhivery
+try {
+  const delhiveryRes = await sendOrderToDelhivery(newOrder);
 
-    res.json({
-      success: true,
-      message: "Order created successfully",
-      order: newOrder,
-      invoiceNumber: `AMBGS - ${String(serialNumber).padStart(4, "0")}`,
-      razorpayOrder,
-      key: process.env.RAZORPAY_KEY_ID,
-    });
+  newOrder.delhiveryResponse = delhiveryRes;
+  await newOrder.save();
+
+  console.log("✅ Delhivery response saved in order");
+} catch (delhiveryErr) {
+  console.error(
+    "⚠ Delhivery failed, but order is safe:",
+    delhiveryErr.message
+  );
+}
+
+// 🟢 Final response
+console.log("✅ Order created:", newOrder._id);
+
+res.json({
+  success: true,
+  message: "Order created successfully",
+  order: newOrder,
+  invoiceNumber, // <-- final correct value (AMBGS-0001)
+  razorpayOrder,
+  key: process.env.RAZORPAY_KEY_ID,
+});
+
   } catch (err) {
     console.error("❌ Order creation error:", err);
     res.status(500).json({

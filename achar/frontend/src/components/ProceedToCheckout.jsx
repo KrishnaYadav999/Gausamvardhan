@@ -163,6 +163,7 @@ const handleCOD = async () => {
       products,
       totalAmount: finalAmount,
       shippingAddress,
+       email: user.email, 
       paymentMethod: "COD", // 🔥 NEW
       paymentStatus: "Pending", // 🔥 NEW
     });

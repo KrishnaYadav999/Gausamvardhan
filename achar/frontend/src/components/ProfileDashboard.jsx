@@ -161,7 +161,6 @@ export default function ProfileDashboard() {
       transition={{ duration: 0.6 }}
     >
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         {/* LEFT SECTION */}
         <motion.aside
           className="lg:col-span-1 backdrop-blur-xl bg-white/10 p-6 rounded-3xl border border-white/20 shadow-lg"
@@ -200,9 +199,7 @@ export default function ProfileDashboard() {
               <FaMoneyBillWave className="text-white/70" />
               <div>
                 <p className="text-sm text-purple-200">Total Spent</p>
-                <p className="font-semibold">
-                  {formatCurrency(totalSpent)}
-                </p>
+                <p className="font-semibold">{formatCurrency(totalSpent)}</p>
               </div>
             </div>
 
@@ -238,7 +235,9 @@ export default function ProfileDashboard() {
                 <p className="font-semibold text-white">Default Shipping</p>
 
                 {!shipping ? (
-                  <p className="text-purple-200">No shipping address available</p>
+                  <p className="text-purple-200">
+                    No shipping address available
+                  </p>
                 ) : (
                   <>
                     <p>{shipping.name}</p>
@@ -289,9 +288,7 @@ export default function ProfileDashboard() {
             <div className="space-y-6">
               <AnimatePresence>
                 {orders
-                  .sort(
-                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-                  )
+                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                   .map((order, index) => (
                     <motion.article
                       key={order._id}
@@ -319,30 +316,44 @@ export default function ProfileDashboard() {
                               {formatCurrency(order.totalAmount)}
                             </h3>
                             <StatusBadge status={order.status} />
-  {console.log("Order ID:", order._id, "Payment method raw:", order.paymentMethod)}
+                            {console.log(
+                              "Order ID:",
+                              order._id,
+                              "Payment method raw:",
+                              order.paymentMethod
+                            )}
 
-{order.paymentMethod &&
- (order.paymentMethod.toString().trim().toLowerCase() === "cod" ||
-  order.paymentMethod.toString().trim().toLowerCase() === "cash on delivery") ? (
-  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
-    Cash on Delivery
-  </span>
-) : (
-  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-300 border border-green-400/30">
-    Online Payment
-  </span>
-)}
-
+                            {order.paymentMethod &&
+                            (order.paymentMethod
+                              .toString()
+                              .trim()
+                              .toLowerCase() === "cod" ||
+                              order.paymentMethod
+                                .toString()
+                                .trim()
+                                .toLowerCase() === "cash on delivery") ? (
+                              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
+                                Cash on Delivery
+                              </span>
+                            ) : (
+                              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-300 border border-green-400/30">
+                                Online Payment
+                              </span>
+                            )}
                           </div>
                           <p className="text-purple-200 text-sm mt-1">
                             Placed on {formatDate(order.createdAt)}
                           </p>
 
-                          {order.isCancelled && (
-                            <p className="mt-1 text-sm italic text-purple-200">
-                              Refund processed in 6–7 days.
-                            </p>
-                          )}
+                        {order.isCancelled &&
+  order.paymentMethod &&
+  !["cod", "cash on delivery"].includes(
+    order.paymentMethod.toString().trim().toLowerCase()
+  ) && (
+    <p className="mt-1 text-sm italic text-purple-200">
+      Refund processed in 6–7 days.
+    </p>
+  )}
                         </div>
 
                         {/* ACTIONS */}

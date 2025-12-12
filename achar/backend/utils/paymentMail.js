@@ -147,6 +147,24 @@ export const deliveredOrderTemplate = (name, orderId) => `
   </div>
 `;
 
+// ============================================
+// 💸 COD ORDER PLACED TEMPLATE
+// ============================================
+export const codOrderPlacedTemplate = (name, orderId, amount) => `
+  <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+    <h2 style="color:#ff9800;">🧾 Cash on Delivery Order Placed</h2>
+
+    <p>Hello ${name},</p>
+    <p>Your order has been successfully placed with <strong>Cash on Delivery</strong>.</p>
+
+    <div style="margin-top: 15px; padding: 15px; background:#fff8e1; border-left:4px solid #ff9800;">
+      <p><strong>Order ID:</strong> ${orderId}</p>
+      <p><strong>Amount:</strong> ₹${amount}</p>
+    </div>
+
+    <p style="margin-top: 20px;">We will notify you once your order is shipped.</p>
+  </div>
+`;
 
 // ============================================
 // 📤 SEND SUCCESS MAIL
@@ -196,3 +214,10 @@ export const sendOrderDeliveredMail = async (email, name, orderId) => {
   const html = deliveredOrderTemplate(name, orderId);
   await sendPaymentMail(email, "Order Delivered Successfully", html);
 };
+
+
+export const sendCODOrderPlacedMail = async (email, name, orderId, amount) => {
+  const html = codOrderPlacedTemplate(name, orderId, amount);
+  await sendPaymentMail(email, "COD Order Placed Successfully", html);
+};
+
