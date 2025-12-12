@@ -10,6 +10,7 @@ import MasalaProduct from "../models/MasalaProduct.js";
 import GheeProduct from "../models/GheeProduct.js";
 import AgarbattiProduct from "./../models/agarbattiModel.js";
 import GanpatiProduct from "../models/ganpatimodel.js";
+import axios from "axios";
 import { sendOrderToDelhivery } from "../utils/delhivery.js";
 import {
   sendPaymentSuccessMail,
@@ -19,6 +20,7 @@ import {
   sendOrderOutForDeliveryMail ,
   sendOrderDeliveredMail,
 } from "../utils/paymentMail.js";
+
 
 dotenv.config();
 
@@ -184,6 +186,8 @@ export const createOrder = async (req, res) => {
       throw new Error("Failed to create Razorpay order. Please try again.");
     const customerEmail = req.body.email || shippingAddress?.email || null;
     // 🧠 Save in DB
+    const paymentMethod = req.body.paymentMethod || "Online";
+const paymentStatus = paymentMethod === "COD" ? "Pending" : "Paid";
     const newOrder = await Order.create({
       orderNumber,
       invoiceNumber,
@@ -193,6 +197,8 @@ export const createOrder = async (req, res) => {
       products,
       totalAmount,
       shippingAddress,
+        paymentMethod,  
+  paymentStatus, 
       razorpayOrderId: razorpayOrder.id,
     });
 
@@ -561,5 +567,62 @@ export const getAllOrders = async (req, res) => {
   } catch (err) {
     console.error("Get all orders error:", err);
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+
+
+export const calculateShippingCharge = async (req, res) => {
+  try {
+    const { destinationPincode, totalWeight, isCOD } = req.body;
+
+    if (!destinationPincode) {
+      return res.status(400).json({
+        success: false,
+        message: "Destination pincode is required",
+      });
+    }
+
+    const originPincode = "110042"; // your origin
+    const weight = totalWeight || 500; // grams
+    const paymentType = isCOD ? "COD" : "Pre-paid";
+
+    const url = "https://track.delhivery.com/api/kinko/v1/invoice/charges/.json";
+
+    const params = {
+      o_pin: originPincode,
+      d_pin: destinationPincode,
+      cgm: weight,
+      pt: paymentType,
+      md: "E",
+      ss: "Delivered",
+    };
+
+    const response = await axios.get(url, {
+      params,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${process.env.DELHIVERY_API_TOKEN}`,
+      },
+    });
+
+    console.log("📦 SHIPPING RESPONSE:", response.data);
+
+    // ✅ Correctly extract total_amount from first element
+    const chargeData = response.data[0]; // first object in array
+    const totalCharge = chargeData?.total_amount || 0;
+
+    return res.json({
+      success: true,
+      charges: totalCharge,
+      breakdown: chargeData,
+    });
+  } catch (err) {
+    console.error("❌ SHIPPING ERROR:", err.response?.data || err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to calculate shipping charges",
+    });
   }
 };

@@ -78,7 +78,7 @@ const AddToCart = () => {
     setTimeout(() => setShowSuccess(false), 2600);
   };
 
-  const gstRate = 0.12;
+  const gstRate = 0.05;
   const gstAmount = (totalPrice - (discountAmount || 0)) * gstRate;
   const finalAmount = totalPrice - (discountAmount || 0) + gstAmount;
 
@@ -316,7 +316,7 @@ const AddToCart = () => {
                 </div>
               )}
 
-              <SummaryRow label="GST (12%)" value={formatPrice(gstAmount)} />
+              <SummaryRow label="All Inclusive Price" value={formatPrice(gstAmount)} />
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-gray-700 font-medium">Total</span>

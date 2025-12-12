@@ -9,6 +9,11 @@ const ProceedToCheckout = () => {
   const { cartItems, totalPrice } = useContext(CartContext);
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [shippingCharge, setShippingCharge] = useState(0);
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+
+ 
+  
 
   const [shippingAddress, setShippingAddress] = useState({
     name: "",
@@ -20,6 +25,67 @@ const ProceedToCheckout = () => {
     phone: "",
   });
 
+ 
+  
+  // -------------------------------
+// CALCULATE TOTAL CART WEIGHT IN GRAMS & KG
+// -------------------------------
+ // NEW: Chargeable weight = max(actual weight, volumetric weight)
+const totalCartWeightGrams = cartItems.reduce((total, item) => {
+  if (!item.selectedWeight) return total;
+
+  // Convert selected weight to grams
+  let actualWeight = 0;
+  const w = item.selectedWeight.toString().toLowerCase();
+  if (w.includes("kg")) actualWeight = parseFloat(w) * 1000;
+  else if (w.includes("g")) actualWeight = parseFloat(w);
+
+  // Default dimensions in cm if not provided
+  const l = item.length || 10;
+  const b = item.breadth || 10;
+  const h = item.height || 10;
+
+  // Volumetric weight (grams) formula used by Delhivery: (L*B*H)/5000*1000
+  const volumetricWeight = (l * b * h) / 5000 * 1000;
+
+  // Chargeable weight = max(actual weight, volumetric weight)
+  const chargeableWeight = Math.max(actualWeight, volumetricWeight);
+
+  return total + chargeableWeight;
+}, 0);
+// -------------------------------
+// CALL SHIPPING API WHEN PINCODE IS ENTERED
+// -------------------------------
+useEffect(() => {
+  const pin = shippingAddress.pincode;
+  if (pin.length === 6) fetchShippingCharge(pin);
+}, [shippingAddress.pincode]);
+
+const fetchShippingCharge = async (pincode) => {
+  try {
+    setIsLoadingShipping(true);
+
+    const res = await axios.post("/api/orders/shipping/calculate", {
+     pickupPincode: "421505",
+  destinationPincode: pincode,
+  totalWeight: totalCartWeightGrams, // already updated
+  isCOD: false,                  // Prepaid shipment
+    });
+
+    if (res.data.success) {
+      setShippingCharge(res.data.charges || 0);
+    } else {
+      setShippingCharge(0);
+      console.warn("Delhivery response not valid:", res.data);
+    }
+  } catch (err) {
+    console.error("Shipping calc error:", err.response?.data || err.message);
+    setShippingCharge(0);
+  } finally {
+    setIsLoadingShipping(false);
+  }
+};
+  
   // Prefill name if logged in
   useEffect(() => {
     if (user) {
@@ -50,9 +116,66 @@ const ProceedToCheckout = () => {
   };
 
   // ✅ GST Calculation (12%)
-  const gstRate = 0.12;
-  const gstAmount = totalPrice * gstRate;
-  const finalAmount = totalPrice + gstAmount;
+// ✅ GST Calculation (5%)
+const gstRate = 0.05;
+const gstAmount = totalPrice * gstRate;
+
+// 🟢 FINAL AMOUNT = Subtotal + GST + Shipping Charge
+const finalAmount = totalPrice + gstAmount + shippingCharge;
+
+const handleCOD = async () => {
+  if (!user) return alert("Please log in to continue.");
+  if (!cartItems.length) return alert("Your cart is empty.");
+
+  const validationError = isShippingValid();
+  if (validationError) return alert(validationError);
+
+  try {
+    const products = cartItems.map((item) => ({
+      productType:
+        item.productType ||
+        (item.category === "Oil"
+          ? "OilProduct"
+          : item.category === "Masala"
+          ? "MasalaProduct"
+          : item.category === "Ghee"
+          ? "GheeProduct"
+          : item.category === "Agarbatti"
+          ? "AgarbattiProduct"
+          : item.category === "Ganpati"
+          ? "GanpatiProduct"
+          : "Product"),
+      product: item._id,
+      quantity: item.quantity || 1,
+      price: item.currentPrice || 0,
+      name:
+        item.category === "Agarbatti"
+          ? item.title
+          : item.productName || item.title || item.name,
+      image: item.productImages?.[0],
+      weight: item.selectedWeight || null,
+      volume: item.selectedVolume || null,
+      pack: item.selectedPack || null,
+    }));
+
+    const res = await axios.post("/api/orders/create-order", {
+      userId: user._id || user.id,
+      products,
+      totalAmount: finalAmount,
+      shippingAddress,
+      paymentMethod: "COD", // 🔥 NEW
+      paymentStatus: "Pending", // 🔥 NEW
+    });
+
+    if (!res.data.success) return alert(res.data.message);
+
+    alert("✅ Order placed successfully with Cash on Delivery!");
+    navigate("/profile");
+  } catch (err) {
+    console.error("COD Order Error:", err);
+    alert("Failed to place COD order. Please try again.");
+  }
+};
 
   // ✅ Payment Handler
   const handlePayment = async () => {
@@ -364,13 +487,29 @@ const ProceedToCheckout = () => {
             <span>₹{totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
-            <span>GST (12%)</span>
+            <span>All Inclusive Price</span>
             <span>₹{gstAmount.toFixed(2)}</span>
           </div>
+          {/* Shipping Charges */}
+<div className="flex justify-between text-sm text-blue-600 font-medium">
+  <span>Delivery Charges Included</span>
+  {isLoadingShipping ? (
+    <span>Calculating...</span>
+  ) : (
+    <span>₹{shippingCharge}</span>
+  )}
+</div>
+
           <div className="flex justify-between text-lg font-bold pt-3 border-t">
             <span>Total</span>
             <span className="text-green-600">₹{finalAmount.toFixed(2)}</span>
           </div>
+<button
+  onClick={handleCOD}
+  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg shadow-lg transition mb-3"
+>
+  🚚 Cash on Delivery (COD)
+</button>
 
           <button
             onClick={handlePayment}

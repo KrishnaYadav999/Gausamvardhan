@@ -7,6 +7,7 @@ import {
   getUserOrders,
   getOrderById,
   getAllOrders,
+  calculateShippingCharge,
 
 } from "../controllers/orderController.js";
 
@@ -19,5 +20,5 @@ router.post("/update-status", updateOrderStatus);
 router.get("/user-orders/:userId", getUserOrders); // all orders of a user
 router.get("/:orderId", getOrderById); // 
 router.get("/admin/orders", getAllOrders);  
-
+router.post("/shipping/calculate", calculateShippingCharge);
 export default router;

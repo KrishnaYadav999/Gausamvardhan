@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-const statusOptions = ["pending", "shipped", "out-for-delivery", "delivered", "cancelled", "refunded", ];
+const statusOptions = ["pending", "shipped", "out-for-delivery", "delivered", "cancelled", "refunded"];
 
 const statusColors = {
   pending: "text-yellow-600",
@@ -13,7 +13,7 @@ const statusColors = {
   "out-for-delivery": "text-purple-600",
   delivered: "text-green-600",
   cancelled: "text-red-600",
-    refunded: "text-blue-600",
+  refunded: "text-blue-600",
 };
 
 const filterOptions = [
@@ -25,6 +25,13 @@ const filterOptions = [
   { label: "Last 60 Days", value: "60d" },
 ];
 
+// Helper to format payment method
+const formatPaymentMethod = (method) => {
+  if (!method) return "Unknown";
+  const m = method.toString().trim().toLowerCase();
+  return m === "cod" || m === "cash on delivery" ? "Cash on Delivery" : "Online Payment";
+};
+
 const AdminUserOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,9 +42,7 @@ const AdminUserOrders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `/api/orders/admin/orders?filter=${selectedFilter}`
-      );
+      const res = await axios.get(`/api/orders/admin/orders?filter=${selectedFilter}`);
       if (res.data.success) {
         setOrders(res.data.orders);
         setOrderCounts(res.data.orderCounts || {});
@@ -100,7 +105,7 @@ const AdminUserOrders = () => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - 100, 40, { align: "right" });
 
     const tableColumn = [
-      "Order #", "Invoice", "User", "Email", "Status", "Products", "Total", "Ordered On", "Shipping Address"
+      "Order #", "Invoice", "User", "Email", "Status", "Payment Method", "Products", "Total", "Ordered On", "Shipping Address"
     ];
 
     const tableRows = orders.map(order => {
@@ -112,6 +117,7 @@ const AdminUserOrders = () => {
         order.user?.name,
         order.user?.email,
         order.isCancelled ? `Cancelled (${order.cancelReason})` : order.status,
+        formatPaymentMethod(order.paymentMethod),
         products,
         `₹${order.totalAmount}`,
         new Date(order.createdAt).toLocaleString(),
@@ -126,7 +132,7 @@ const AdminUserOrders = () => {
       theme: "grid",
       headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold", fontSize: 7 },
       styles: { fontSize: 6, cellPadding: 3, overflow: "linebreak", valign: "middle" },
-      columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 50 }, 2: { cellWidth: 60 }, 3: { cellWidth: 80 }, 4: { cellWidth: 50 }, 5: { cellWidth: 100 }, 6: { cellWidth: 40 }, 7: { cellWidth: 70 }, 8: { cellWidth: 180 } },
+      columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 50 }, 2: { cellWidth: 60 }, 3: { cellWidth: 80 }, 4: { cellWidth: 50 }, 5: { cellWidth: 60 }, 6: { cellWidth: 100 }, 7: { cellWidth: 40 }, 8: { cellWidth: 70 }, 9: { cellWidth: 180 } },
       margin: { left: 20, right: 20 },
       pageBreak: "auto",
       didDrawPage: (data) => {
@@ -148,6 +154,7 @@ const AdminUserOrders = () => {
       User: order.user?.name,
       Email: order.user?.email,
       Status: order.isCancelled ? `Cancelled (${order.cancelReason})` : order.status,
+      "Payment Method": formatPaymentMethod(order.paymentMethod),
       Products: order.products.map(p => `${p.name} x${p.quantity} ₹${p.price}`).join(", "),
       Total: order.totalAmount,
       "Ordered On": new Date(order.createdAt).toLocaleString(),
@@ -201,19 +208,19 @@ const AdminUserOrders = () => {
         <div className="space-y-6">
           {orders.map(order => (
             <div key={order._id} className="border rounded-lg p-4 shadow-md bg-white">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                 <div>
                   <p className="font-bold text-lg">Order #{order.orderNumber}</p>
                   <p className="text-sm text-gray-500">Invoice: {order.invoiceNumber}</p>
                   <p className="text-sm text-gray-600">User: {order.user?.name} ({order.user?.email})</p>
                   <p className="text-sm text-gray-500">Ordered on: {new Date(order.createdAt).toLocaleString()}</p>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
                   <select value={order.status} onChange={(e) => handleUpdateStatus(order._id, e.target.value)} className="border px-3 py-1 rounded" disabled={order.status === "delivered"} >
                     {statusOptions.map(status => <option key={status} value={status}>{status}</option>)}
                   </select>
                   {!order.isCancelled && (
-                    <button onClick={() => handleCancel(order._id)} className="ml-3 px-4 py-1 bg-red-500 text-white rounded">
+                    <button onClick={() => handleCancel(order._id)} className="px-4 py-1 bg-red-500 text-white rounded">
                       Cancel
                     </button>
                   )}
@@ -234,32 +241,23 @@ const AdminUserOrders = () => {
                     <img src={item.image || "/no-image.png"} alt={item.name} className="w-16 h-16 rounded mr-4 object-cover" />
                     <div>
                       <p className="font-medium">{item.name}</p>
- {item.pack && (
-  <p className="text-sm text-gray-600">Pack: {item.pack}</p>
-)}
-
-{item.weight && (
-  <p className="text-sm text-gray-600">Weight: {item.weight}</p>
-)}
-
-{item.volume && (
-  <p className="text-sm text-gray-600">Volume: {item.volume}</p>
-)}
-
-
+                      {item.pack && <p className="text-sm text-gray-600">Pack: {item.pack}</p>}
+                      {item.weight && <p className="text-sm text-gray-600">Weight: {item.weight}</p>}
+                      {item.volume && <p className="text-sm text-gray-600">Volume: {item.volume}</p>}
                       <p className="text-sm text-gray-600">Qty: {item.quantity} × ₹{item.price}</p>
                       <p className="font-bold">₹{item.quantity * item.price}</p>
-                      
                     </div>
-                    
                   </div>
                 ))}
               </div>
 
-              <div className="mt-3 flex justify-between items-center">
+              <div className="mt-3 flex justify-between items-center flex-wrap gap-2">
                 <span className="font-bold text-lg">Total: ₹{order.totalAmount}</span>
                 <span className={`font-semibold ${order.isCancelled ? statusColors["cancelled"] : statusColors[order.status] || "text-gray-800"}`}>
                   {order.isCancelled ? `Cancelled (${order.cancelReason})` : order.status}
+                </span>
+                <span className="px-2 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-800">
+                  {formatPaymentMethod(order.paymentMethod)}
                 </span>
               </div>
             </div>

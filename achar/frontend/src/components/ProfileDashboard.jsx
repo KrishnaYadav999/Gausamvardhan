@@ -319,6 +319,20 @@ export default function ProfileDashboard() {
                               {formatCurrency(order.totalAmount)}
                             </h3>
                             <StatusBadge status={order.status} />
+  {console.log("Order ID:", order._id, "Payment method raw:", order.paymentMethod)}
+
+{order.paymentMethod &&
+ (order.paymentMethod.toString().trim().toLowerCase() === "cod" ||
+  order.paymentMethod.toString().trim().toLowerCase() === "cash on delivery") ? (
+  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
+    Cash on Delivery
+  </span>
+) : (
+  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-300 border border-green-400/30">
+    Online Payment
+  </span>
+)}
+
                           </div>
                           <p className="text-purple-200 text-sm mt-1">
                             Placed on {formatDate(order.createdAt)}
