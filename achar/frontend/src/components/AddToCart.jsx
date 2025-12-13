@@ -20,7 +20,9 @@ const formatPrice = (v) =>
 const SummaryRow = ({ label, value, accent }) => (
   <div className="flex justify-between items-center text-sm md:text-base">
     <span className="text-gray-700">{label}</span>
-    <span className={`font-medium ${accent ? "text-green-600" : "text-gray-800"}`}>
+    <span
+      className={`font-medium ${accent ? "text-green-600" : "text-gray-800"}`}
+    >
       {value}
     </span>
   </div>
@@ -44,10 +46,12 @@ const AddToCart = () => {
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
   const [windowSize, setWindowSize] = useState({ w: 1200, h: 800 });
+  const [couponInput, setCouponInput] = useState("");
 
   useEffect(() => {
     setWindowSize({ w: window.innerWidth, h: window.innerHeight });
-    const onResize = () => setWindowSize({ w: window.innerWidth, h: window.innerHeight });
+    const onResize = () =>
+      setWindowSize({ w: window.innerWidth, h: window.innerHeight });
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -56,25 +60,39 @@ const AddToCart = () => {
         COUPON VALIDATION LOGIC
   ----------------------------------------------------*/
   const handleApplyCoupon = () => {
-    const coup = cartItems[0]?.coupons?.[0];
+    const enteredCode = couponInput.trim();
 
-    if (!coup) {
-      toast.error("No coupon available!");
+    if (!enteredCode) {
+      toast.error("Please enter a coupon code");
       return;
     }
 
-    if (!coup.isPermanent && new Date(coup.expiryDate) < new Date()) {
-      toast.error("⚠️ Coupon Expired");
+    const availableCoupon = cartItems[0]?.coupons?.find(
+      (c) => c.code.toLowerCase() === enteredCode.toLowerCase()
+    );
+
+    if (!availableCoupon) {
+      toast.error("❌ Invalid coupon code");
       return;
     }
 
-    if (coup.isActive === false) {
-      toast.error("⚠️ Coupon Not Active");
+    if (
+      !availableCoupon.isPermanent &&
+      new Date(availableCoupon.expiryDate) < new Date()
+    ) {
+      toast.error("⚠️ Coupon expired");
       return;
     }
 
-    applyCoupon(coup);
+    if (availableCoupon.isActive === false) {
+      toast.error("⚠️ Coupon not active");
+      return;
+    }
+
+    applyCoupon(availableCoupon);
     setShowSuccess(true);
+    setCouponInput("");
+
     setTimeout(() => setShowSuccess(false), 2600);
   };
 
@@ -118,11 +136,12 @@ const AddToCart = () => {
           transition={{ delay: 0.2 }}
           className="text-xl md:text-2xl font-extrabold text-gray-800"
         >
-          Your cart is empty 
+          Your cart is empty
         </motion.h2>
 
         <p className="text-gray-500 mt-2 text-sm md:text-base max-w-xs">
-          Looks like you haven't added anything yet. Explore products & add to cart!
+          Looks like you haven't added anything yet. Explore products & add to
+          cart!
         </p>
 
         {/* CTA Button */}
@@ -173,7 +192,8 @@ const AddToCart = () => {
           {/* LEFT: items */}
           <div className="lg:col-span-2 space-y-5">
             {cartItems.map((item) => {
-              const imgSrc = item.productImages?.[0] || item.images?.[0] || "/no-image.png";
+              const imgSrc =
+                item.productImages?.[0] || item.images?.[0] || "/no-image.png";
               return (
                 <motion.article
                   key={`${item._id}-${item.selectedWeight}-${item.selectedVolume}-${item.selectedPack}`}
@@ -206,15 +226,22 @@ const AddToCart = () => {
                           {item.productName || item.title}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
-                          {item.selectedWeight || item.selectedVolume || item.selectedPack || ""}
+                          {item.selectedWeight ||
+                            item.selectedVolume ||
+                            item.selectedPack ||
+                            ""}
                         </p>
 
                         <div className="mt-3 flex items-center gap-3">
                           <p className="text-lg font-bold text-green-600">
-                            {formatPrice((item.currentPrice || 0) * (item.quantity || 1))}
+                            {formatPrice(
+                              (item.currentPrice || 0) * (item.quantity || 1)
+                            )}
                           </p>
                           <p className="text-xs text-gray-400 line-through">
-                            {item.mrp ? formatPrice(item.mrp * (item.quantity || 1)) : ""}
+                            {item.mrp
+                              ? formatPrice(item.mrp * (item.quantity || 1))
+                              : ""}
                           </p>
                           {item.offer && (
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
@@ -247,7 +274,11 @@ const AddToCart = () => {
                             key={item.quantity}
                             initial={{ scale: 0.95 }}
                             animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 20,
+                            }}
                             className="text-gray-800 font-medium px-2"
                           >
                             {item.quantity}
@@ -288,7 +319,7 @@ const AddToCart = () => {
 
                     <div className="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 flex items-center justify-between">
                       <div>Seller: {item.sellerName || "Local Store"}</div>
-                      <div>Delivery: {item.deliveryEstimate || "2-4 days"}</div>
+                      <div>Delivery: {item.deliveryEstimate || "6-7 days"}</div>
                     </div>
                   </div>
                 </motion.article>
@@ -303,7 +334,9 @@ const AddToCart = () => {
               animate={{ opacity: 1, y: 0 }}
               className="sticky top-6 bg-white/85 backdrop-blur-md border border-gray-100 rounded-2xl p-5 shadow-lg w-full"
             >
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Order Summary
+              </h2>
 
               <SummaryRow label="Items" value={`${totalItems}`} />
               <div className="my-3">
@@ -312,11 +345,18 @@ const AddToCart = () => {
 
               {discountAmount > 0 && (
                 <div className="mb-2">
-                  <SummaryRow label="Discount" value={`- ${formatPrice(discountAmount)}`} accent />
+                  <SummaryRow
+                    label="Discount"
+                    value={`- ${formatPrice(discountAmount)}`}
+                    accent
+                  />
                 </div>
               )}
 
-              <SummaryRow label="All Inclusive Price" value={formatPrice(gstAmount)} />
+              <SummaryRow
+                label="All Inclusive Price"
+                value={formatPrice(gstAmount)}
+              />
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-gray-700 font-medium">Total</span>
@@ -324,41 +364,45 @@ const AddToCart = () => {
                     {formatPrice(finalAmount)}
                   </span>
                 </div>
-
                 {/* Coupon */}
-                {cartItems[0]?.coupons?.[0] && !coupon?.code ? (
+                {/* Coupon */}
+                {coupon && coupon.code ? (
+                  <div className="mt-3 p-3 rounded-lg bg-green-50 border border-green-100 text-green-700 text-sm font-semibold">
+                    Coupon <span className="font-bold">{coupon.code}</span>{" "}
+                    applied 🎉
+                  </div>
+                ) : (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-3 p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-white border border-green-100"
+                    className="mt-3 p-4 rounded-lg bg-gradient-to-r from-emerald-50 to-white border border-green-100"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-semibold text-green-700">
-                          {cartItems[0].coupons[0].code}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {cartItems[0].coupons[0].discountType === "percentage"
-                            ? `${cartItems[0].coupons[0].discountValue}% off`
-                            : `Save ${formatPrice(cartItems[0].coupons[0].discountValue)}`}
-                        </div>
-                      </div>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                      Apply Coupon
+                    </p>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        placeholder="Enter coupon code"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-green-500
+                   uppercase text-sm"
+                      />
 
                       <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={handleApplyCoupon}
-                        className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold shadow"
+                        className="px-4 py-2 rounded-lg bg-green-600
+                   text-white font-semibold shadow"
                       >
                         Apply
                       </motion.button>
                     </div>
                   </motion.div>
-                ) : coupon?.code ? (
-                  <div className="mt-3 p-3 rounded-lg bg-green-50 border border-green-100 text-green-700 text-sm font-semibold">
-                    Coupon <span className="font-bold">{coupon.code}</span> applied
-                  </div>
-                ) : null}
-
+                )}
                 <div className="mt-6">
                   <button
                     onClick={() => navigate("/checkout")}
@@ -367,9 +411,8 @@ const AddToCart = () => {
                     Proceed to Checkout
                   </button>
                 </div>
-
                 <p className="text-xs text-gray-400 mt-3">
-                  Safe & secure checkout • Free delivery above ₹499
+                  Safe & secure checkout • Free delivery above ₹500
                 </p>
               </div>
             </motion.div>
@@ -397,11 +440,19 @@ const AddToCart = () => {
                     stroke="currentColor"
                     strokeWidth={2}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mt-4">Coupon Applied!</h3>
-                <p className="text-sm text-gray-600 mt-2">You've saved on your order 🎉</p>
+                <h3 className="text-xl font-bold text-gray-900 mt-4">
+                  Coupon Applied!
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  You've saved on your order 🎉
+                </p>
               </div>
             </motion.div>
           </>

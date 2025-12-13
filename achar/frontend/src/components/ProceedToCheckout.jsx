@@ -4,6 +4,7 @@ import { CartContext } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const ProceedToCheckout = () => {
   const { cartItems, totalPrice } = useContext(CartContext);
@@ -120,15 +121,31 @@ const fetchShippingCharge = async (pincode) => {
 const gstRate = 0.05;
 const gstAmount = totalPrice * gstRate;
 
-// 🟢 FINAL AMOUNT = Subtotal + GST + Shipping Charge
-const finalAmount = totalPrice + gstAmount + shippingCharge;
+const FREE_SHIPPING_LIMIT = 500;
+const isFreeShipping = totalPrice >= FREE_SHIPPING_LIMIT;
+
+// 🟢 Final Shipping Charge
+const finalShippingCharge = isFreeShipping ? 0 : shippingCharge;
+
+// 🟢 FINAL AMOUNT
+const finalAmount = totalPrice + gstAmount + finalShippingCharge;
+useEffect(() => {
+  const pin = shippingAddress.pincode;
+
+  if (isFreeShipping) {
+    setShippingCharge(0);
+    return;
+  }
+
+  if (pin.length === 6) fetchShippingCharge(pin);
+}, [shippingAddress.pincode, isFreeShipping]);
 
 const handleCOD = async () => {
-  if (!user) return alert("Please log in to continue.");
-  if (!cartItems.length) return alert("Your cart is empty.");
+  if (!user) return toast("Please log in to continue.");
+  if (!cartItems.length) return toast("Your cart is empty.");
 
   const validationError = isShippingValid();
-  if (validationError) return alert(validationError);
+  if (validationError) return toast(validationError);
 
   try {
     const products = cartItems.map((item) => ({
@@ -168,24 +185,24 @@ const handleCOD = async () => {
       paymentStatus: "Pending", // 🔥 NEW
     });
 
-    if (!res.data.success) return alert(res.data.message);
+    if (!res.data.success) return toast(res.data.message);
 
-    alert("✅ Order placed successfully with Cash on Delivery!");
+    toast("✅ Order placed successfully with Cash on Delivery!");
     navigate("/profile");
   } catch (err) {
     console.error("COD Order Error:", err);
-    alert("Failed to place COD order. Please try again.");
+    toast("Failed to place COD order. Please try again.");
   }
 };
 
   // ✅ Payment Handler
   const handlePayment = async () => {
     if (loading) return;
-    if (!user) return alert("Please log in to proceed.");
-    if (!cartItems.length) return alert("Your cart is empty.");
+    if (!user) return toast("Please log in to proceed.");
+    if (!cartItems.length) return toast("Your cart is empty.");
 
     const validationError = isShippingValid();
-    if (validationError) return alert(validationError);
+    if (validationError) return toast(validationError);
 
     try {
       // Map products properly for backend
@@ -226,7 +243,7 @@ const handleCOD = async () => {
         }
       );
 
-      if (!res.data.success) return alert(res.data.message);
+      if (!res.data.success) return toast(res.data.message);
 
       const { razorpayOrder, key, invoiceNumber } = res.data;
 
@@ -249,14 +266,14 @@ const handleCOD = async () => {
             );
 
             if (verifyRes.data.success) {
-              alert("✅ Payment Successful! Thank you for shopping.");
+              toast("✅ Payment Successful! Thank you for shopping.");
               navigate("/profile");
             } else {
-              alert("❌ Payment verification failed!");
+              toast("❌ Payment verification failed!");
             }
           } catch (error) {
             console.error("Verification error:", error);
-            alert("Payment verification failed.");
+            toast("Payment verification failed.");
           }
         },
         prefill: {
@@ -276,7 +293,7 @@ const handleCOD = async () => {
       razorpay.open();
     } catch (err) {
       console.error("Order creation error:", err);
-      alert("Failed to create order. Please try again.");
+      toast("Failed to create order. Please try again.");
     }
   };
 
@@ -466,6 +483,7 @@ const handleCOD = async () => {
 
         {/* ---------------- RIGHT SIDE ---------------- */}
         <div className="border p-6 rounded-xl shadow-md bg-white space-y-4">
+
           <h2 className="font-semibold text-lg">🧾 Order Summary</h2>
 
           <div className="divide-y text-sm">
@@ -492,14 +510,26 @@ const handleCOD = async () => {
             <span>₹{gstAmount.toFixed(2)}</span>
           </div>
           {/* Shipping Charges */}
-<div className="flex justify-between text-sm text-blue-600 font-medium">
-  <span>Delivery Charges Included</span>
-  {isLoadingShipping ? (
+
+<div className="flex justify-between text-sm font-medium">
+  <span>
+    Delivery Charges{" "}
+    {!isFreeShipping && (
+      <span className="text-xs text-gray-400">
+        (Free above ₹{FREE_SHIPPING_LIMIT})
+      </span>
+    )}
+  </span>
+
+  {isFreeShipping ? (
+    <span className="text-green-600 font-bold">FREE </span>
+  ) : isLoadingShipping ? (
     <span>Calculating...</span>
   ) : (
-    <span>₹{shippingCharge}</span>
+    <span className="text-blue-600">₹{shippingCharge}</span>
   )}
 </div>
+
 
           <div className="flex justify-between text-lg font-bold pt-3 border-t">
             <span>Total</span>

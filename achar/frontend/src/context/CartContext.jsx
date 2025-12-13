@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { useNavigate } from "react-router-dom";  
-import {toast} from "react-hot-toast"
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 export const CartContext = createContext();
 
@@ -10,7 +10,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
   const [coupon, setCoupon] = useState(null); // applied coupon
-const [discountAmount, setDiscountAmount] = useState(0)
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   // Load cart for the logged-in user
   useEffect(() => {
@@ -49,54 +49,48 @@ const [discountAmount, setDiscountAmount] = useState(0)
 
   const addToCart = (product) => {
     if (!user) {
-      const confirmLogin = window.confirm(
-        "⚠️ Please login to continue.\n\nTo add this product to your cart, kindly log in to your account first.\n\n⚡ कृपया आगे बढ़ने के लिए लॉगिन करें।\nइस उत्पाद को अपने कार्ट में जोड़ने के लिए पहले अपने अकाउंट में लॉगिन करें।\n\n👉 Do you want to go to the sign in page now?"
-      );
-      if (confirmLogin) {
-        navigate("/signin"); // ✅ Redirect user to login page
+      if (window.confirm("Please login to add items to cart")) {
+        navigate("/signin");
       }
       return;
     }
 
     const price = parseFloat(product.selectedPrice) || 0;
 
-    setCartItems((prev) => {
-      const existingItem = prev.find(
-        (item) =>
-          item._id === product._id &&
-          item.selectedWeight === product.selectedWeight &&
-          item.selectedVolume === product.selectedVolume &&
-           item.selectedPack === product.selectedPack
-      );
+    // ✅ UNIQUE KEY FOR SAME PRODUCT VARIANT
+    const cartKey = `${product._id}_${product.selectedWeight || ""}_${
+      product.selectedVolume || ""
+    }_${product.selectedPack || ""}`;
 
-      if (existingItem) {
-        return prev.map((item) =>
-          item._id === product._id &&
-          item.selectedWeight === product.selectedWeight &&
-          item.selectedVolume === product.selectedVolume&&
-           item.selectedPack === product.selectedPack
-            ? {
-                ...item,
-                quantity: Math.min(99, item.quantity + (product.quantity || 1)), // max 99
-              }
-            : item
-        );
-      } else {
-        return [
-          ...prev,
-          {
-            ...product,
-            quantity: product.quantity || 1,
-            currentPrice: price,
-          productImages: product.productImages?.length
-  ? product.productImages
-  : product.images?.length
-    ? product.images
-    : ["/no-image.png"], // fallbac// fallback image
-              selectedPack: product.selectedPack || null, 
-          },
-        ];
+    setCartItems((prev) => {
+      const index = prev.findIndex((item) => item.cartKey === cartKey);
+
+      // ✅ SAME ITEM → increase quantity
+      if (index !== -1) {
+        const updated = [...prev];
+        updated[index] = {
+          ...updated[index],
+          quantity: Math.min(99, updated[index].quantity + 1),
+        };
+        return updated;
       }
+
+      // ✅ NEW ITEM
+      return [
+        {
+          ...product,
+          cartKey, // 🔥 VERY IMPORTANT
+          quantity: 1,
+          basePrice: price,
+          currentPrice: price,
+          productImages: product.productImages?.length
+            ? product.productImages
+            : product.images?.length
+            ? product.images
+            : ["/no-image.png"],
+        },
+        ...prev,
+      ];
     });
   };
 
@@ -107,7 +101,7 @@ const [discountAmount, setDiscountAmount] = useState(0)
         item._id === id &&
         item.selectedWeight === weight &&
         item.selectedVolume === volume &&
-         item.selectedPack === pack
+        item.selectedPack === pack
           ? {
               ...item,
               quantity: Math.min(99, Math.max(1, item.quantity + change)), // min 1, max 99
@@ -131,33 +125,37 @@ const [discountAmount, setDiscountAmount] = useState(0)
     );
   };
 
- const applyCoupon = (couponObj) => {
-  if (!couponObj || (!couponObj.isPermanent && new Date(couponObj.expiryDate) < new Date())) {
-    toast("Invalid or expired coupon");
-    return;
-  }
+  const applyCoupon = (couponObj) => {
+    if (
+      !couponObj ||
+      (!couponObj.isPermanent && new Date(couponObj.expiryDate) < new Date())
+    ) {
+      toast("Invalid or expired coupon");
+      return;
+    }
 
-  let discount = 0;
-  let updatedCart = [...cartItems];
+    let discount = 0;
+    let updatedCart = [...cartItems];
 
-  if (couponObj.discountType === "percentage") {
-    updatedCart = updatedCart.map((item) => ({
-      ...item,
-      currentPrice:
-        parseFloat(item.currentPrice) - (parseFloat(item.currentPrice) * couponObj.discountValue) / 100,
-    }));
-  } else if (couponObj.discountType === "flat") {
-    discount = couponObj.discountValue;
-    updatedCart = updatedCart.map((item) => ({
-      ...item,
-      currentPrice: Math.max(0, parseFloat(item.currentPrice) - discount),
-    }));
-  }
+    if (couponObj.discountType === "percentage") {
+      updatedCart = updatedCart.map((item) => ({
+        ...item,
+        currentPrice:
+          parseFloat(item.currentPrice) -
+          (parseFloat(item.currentPrice) * couponObj.discountValue) / 100,
+      }));
+    } else if (couponObj.discountType === "flat") {
+      discount = couponObj.discountValue;
+      updatedCart = updatedCart.map((item) => ({
+        ...item,
+        currentPrice: Math.max(0, parseFloat(item.currentPrice) - discount),
+      }));
+    }
 
-  setCartItems(updatedCart);
-  setCoupon(couponObj);
-  toast(`Coupon ${couponObj.code} applied!`);
-};
+    setCartItems(updatedCart);
+    setCoupon(couponObj);
+    toast(`Coupon ${couponObj.code} applied!`);
+  };
 
   // Totals
   const totalItems = cartItems.reduce(
@@ -166,7 +164,8 @@ const [discountAmount, setDiscountAmount] = useState(0)
   );
   const totalPrice = cartItems.reduce(
     (acc, item) =>
-      acc + (parseFloat(item.currentPrice) || 0) * (parseInt(item.quantity) || 0),
+      acc +
+      (parseFloat(item.currentPrice) || 0) * (parseInt(item.quantity) || 0),
     0
   );
 
@@ -180,12 +179,12 @@ const [discountAmount, setDiscountAmount] = useState(0)
         totalItems,
         totalPrice,
         setCartItems, // ✅ Export this for Buy Now
-           coupon,
-    discountAmount,
-    applyCoupon,
+        coupon,
+        discountAmount,
+        applyCoupon,
       }}
     >
       {children}
     </CartContext.Provider>
   );
-}; 
+};

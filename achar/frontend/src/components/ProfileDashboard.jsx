@@ -278,7 +278,7 @@ export default function ProfileDashboard() {
                 You have no orders yet.
               </p>
               <Link
-                to="/shop"
+                to="/"
                 className="inline-block mt-4 px-5 py-2 rounded-xl bg-pink-500 text-white font-semibold hover:bg-pink-400 transition"
               >
                 Shop Now
