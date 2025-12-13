@@ -7,10 +7,10 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    userEmail: {
-      type: String,
-      required: false,
-    },
+userEmail: {
+  type: String,
+  required: false,
+},
 
     // Add orderNumber here
     orderNumber: {
@@ -18,11 +18,11 @@ const orderSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
-    invoiceNumber: {
-      type: String,
-      unique: true,
-      required: true,
-    },
+invoiceNumber: {
+  type: String,
+  unique: true,
+  required: true,
+},
 
     products: [
       {
@@ -35,10 +35,10 @@ const orderSchema = new mongoose.Schema(
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         image: String, // optional fallback
-        name: String, // optional fallback
-        weight: String, // ✅ must be here
-        volume: String,
-        pack: String,
+        name: String,  // optional fallback
+          weight: String, // ✅ must be here
+    volume: String,
+    pack: String, 
       },
     ],
 
@@ -53,7 +53,7 @@ const orderSchema = new mongoose.Schema(
       country: { type: String, required: true },
       phone: { type: String },
     },
-    paymentMethod: {
+ paymentMethod: {
       type: String,
       enum: ["COD", "Online"],
       default: "Online",
@@ -65,19 +65,14 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: [
-        "pending",
-        "paid",
-        "shipped",
-        "out-for-delivery",
-        "delivered",
-        "cancelled",
-        "refunded",
-      ],
+      enum: ["pending", "paid", "shipped","out-for-delivery", "delivered", "cancelled","refunded"],
       default: "pending",
     },
     isCancelled: { type: Boolean, default: false },
     cancelReason: { type: String, default: "" },
+delhiveryWaybill: {
+  type: String,
+},
 
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },

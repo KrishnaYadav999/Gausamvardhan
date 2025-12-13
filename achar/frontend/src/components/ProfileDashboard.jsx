@@ -132,13 +132,17 @@ export default function ProfileDashboard() {
   const storedUser = user || JSON.parse(localStorage.getItem("user"));
   if (!storedUser) return null;
 
-  const totalSpent = orders.reduce(
-    (s, o) => s + (Number(o.totalAmount) || 0),
-    0
-  );
-  const activeOrders = orders.filter(
+const totalSpent = orders
+  .filter(
     (o) => o.status !== "cancelled" && o.status !== "refunded"
-  );
+  )
+  .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+
+const activeOrders = orders.filter(
+  (o) => o.status !== "cancelled" && o.status !== "refunded"
+);
+
+
 
   // ⭐ FETCH DEFAULT SHIPPING ADDRESS (FIRST ORDER)
   const shipping =
@@ -190,7 +194,7 @@ export default function ProfileDashboard() {
               <FaBoxOpen className="text-white/70" />
               <div>
                 <p className="text-sm text-purple-200">Active Orders</p>
-                <p className="font-semibold">{activeOrders.length}</p>
+               <p className="font-semibold">{activeOrders.length}</p>
               </div>
             </div>
 
@@ -345,15 +349,18 @@ export default function ProfileDashboard() {
                             Placed on {formatDate(order.createdAt)}
                           </p>
 
-                        {order.isCancelled &&
-  order.paymentMethod &&
-  !["cod", "cash on delivery"].includes(
-    order.paymentMethod.toString().trim().toLowerCase()
-  ) && (
-    <p className="mt-1 text-sm italic text-purple-200">
-      Refund processed in 6–7 days.
-    </p>
-  )}
+                          {order.isCancelled &&
+                            order.paymentMethod &&
+                            !["cod", "cash on delivery"].includes(
+                              order.paymentMethod
+                                .toString()
+                                .trim()
+                                .toLowerCase()
+                            ) && (
+                              <p className="mt-1 text-sm italic text-purple-200">
+                                Refund processed in 6–7 days.
+                              </p>
+                            )}
                         </div>
 
                         {/* ACTIONS */}

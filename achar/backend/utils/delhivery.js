@@ -172,3 +172,35 @@ export const sendOrderToDelhivery = async (order) => {
     return null;
   }
 };
+
+export const cancelDelhiveryOrder = async (waybill, reason = "Customer cancelled") => {
+  try {
+    if (!waybill) {
+      console.log("⚠ No waybill found, skipping Delhivery cancel");
+      return;
+    }
+
+    const res = await axios.post(
+      "https://track.delhivery.com/api/p/edit",
+      {
+        waybill,
+        status: "Cancelled",
+        cancellation_reason: reason,
+      },
+      {
+        headers: {
+          Authorization: `Token ${process.env.DELHIVERY_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("🚚 Delhivery order cancelled:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error(
+      "❌ Delhivery cancel failed:",
+      err.response?.data || err.message
+    );
+  }
+};

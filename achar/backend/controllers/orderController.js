@@ -12,6 +12,7 @@ import AgarbattiProduct from "./../models/agarbattiModel.js";
 import GanpatiProduct from "../models/ganpatimodel.js";
 import axios from "axios";
 import { sendOrderToDelhivery } from "../utils/delhivery.js";
+import { cancelDelhiveryOrder } from "../utils/delhivery.js";
 import {
   sendPaymentSuccessMail,
   sendOrderCancelledMail,
@@ -19,7 +20,8 @@ import {
   sendOrderShippedMail,
   sendOrderOutForDeliveryMail ,
   sendOrderDeliveredMail,
-  sendCODOrderPlacedMail 
+  sendCODOrderPlacedMail ,
+   sendAdminNewOrderMail 
 } from "../utils/paymentMail.js";
 
 
@@ -207,7 +209,18 @@ const newOrder = await Order.create({
   paymentStatus,
   razorpayOrderId: razorpayOrder.id,
 });
-
+try {
+  await sendAdminNewOrderMail(
+    shippingAddress.name,
+    newOrder._id,
+    totalAmount,
+    paymentMethod,
+    products.length
+  );
+  console.log("📩 Admin notified for new order");
+} catch (err) {
+  console.log("❌ Admin mail failed:", err.message);
+}
 // ===============================
 // 📩 SEND MAIL FOR COD ORDERS
 // ===============================
@@ -241,8 +254,12 @@ if (paymentMethod === "COD") {
 // 🚚 Send order to Delhivery
 try {
   const delhiveryRes = await sendOrderToDelhivery(newOrder);
+const waybill =
+  delhiveryRes?.packages?.[0]?.waybill || null;
+
 
   newOrder.delhiveryResponse = delhiveryRes;
+  newOrder.delhiveryWaybill = waybill;
   await newOrder.save();
 
   console.log("✅ Delhivery response saved in order");
@@ -409,6 +426,35 @@ export const cancelOrder = async (req, res) => {
         message: "Order already cancelled",
       });
     }
+    if (
+      order.status === "shipped" ||
+      order.status === "out-for-delivery" ||
+      order.status === "delivered"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Order cannot be cancelled after shipment",
+      });
+    }
+
+    // 🔍 Extract Waybill from Delhivery response
+// 🔍 Use saved waybill
+const waybill = order.delhiveryWaybill;
+
+console.log("📦 Cancelling Delhivery Waybill:", waybill);
+
+// ❗ Safety check
+if (waybill) {
+  await cancelDelhiveryOrder(
+    waybill,
+    reason || "User cancelled order"
+  );
+} else {
+  console.log("⚠ No waybill found, skipping Delhivery cancel");
+}
+
+
+    
 
     // Updating order status
     order.status = "cancelled";
@@ -430,6 +476,7 @@ export const cancelOrder = async (req, res) => {
       success: true,
       message: "Order cancelled successfully",
     });
+    
   } catch (err) {
     console.error("Cancel order error:", err);
     return res.status(500).json({

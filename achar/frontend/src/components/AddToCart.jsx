@@ -381,22 +381,22 @@ const AddToCart = () => {
                       Apply Coupon
                     </p>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="text"
                         value={couponInput}
                         onChange={(e) => setCouponInput(e.target.value)}
                         placeholder="Enter coupon code"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg
-                   focus:outline-none focus:ring-2 focus:ring-green-500
-                   uppercase text-sm"
+                        className="w-full sm:flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg
+      focus:outline-none focus:ring-2 focus:ring-green-500
+      uppercase text-sm"
                       />
 
                       <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={handleApplyCoupon}
-                        className="px-4 py-2 rounded-lg bg-green-600
-                   text-white font-semibold shadow"
+                        className="w-full sm:w-auto flex-shrink-0 px-4 py-2 rounded-lg
+      bg-green-600 text-white font-semibold shadow"
                       >
                         Apply
                       </motion.button>

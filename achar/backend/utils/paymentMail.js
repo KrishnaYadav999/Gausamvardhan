@@ -166,6 +166,31 @@ export const codOrderPlacedTemplate = (name, orderId, amount) => `
   </div>
 `;
 
+export const adminNewOrderTemplate = (
+  customerName,
+  orderId,
+  amount,
+  paymentMethod,
+  productsCount
+) => `
+  <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+    <h2 style="color:#007bff;">🛒 New Order Received</h2>
+
+    <p><strong>A new order has been placed on GausamVardhan.</strong></p>
+
+    <div style="margin-top: 15px; padding: 15px; background:#f1f7ff; border-left:4px solid #007bff;">
+      <p><strong>Customer Name:</strong> ${customerName}</p>
+      <p><strong>Order ID:</strong> ${orderId}</p>
+      <p><strong>Amount:</strong> ₹${amount}</p>
+      <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+      <p><strong>Total Items:</strong> ${productsCount}</p>
+    </div>
+
+    <p style="margin-top: 20px;">
+      Please login to admin panel to process this order.
+    </p>
+  </div>
+`;
 // ============================================
 // 📤 SEND SUCCESS MAIL
 // ============================================
@@ -221,3 +246,27 @@ export const sendCODOrderPlacedMail = async (email, name, orderId, amount) => {
   await sendPaymentMail(email, "COD Order Placed Successfully", html);
 };
 
+export const sendAdminNewOrderMail = async (
+  customerName,
+  orderId,
+  amount,
+  paymentMethod,
+  productsCount
+) => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const html = adminNewOrderTemplate(
+    customerName,
+    orderId,
+    amount,
+    paymentMethod,
+    productsCount
+  );
+
+  await sendPaymentMail(
+    adminEmail,
+    "🛒 New Order Received - GausamVardhan",
+    html
+  );
+};
