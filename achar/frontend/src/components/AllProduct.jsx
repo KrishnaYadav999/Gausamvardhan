@@ -1,22 +1,31 @@
 import React, { useRef, useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 import { CartContext } from "../context/CartContext";
 import toast from "react-hot-toast";
+import StarRating from "../components/StarRating";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "/api";
 
 /* ---------------- HELPERS ---------------- */
-
+const getAvgRating = (reviews = []) => {
+  if (!reviews.length) return 0;
+  const total = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+  return Number((total / reviews.length).toFixed(1));
+};
 // Ghee weight pricing
 const getPriceByWeight = (product, weight) => {
-  if (!product?.pricePerGram || !weight) return Number(product.currentPrice) || 0;
+  if (!product?.pricePerGram || !weight)
+    return Number(product.currentPrice) || 0;
+
   const map = {};
   product.pricePerGram.split(",").forEach((p) => {
     const [w, v] = p.split("=");
-    if (w && v) map[w.trim()] = Number(v.trim());
+    if (w && v) map[w.trim()] = Number(v.trim()); // ensure Number
   });
-  return map[weight] || Number(product.currentPrice) || 0;
+
+  return map[weight] !== undefined ? map[weight] : Number(product.currentPrice) || 0;
 };
 
 // Ganpati pack pricing
@@ -32,13 +41,26 @@ const getDiscountPercent = (cut, current) => {
 };
 
 /* ---------------- MAIN ---------------- */
+
 const HolidayPicks = () => {
   const sliderRef = useRef(null);
   const { addToCart } = useContext(CartContext);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  /* ---------------- PRODUCT CLICK → DETAILS ---------------- */
+  const handleProductClick = (product) => {
+    if (product.tag === "Ghee") {
+      navigate(`/ghee-product/${product.slug}/${product._id}`);
+    } else if (product.tag === "Ganpati") {
+      navigate(`/ganpati-product/${product.slug}/${product._id}`);
+    } else {
+      navigate(`/products/${product.category?.slug}/${product._id}`);
+    }
+  };
 
+  /* ---------------- FETCH ALL ---------------- */
   /* ---------------- FETCH ALL ---------------- */
   useEffect(() => {
     const fetchAll = async () => {
@@ -50,28 +72,35 @@ const HolidayPicks = () => {
           axios.get(`${BASE_URL}/products`),
         ]);
 
-        const gheeData = ghee.data.map((p) => ({
-          ...p,
-          tag: "Ghee",
-          productName: p.productName,
-          cutPrice: p.cutPrice,
-          currentPrice: p.currentPrice,
-          selectedWeight: p.pricePerGram
-            ? p.pricePerGram.split(",")[0].split("=")[0].trim()
-            : "",
-          productImages: p.productImages,
-        }));
+        const gheeData = ghee.data.map((p) => {
+          const weights = p.pricePerGram?.split(",") || [];
+          const defaultWeight = weights.length
+            ? weights[0].split("=")[0].trim()
+            : "";
+          return {
+            ...p,
+            tag: "Ghee",
+            productName: p.title,
+            cutPrice: p.cutPrice,
+            currentPrice: p.currentPrice,
+            selectedWeight: defaultWeight, // ✅ default weight
+            productImages: p.images,
+          };
+        });
 
-        const ganpatiData = ganpati.data.map((p) => ({
-          ...p,
-          tag: "Ganpati",
-          productName: p.title,
-          cutPrice: p.cut_price,
-          currentPrice: p.current_price,
-          packs: p.packs || [],
-          selectedPack: p.packs?.[0]?.name || "",
-          productImages: p.images,
-        }));
+        const ganpatiData = ganpati.data.map((p) => {
+          const defaultPack = p.packs?.[0]?.name || "";
+          return {
+            ...p,
+            tag: "Ganpati",
+            productName: p.title,
+            cutPrice: p.cut_price,
+            currentPrice: p.current_price,
+            packs: p.packs || [],
+            selectedPack: defaultPack, // ✅ default pack
+            productImages: p.images,
+          };
+        });
 
         const agarbattiData = agarbatti.data.map((p) => ({
           ...p,
@@ -79,6 +108,9 @@ const HolidayPicks = () => {
           productName: p.productName || p.title,
           cutPrice: p.cutPrice,
           currentPrice: p.currentPrice,
+          selectedWeight: p.pricePerGram
+            ? p.pricePerGram.split(",")[0].split("=")[0].trim()
+            : "", // ✅ default weight if any
           productImages: p.productImages,
         }));
 
@@ -88,6 +120,9 @@ const HolidayPicks = () => {
           productName: p.productName,
           cutPrice: p.cutPrice,
           currentPrice: p.currentPrice,
+          selectedWeight: p.pricePerGram
+            ? p.pricePerGram.split(",")[0].split("=")[0].trim()
+            : "", // ✅ default weight if any
           productImages: p.productImages,
         }));
 
@@ -129,13 +164,13 @@ const HolidayPicks = () => {
     let price = Number(product.currentPrice);
 
     if (product.pricePerGram) {
-      price = getPriceByWeight(product, product.selectedWeight);
       if (!product.selectedWeight) return toast.error("Select weight");
+      price = getPriceByWeight(product, product.selectedWeight);
     }
 
     if (product.packs?.length) {
-      price = getPriceByGanpatiPack(product.packs, product.selectedPack);
       if (!product.selectedPack) return toast.error("Select pack");
+      price = getPriceByGanpatiPack(product.packs, product.selectedPack);
     }
 
     addToCart({ ...product, selectedPrice: price });
@@ -151,7 +186,12 @@ const HolidayPicks = () => {
   }
 
   return (
-    <div className="bg-[#f5f5f7] py-16 px-6 relative overflow-hidden">
+   <div
+  className="py-16 px-6 relative overflow-hidden bg-cover bg-center"
+  style={{
+    backgroundImage:
+      "url('')",
+  }}>
       <h2 className="text-4xl font-semibold mb-10">
         <span className="text-blue-600">Best</span>{" "}
         <span className="text-orange-500">Selling</span>{" "}
@@ -178,124 +218,143 @@ const HolidayPicks = () => {
         ref={sliderRef}
         className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide pb-6"
       >
-        {products.map((item, index) =>
-          item.isBanner ? (
-            /* -------- BANNER -------- */
-            <div
-              key={index}
-              className="min-w-[380px] h-[460px] rounded-3xl shadow-lg relative overflow-hidden p-8"
-            >
-              <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                  <p className="text-xs tracking-widest text-gray-600 mb-3">
-                    {item.subtitle}
-                  </p>
-                  <h3 className="text-3xl font-semibold">{item.title}</h3>
-                </div>
-                <video
-                  src={item.video}
-                  autoPlay
-                  muted
-                  loop
-                  className="w-full h-64 object-cover rounded-xl"
-                />
-              </div>
-            </div>
-          ) : (
-            /* -------- PRODUCT CARD -------- */
-            <div
-              key={item._id}
-              className="min-w-[300px] bg-white rounded-3xl p-4 shadow-sm hover:shadow-lg transition flex flex-col justify-between"
-            >
-              <img
-                src={item.productImages?.[0]}
-                className="h-48 w-full object-cover rounded-xl mb-3"
-                alt=""
-              />
+       {products.map((item, index) => {
+  // ---------------- CALCULATE DISPLAYED PRICE ----------------
+ const displayedPrice = item.tag === "Ghee" && item.pricePerGram
+  ? getPriceByWeight(item, item.selectedWeight)
+  : item.packs?.length
+  ? getPriceByGanpatiPack(item.packs, item.selectedPack)
+  : Number(item.currentPrice); // ensure number
 
-              <span className="text-orange-500 text-sm font-medium">
-                {item.tag}
-              </span>
-
-              <h3 className="font-semibold text-lg">{item.productName}</h3>
-
-              {/* PRICE */}
-              <div className="flex items-center gap-2 my-1">
-                {item.cutPrice > 0 && (
-                  <span className="line-through text-gray-400 text-sm">
-                    ₹{item.cutPrice}
-                  </span>
-                )}
-                <span className="text-lg font-semibold">
-                  ₹{item.currentPrice}
-                </span>
-                {item.cutPrice > item.currentPrice && (
-                  <span className="text-green-600 text-xs font-semibold">
-                    {getDiscountPercent(item.cutPrice, item.currentPrice)}% OFF
-                  </span>
-                )}
-              </div>
-
-              {/* WEIGHT */}
-              {item.pricePerGram && (
-                <select
-                  value={item.selectedWeight}
-                  onChange={(e) =>
-                    setProducts((prev) =>
-                      prev.map((p) =>
-                        p._id === item._id
-                          ? { ...p, selectedWeight: e.target.value }
-                          : p
-                      )
-                    )
-                  }
-                  className="border px-3 py-2 my-2 rounded-md"
-                >
-                  {item.pricePerGram.split(",").map((p) => {
-                    const w = p.split("=")[0].trim();
-                    return (
-                      <option key={w} value={w}>
-                        {w}
-                      </option>
-                    );
-                  })}
-                </select>
-              )}
-
-              {/* GANPATI PACKS */}
-              {item.packs?.length > 0 && (
-                <select
-                  value={item.selectedPack}
-                  onChange={(e) =>
-                    setProducts((prev) =>
-                      prev.map((p) =>
-                        p._id === item._id
-                          ? { ...p, selectedPack: e.target.value }
-                          : p
-                      )
-                    )
-                  }
-                  className="border px-3 py-2 my-2 rounded-md"
-                >
-                  {item.packs.map((p) => (
-                    <option key={p.name} value={p.name}>
-                      {p.name} – ₹{p.price}
-                    </option>
-                  ))}
-                </select>
-              )}
-
-              <button
-                onClick={() => handleAddToCart(item)}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-3"
-              >
-                <ShoppingCart size={18} /> Add to Cart
-              </button>
-            </div>
-          )
-        )}
+  // ---------------- RENDER BANNER ----------------
+  if (item.isBanner) {
+    return (
+      <div
+        key={index}
+        className="min-w-[380px] h-[460px] rounded-3xl shadow-lg relative overflow-hidden p-8"
+      >
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-sm" />
+        <div className="relative z-10 flex flex-col h-full justify-between">
+          <div>
+            <p className="text-xs tracking-widest text-gray-600 mb-3">
+              {item.subtitle}
+            </p>
+            <h3 className="text-3xl font-semibold">{item.title}</h3>
+          </div>
+          <video
+            src={item.video}
+            autoPlay
+            muted
+            loop
+            className="w-full h-64 object-cover rounded-xl"
+          />
+        </div>
       </div>
+    );
+  }
+
+  // ---------------- RENDER PRODUCT ----------------
+  return (
+    <div
+      key={item._id}
+      onClick={() => handleProductClick(item)}
+      className="min-w-[300px] bg-white rounded-3xl p-4 shadow-sm hover:shadow-lg transition flex flex-col justify-between cursor-pointer"
+    >
+      <img
+        src={item.productImages?.[0]}
+        className="h-48 w-full object-cover rounded-xl mb-3"
+        alt={item.productName}
+      />
+
+      <span className="text-orange-500 text-sm font-medium">{item.tag}</span>
+
+      <h3 className="font-semibold text-lg">{item.productName}</h3>
+
+      <StarRating
+        rating={getAvgRating(item.reviews)}
+        count={item.reviews?.length || 0}
+      />
+
+     <div className="flex items-center gap-2 my-1">
+  {item.cutPrice > 0 && (
+    <span className="line-through text-gray-400 text-sm">
+      ₹{item.cutPrice}  {/* cutPrice wahi rahe */}
+    </span>
+  )}
+  <span className="text-lg font-semibold">₹{displayedPrice}</span> {/* dynamic current price */}
+  
+  {item.cutPrice > 0 && (
+    <span className="text-sm text-red-500">
+      {getDiscountPercent(item.cutPrice, displayedPrice)}% OFF
+    </span>
+  )}
+</div>
+
+      {/* ---------------- WEIGHT SELECT ---------------- */}
+      {item.pricePerGram && (
+        <select
+          value={item.selectedWeight}
+          onClick={(e) => e.stopPropagation()}
+         onChange={(e) => {
+  e.stopPropagation();
+  const value = e.target.value;
+  setProducts((prev) =>
+    prev.map((p) =>
+      p._id === item._id ? { ...p, selectedWeight: value } : p
+    )
+  );
+}}
+          className="border px-3 py-2 my-2 rounded-md"
+        >
+          {item.pricePerGram.split(",").map((p) => {
+            const w = p.split("=")[0].trim();
+            return (
+              <option key={w} value={w}>
+                {w}
+              </option>
+            );
+          })}
+        </select>
+      )}
+
+      {/* ---------------- PACK SELECT ---------------- */}
+      {item.packs?.length > 0 && (
+        <select
+          value={item.selectedPack}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            e.stopPropagation();
+            setProducts((prev) =>
+              prev.map((p) =>
+                p._id === item._id
+                  ? { ...p, selectedPack: e.target.value }
+                  : p
+              )
+            );
+          }}
+          className="border px-3 py-2 my-2 rounded-md"
+        >
+          {item.packs.map((p) => (
+            <option key={p.name} value={p.name}>
+              {p.name} – ₹{p.price}
+            </option>
+          ))}
+        </select>
+      )}
+
+      {/* ---------------- ADD TO CART ---------------- */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleAddToCart(item);
+        }}
+        className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-3"
+      >
+        <ShoppingCart size={18} /> Add to Cart
+      </button>
+    </div>
+  );
+})}      </div>
     </div>
   );
 };
