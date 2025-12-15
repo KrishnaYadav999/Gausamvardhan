@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const translations = {
   achar: "अचार",
@@ -106,8 +107,107 @@ const Category = () => {
 
   return (
     <div className="px-4 py-10 font-[Poppins] flex flex-col items-center">
+      <Helmet>
+        {/* =========================
+       CATEGORY PAGE TITLE
+  ========================== */}
+        <title>
+          Shop by Category – Homemade Achar, Desi Ghee, Agarbatti, Pooja
+          Products | Gausamvardhan
+        </title>
 
-      {/* 🔥 CSS FIX for unwanted scrolling lines / focus highlights */}
+        {/* =========================
+      META DESCRIPTION
+  ========================== */}
+        <meta
+          name="description"
+          content="Explore categories at Gausamvardhan – homemade achar, pure desi cow ghee, agarbatti, dhoop, ganpati murti, pooja essentials, masala & oils. Traditional Indian products made naturally with no chemicals or preservatives."
+        />
+
+        {/* =========================
+       CANONICAL
+  ========================== */}
+        <link rel="canonical" href="https://www.gausamvardhan.com/" />
+
+        {/* =========================
+       OPEN GRAPH
+  ========================== */}
+        <meta property="og:title" content="Shop by Category – Gausamvardhan" />
+        <meta
+          property="og:description"
+          content="Browse homemade achar, pure desi ghee, pooja samagri, agarbatti, dhoop & traditional Indian products by category."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.gausamvardhan.com/" />
+        <meta property="og:site_name" content="Gausamvardhan" />
+        <meta
+          property="og:image"
+          content="https://www.gausamvardhan.com/images/category-og.jpg"
+        />
+
+        {/* =========================
+       TWITTER
+  ========================== */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Shop Indian Homemade Products by Category | Gausamvardhan"
+        />
+        <meta
+          name="twitter:description"
+          content="Find homemade achar, desi ghee, agarbatti, dhoop, ganpati murti & pooja essentials by category."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.gausamvardhan.com/images/category-og.jpg"
+        />
+
+        {/* =========================
+      ROBOTS
+  ========================== */}
+        <meta name="robots" content="index, follow" />
+
+        {/* =========================
+       CATEGORY KEYWORDS (INDIAN SEARCH INTENT)
+  ========================== */}
+        <meta
+          name="keywords"
+          content="
+    shop by category india,
+    indian product categories online,
+    homemade products category,
+
+    achar category, homemade achar, desi achar,
+    ghee category, pure cow ghee, a2 ghee,
+    pooja products category, pooja samagri online,
+    agarbatti category, dhoop sticks, cow dung dhoop,
+    ganpati murti category, eco friendly ganesh murti,
+    masala category, indian spices online,
+    oil category, cold pressed oil india,
+
+    traditional indian products,
+    village style products,
+    gaav ka saman online,
+    bharatiya paramparik utpad,
+
+    अचार कैटेगरी, देसी घी,
+    पूजा सामग्री, अगरबत्ती,
+    धूप, गणपति मूर्ति,
+    घर का बना सामान,
+
+    gausamvardhan categories
+    "
+        />
+
+        {/* =========================
+       GEO TARGET
+  ========================== */}
+        <meta name="geo.region" content="IN" />
+        <meta name="geo.placename" content="India" />
+        <meta name="language" content="English,Hindi" />
+      </Helmet>
+
+      {/*  CSS FIX for unwanted scrolling lines / focus highlights */}
       <style>
         {`
           * { outline: none !important; }
@@ -126,7 +226,17 @@ const Category = () => {
       </style>
 
       {/* Heading */}
-      <h2 className="text-2xl sm:text-3xl font-bold text-green-700 mb-8 text-center">
+      <h2
+        className="
+    text-2xl sm:text-3xl
+    font-semibold
+    text-green-700
+    mb-8
+    text-center
+    font-poppins
+    tracking-tight
+  "
+      >
         {heading}
       </h2>
 
@@ -165,7 +275,7 @@ const Category = () => {
                 "
               >
                 <img
-                  src={cat.image || 'https://via.placeholder.com/300'}
+                  src={cat.image || "https://via.placeholder.com/300"}
                   className="w-full h-full object-cover"
                   alt={cat.name}
                 />

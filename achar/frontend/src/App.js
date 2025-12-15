@@ -69,85 +69,100 @@ import AllProduct from "./components/AllProduct";
 function App() {
   return (
    <>
-    <Helmet>
-  {/* ===== PAGE TITLE ===== */}
+  <Helmet>
+  {/* =========================
+       PRIMARY TITLE
+  ========================== */}
   <title>
-    gausamvardhan – pure desi ghee, achar, agarbatti, masala, oils & pooja essentials online
+    Buy Homemade Achar, Pure Desi Ghee, Ganpati Murti, Agarbatti & Pooja Samagri Online | Gausamvardhan
   </title>
 
-  {/* ===== META DESCRIPTION ===== */}
+  {/* =========================
+       META DESCRIPTION
+  ========================== */}
   <meta
     name="description"
-    content="Buy premium desi ghee, achar (pickles), oils, masala, agarbatti, dhoop cups, ganpati murti & pooja essentials at gausamvardhan. Shop garlic ginger chili pickle, bharwa lal mirch achar, mango achar, amla pickle, haldi mirchi achar & more. 100% authentic, chemical-free products."
+    content="Shop authentic homemade achar, pure desi cow ghee, ganpati murti, cow dung products, agarbatti, dhoop cups, masala & pooja essentials online at Gausamvardhan. Traditional recipes, no chemicals, no preservatives. Haldi mirchi amla adrak achar, lal mirchi bharwa achar, mango pickle, kathal ka achar, lemon chili pickle, amla murabba & more."
   />
 
-  {/* ===== CANONICAL ===== */}
+  {/* =========================
+       CANONICAL URL
+  ========================== */}
   <link rel="canonical" href="https://www.gausamvardhan.com/" />
 
-  {/* ===== OPEN GRAPH ===== */}
-  <meta property="og:title"
-    content="gausamvardhan – pure ghee, pickles, masala, oils & pooja essentials" />
+  {/* =========================
+       OPEN GRAPH (FB / WhatsApp)
+  ========================== */}
+  <meta property="og:title" content="Homemade Achar, Pure Ghee & Pooja Essentials – Gausamvardhan" />
   <meta
     property="og:description"
-    content="Shop premium desi ghee, handmade achar, pure oils, agarbatti, dhoop cups, masalas & ganpati murti from gausamvardhan. Authentic natural products for your home."
+    content="Buy traditional homemade achar, pure cow ghee, ganpati murti, cow dung dhoop, agarbatti & pooja essentials. Authentic village-style products made with love."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.gausamvardhan.com/" />
-  <meta property="og:site_name" content="gausamvardhan" />
-  <meta property="og:image" content="https://www.gausamvardhan.com/images/og-image.jpg" />
+  <meta property="og:site_name" content="Gausamvardhan" />
+  <meta property="og:image" content="https://www.gausamvardhan.com/images/og-main.jpg" />
 
-  {/* ===== TWITTER CARD ===== */}
+  {/* =========================
+       TWITTER CARD
+  ========================== */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="gausamvardhan – organic & pooja products store" />
+  <meta name="twitter:title" content="Homemade Achar & Pure Desi Products Online | Gausamvardhan" />
   <meta
     name="twitter:description"
-    content="Explore premium ghee, achar, oils, masala, pooja essentials, agarbatti, dhoop & ganpati murti from gausamvardhan."
+    content="Shop homemade achar, pure cow ghee, ganpati murti, cow dung dhoop, agarbatti & pooja samagri online."
   />
-  <meta name="twitter:image" content="https://www.gausamvardhan.com/images/og-image.jpg" />
+  <meta name="twitter:image" content="https://www.gausamvardhan.com/images/og-main.jpg" />
   <meta name="twitter:site" content="@gausamvardhan" />
 
-  {/* ===== ROBOTS ===== */}
-  <meta name="robots" content="index, follow" />
+  {/* =========================
+      ROBOTS
+  ========================== */}
+  <meta name="robots" content="index, follow, max-image-preview:large" />
 
-  {/* ===== KEYWORDS (ENGLISH + HINDI) ===== */}
+  {/* =========================
+       MASTER KEYWORDS (PRO LEVEL)
+  ========================== */}
   <meta
     name="keywords"
     content="
-    desi ghee, pure ghee, a2 ghee, cow ghee,
-    organic oil, mustard oil, groundnut oil, cold pressed oil,
-    masala, indian spices, haldi, mirchi, garam masala,
-    achar, pickles, handmade pickles, traditional pickle,
-    garlic ginger chili pickle, ginger garlic pickle,
-    lal mirchi bharwa achar, stuffed red chili pickle,
+    homemade achar, traditional indian pickle, desi achar online,
+    haldi mirchi amla adrak achar,
+    lal mirchi bharwa achar,
+    sukha aam ka achar,
+    lasun adrak mirchi achar,
     jackfruit pickle, kathal ka achar,
     lemon chili pickle, nimbu mirchi achar,
-    nimbu achar, lemon pickle,
-    amla pickle, amla achar,
-    haldi mirchi amla adrak pickle, mixed pickle,
-    mango pickle, aam ka achar, mango achar,
-    agarbatti, dhoop, dhoop cups, pooja essentials,
-    ganpati murti, ganesh murti, pooja samagri,
-    cups for dhoop, organic pooja products,
-    gausamvardhan products, natural products, ayurvedic products,
+    amla murabba achar,
 
-    desi ghee online, pure ghee buy, organic ghee shop,
-    achar online, pickles online india,
-    agarbatti online, dhoop cups shop,
-    pooja essentials online, ganpati murti online,
+    pure desi ghee, a2 cow ghee, organic ghee online,
+    cow dung dhoop, gomay dhoop, cow dung products,
+    agarbatti sticks, herbal agarbatti, dhoop cups,
+    pooja essentials online, pooja samagri store,
+    ganpati murti online, eco friendly ganesh murti,
 
-    देसी घी, ए2 घी, शुद्ध घी,
-    अचार, मिक्स अचार, आम का अचार,
-    नींबू का अचार, नींबू मिर्च का अचार,
-    लहसुन अदरक मिर्च अचार,
-    लाल मिर्च भरवा अचार,
-    कटहल का अचार, आंवला अचार,
-    हल्दी मिर्च आंवला अदरक अचार,
-    मसाला, तेल, पूजा सामग्री,
-    अगरबत्ती, धूप, धूप कप,
-    गणपति मूर्ति, पूजा का सामान,
-    gausamvardhan उत्पाद
+    no preservative pickle, chemical free achar,
+    village style achar, maa ke haath ka achar,
+    handmade pickles india, ayurvedic achar,
+
+    घर का बना अचार, देसी अचार,
+    हल्दी मिर्च अचार, लाल मिर्च भरवा अचार,
+    आम का सूखा अचार, कटहल का अचार,
+    नींबू मिर्च का अचार, आंवला मुरब्बा,
+    शुद्ध देसी घी, गोबर धूप, पूजा सामग्री,
+    अगरबत्ती, गणपति मूर्ति,
+
+    gausamvardhan products, organic indian products
     "
   />
+
+  {/* =========================
+       GEO TARGETING (INDIA)
+  ========================== */}
+  <meta name="geo.region" content="IN" />
+  <meta name="geo.placename" content="India" />
+  <meta name="language" content="English,Hindi" />
+
 </Helmet>
 
     <ThemeProvider>
