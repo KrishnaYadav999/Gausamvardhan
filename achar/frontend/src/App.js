@@ -61,6 +61,7 @@ import HomeCertificates from "./components/HomeCertificates";
 import GausamvardhanOrganicHandcrafted from "./components/GausamvardhanOrganicHandcrafted";
 import JoinCollective from "./components/JoinCollective";
 import BeyondProducts from "./components/BeyondProducts";
+import AllProduct from "./components/AllProduct";
 // import CupCategoryProduct from "./components/CupCategoryProduct";
 // import CupDetail from "./components/CupDetail";
 // import CupProductList from "./components/CupProductList";
@@ -168,6 +169,7 @@ function App() {
             <div className="flex flex-col gap-10">
               <AcharBanner />
               <Category />
+              <AllProduct />
               <div className="">
                 <AcharProductList />
               </div>
