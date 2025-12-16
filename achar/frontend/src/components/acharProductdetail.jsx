@@ -275,7 +275,8 @@ const AcharProductDetail = () => {
       <div className="text-[0.9rem] bg-gray-50 min-h-screen">
         <div className="max-w-screen-xl mx-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            <div>
+           <div className="order-1 md:order-1">
+
               {/* MAIN IMAGE + HERO */}
               <div
                 ref={zoomRef}
@@ -338,7 +339,7 @@ const AcharProductDetail = () => {
               </div>
 
               {/* MORE ABOUT (EXISTING BLOCK - UNTOUCHED) */}
-              <div className="mt-6 bg-white p-6 rounded-2xl shadow">
+              <div className="mt-6 bg-white p-6 rounded-2xl shadow hidden md:block">
                 <h3 className="text-lg md:text-xl font-semibold mb-3">
                   More About
                 </h3>
@@ -400,7 +401,7 @@ const AcharProductDetail = () => {
 
               {/* ⭐⭐⭐ NEW SECTION — More About This Pack ⭐⭐⭐ */}
               {product.moreAboutThisPack && (
-                <div className="mt-6 bg-white p-6 rounded-2xl shadow">
+                <div className="hidden md:block">
                   <h3 className="text-lg md:text-xl font-semibold">
                     {product.moreAboutThisPack.header || "More About This Pack"}
                   </h3>
@@ -428,8 +429,8 @@ const AcharProductDetail = () => {
             </div>
 
             {/* RIGHT SIDE */}
-            <div className="sticky top-6 self-start">
-              <div className="bg-white rounded-3xl p-6 shadow-lg">
+            <div className="order-2 md:order-2 md:sticky md:top-6 self-start">
+              <div className="bg-white rounded-3xl p-4 md:p-6 shadow-lg">
                 <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">
                   {product.productName}
                 </h1>
@@ -561,6 +562,69 @@ const AcharProductDetail = () => {
                 </div>
 
                 <Features />
+{/* MORE ABOUT (MOBILE ONLY) */}
+  <div className="mt-6 bg-white p-6 rounded-2xl shadow block md:hidden">
+                <h3 className="text-lg md:text-xl font-semibold mb-3">
+                  More About
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {product.moreAboutPickle ||
+                    "Rich, traditional amlaprash made with desi khand and A2 Gir cow ghee."}
+                </p>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center font-semibold text-green-700">
+                      A
+                    </div>
+                    <div>
+                      <div className="font-medium">Authentic</div>
+                      <div className="text-xs text-gray-600">
+                        Small-batch, traditional recipe
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center font-semibold text-yellow-700">
+                      A
+                    </div>
+                    <div>
+                      <div className="font-medium">Achar</div>
+                      <div className="text-xs text-gray-600">
+                        Home Made Achar
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center font-semibold text-indigo-700">
+                      N
+                    </div>
+                    <div>
+                      <div className="font-medium">No Preservatives</div>
+                      <div className="text-xs text-gray-600">
+                        Naturally preserved
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center font-semibold text-pink-700">
+                      T
+                    </div>
+                    <div>
+                      <div className="font-medium">Taste</div>
+                      <div className="text-xs text-gray-600">
+                        {product.tasteDescription || "Sweet & tangy"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ⭐⭐⭐ NEW SECTION — More About This Pack ⭐⭐⭐ */}
+              
 
                 {/* PRODUCT DETAILS */}
                 <div className="mt-6">
@@ -582,6 +646,31 @@ const AcharProductDetail = () => {
                   </ul>
                 </div>
               </div>
+{/* MORE ABOUT THIS PACK — MOBILE (Product Details ke neeche) */}
+{product.moreAboutThisPack && (
+  <div className="mt-6 bg-white p-5 rounded-2xl shadow md:hidden">
+    <h3 className="text-lg font-semibold mb-2">
+      {product.moreAboutThisPack.header || "More About This Pack"}
+    </h3>
+
+    <p className="text-gray-700 leading-relaxed mb-4">
+      {product.moreAboutThisPack.description}
+    </p>
+
+    {product.moreAboutThisPack.images?.length > 0 && (
+      <div className="space-y-3">
+        {product.moreAboutThisPack.images.map((img, index) => (
+          <img
+            key={index}
+            src={img}
+            alt={`pack-img-${index}`}
+            className="w-full rounded-xl object-cover"
+          />
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
               {/* PRODUCT VIDEO */}
               {product.videoUrl && (

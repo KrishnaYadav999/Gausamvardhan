@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 const Chat = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Hello, I’m Gausam 🐄. How can I help you today?" }
+    { from: "bot", text: "Hello, I’m Gausam. How can I help you today?" }
   ]);
   const [input, setInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const messagesEndRef = useRef(null);
+
+  const logoUrl = "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/chatbot.png";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -72,15 +74,16 @@ const Chat = () => {
 
   return (
     <>
+      {/* Floating button */}
       {!open && (
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="fixed bottom-5 right-5 w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white text-xl cursor-pointer shadow-lg hover:bg-green-700 z-50"
+          className="fixed bottom-5 right-5 w-14 h-14 bg-green-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-green-700 z-50"
           onClick={() => setOpen(true)}
         >
-          🐄
+          <img src={logoUrl} alt="Chatbot Logo" className="w-10 h-10 rounded-full" />
         </motion.div>
       )}
 
@@ -95,7 +98,10 @@ const Chat = () => {
           >
             {/* Header */}
             <div className="bg-green-600 text-white px-4 py-2 flex justify-between items-center">
-              <span className="font-semibold flex items-center gap-2">🐄 Gausam</span>
+              <span className="font-semibold flex items-center gap-2">
+                <img src={logoUrl} alt="Chatbot Logo" className="w-6 h-6 rounded-full" />
+                Gausam
+              </span>
               <button
                 onClick={() => setOpen(false)}
                 className="text-white font-bold hover:scale-110 transition"

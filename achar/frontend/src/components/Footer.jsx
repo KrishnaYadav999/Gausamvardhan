@@ -38,10 +38,16 @@ export default function Footer() {
 
       {/* Background Shape */}
       <div
-        className="absolute bottom-0 left-0 w-full h-[230px] bg-bottom bg-cover bg-no-repeat opacity-90 animate-fadeIn"
+        className="
+    absolute bottom-0 left-0 w-full
+    h-[320px] md:h-[420px]
+    bg-center bg-no-repeat
+    opacity-90 animate-fadeIn
+    bg-contain md:bg-cover
+  "
         style={{
           backgroundImage:
-            "url('https://res.cloudinary.com/dtvihyts8/image/upload/v1764588639/33b5dd6c-b692-4370-a049-45316258f599.png')",
+            "url('https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/footer%20iamge.png')",
         }}
       />
 
@@ -100,7 +106,7 @@ export default function Footer() {
             </div>
 
             {/* Social */}
-            <div className="flex gap-6 mt-8 text-white text-2xl">
+            <div className="flex gap-6 mt-8 text-green text-2xl">
               <a
                 href="https://www.instagram.com/gau.samvardhan"
                 target="_blank"
@@ -200,7 +206,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-20 border-t pt-6 text-center text-sm text-white animate-fadeUp font-light">
+        <div className="mt-20 border-t pt-6 text-center text-sm text-green animate-fadeUp font-light">
           © {new Date().getFullYear()} SIDDHARTH MEP PRIVATE LIMITED
           (Gausamvardhan). All Rights Reserved.
         </div>

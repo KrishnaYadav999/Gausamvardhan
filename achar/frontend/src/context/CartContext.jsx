@@ -70,7 +70,7 @@ export const CartProvider = ({ children }) => {
         const updated = [...prev];
         updated[index] = {
           ...updated[index],
-          quantity: Math.min(99, updated[index].quantity + 1),
+        quantity: Math.min(99, updated[index].quantity + (product.quantity || 1)),
         };
         return updated;
       }

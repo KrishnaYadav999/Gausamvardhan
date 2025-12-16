@@ -19,10 +19,10 @@ const searchItems = [
 ];
 
 const menuItems = [
-  { title: "Achar", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-06.png?v=1753598784&width=360" },
-  { title: "Ghee", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-03.png?v=1753598766" },
-  { title: "Ganpati", icon: "https://i.pinimg.com/1200x/53/fd/bd/53fdbd0797322c9a2280321b51cd5548.jpg" },
-  { title: "PoojaEssentials", icon: "https://www.rosierfoods.com/cdn/shop/files/Icon-01.png?v=1753598791&width=360" },
+  { title: "Achar", icon: "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/image7-mi.jpeg" },
+  { title: "Ghee", icon: "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/image8-mi.jpeg" },
+  { title: "Ganpati", icon: "https://res.cloudinary.com/dkwifvhuw/image/upload/v1765013726/ganpati_x21jyf.png" },
+  { title: "PoojaEssentials", icon: "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/image9-mi.jpeg" },
 ];
 
 const Navbar = () => {

@@ -217,16 +217,48 @@ export default function CategoryProducts() {
     load();
   }, [slug]);
 
-  const handleFilter = useCallback(
-    (filters) => {
-      let temp = [...products];
-      if (filters.rating > 0)
-        temp = temp.filter((p) => p.rating >= filters.rating);
+ const handleFilter = useCallback(
+  (filters) => {
+    let temp = [...products];
 
-      setFiltered(temp);
-    },
-    [products]
-  );
+    // CATEGORY
+    if (filters.category) {
+      temp = temp.filter(
+        (p) => p.category === filters.category || p.categoryId === filters.category
+      );
+    }
+
+    // PRICE
+    temp = temp.filter((p) => {
+      const price = Number(p.currentPrice || 0);
+      return price >= filters.price[0] && price <= filters.price[1];
+    });
+
+    // RATING (from reviews)
+    if (filters.rating > 0) {
+      temp = temp.filter((p) => {
+        if (!p.reviews || p.reviews.length === 0) return false;
+
+        const avg =
+          p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+          p.reviews.length;
+
+        return avg >= filters.rating;
+      });
+    }
+
+    // STOCK
+    if (filters.stock) {
+      temp = temp.filter(
+        (p) => p.stock !== false && p.stockQuantity > 0
+      );
+    }
+
+    setFiltered(temp);
+  },
+  [products]
+);
+
 
   return (
     <>

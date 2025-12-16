@@ -11,7 +11,7 @@ import ImageZoom from "./ImageZoom";
 import Certificate from "./Certificate";
 import { Helmet } from "react-helmet-async";
 import GheeCustomerReview from "./GheeCustomerReview";
-import VideoAdvertiseList from "./VideoAdvertiseList"
+import VideoAdvertiseList from "./VideoAdvertiseList";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png"; // use same hero or change
 
@@ -397,6 +397,156 @@ const GheeProductDetail = () => {
                 ))}
               </div>
 
+              {/* MOBILE PURCHASE CARD — SAME AS ACHAR */}
+              <div className="block md:hidden mt-6 bg-white rounded-2xl p-4 shadow-lg">
+                <h1 className="text-xl font-bold text-gray-900">
+                  {product.title || product.productName}
+                </h1>
+
+                {/* Rating */}
+                <div className="flex items-center mt-2 space-x-2">
+                  <div className="flex">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={
+                          i < Math.round(Number(averageRating) || 0)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-gray-600">
+                    ({totalReviews} reviews)
+                  </span>
+                </div>
+
+                <p className="mt-4 text-gray-700 text-[0.95rem]">
+                  {product.shortDescription ||
+                    product.tagline ||
+                    "Handcrafted, fresh & delicious ghee."}
+                </p>
+
+                <Certificate />
+
+                {/* Price */}
+                <div className="mt-3 text-2xl font-bold text-green-600">
+                  ₹
+                  {getPrice(product, selectedWeight) *
+                    (weightQuantities[selectedWeight] || 1)}
+                </div>
+
+                {product.cutPrice && (
+                  <div className="line-through text-gray-400">
+                    ₹{product.cutPrice}
+                  </div>
+                )}
+
+                {/* WEIGHT OPTIONS */}
+                {(product.pricePerGram || product.weightVolume) && (
+                  <div className="mt-4">
+                    <p className="font-medium text-gray-700 mb-2 text-sm">
+                      Select Weight
+                    </p>
+
+                    <div className="flex flex-col gap-2">
+                      {(product.pricePerGram
+                        ? product.pricePerGram
+                            .split(",")
+                            .map((p) => p.split("=")[0].trim())
+                        : product.weightVolume.split(",")
+                      ).map((weight, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedWeight(weight)}
+                          className={`flex items-center justify-between border p-2 rounded-lg ${
+                            selectedWeight === weight
+                              ? "border-green-600 bg-green-50"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          <span className="text-sm font-medium">
+                            {weight} – ₹{getPrice(product, weight)}
+                          </span>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateWeightQuantity(weight, -1);
+                              }}
+                              className="px-2 border rounded"
+                            >
+                              -
+                            </button>
+                            <span className="text-sm">
+                              {weightQuantities[weight] || 1}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateWeightQuantity(weight, 1);
+                              }}
+                              className="px-2 border rounded"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA */}
+                <div className="mt-6 grid grid-cols-1 gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                    className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
+                      isOutOfStock
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
+                  </button>
+
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={isOutOfStock}
+                    className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
+                      isOutOfStock
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-yellow-400 hover:bg-yellow-500"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "💳 Shop Now"}
+                  </button>
+                </div>
+
+                <Features />
+
+                {/* PRODUCT DETAILS */}
+
+                <h3 className="text-lg font-semibold mb-2">Product Details</h3>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  {productDetails.map(
+                    (item) =>
+                      item.value && (
+                        <li key={item.key}>
+                          <span className="font-medium text-gray-900">
+                            {item.label}:
+                          </span>{" "}
+                          {item.value}
+                        </li>
+                      )
+                  )}
+                </ul>
+              </div>
+
               {/* MORE ABOUT - left column */}
               <div className="mt-6 bg-white p-6 rounded-2xl shadow">
                 <h3 className="text-lg md:text-xl font-semibold mb-3">
@@ -481,10 +631,23 @@ const GheeProductDetail = () => {
                   ))}
                 </div>
               )}
+
+              {/* PRODUCT VIDEO — MOBILE & TABLET ONLY */}
+              {product.videoUrl && (
+                <div className="mt-6 block lg:hidden">
+                  <div className="bg-white p-4 rounded-2xl shadow">
+                    <h4 className="font-semibold mb-2">Product Video</h4>
+                    <ProductVideo
+                      videoUrl={product.videoUrl}
+                      thumbnail={product.images?.[0]}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* RIGHT: Sticky purchase card */}
-            <div className="sticky top-6 self-start">
+            <div className="hidden md:block sticky top-6 self-start">
               <div className="bg-white rounded-3xl p-6 shadow-lg">
                 <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 leading-tight">
                   {product.title || product.productName}
@@ -514,7 +677,7 @@ const GheeProductDetail = () => {
                     product.tagline ||
                     "Handcrafted, fresh & delicious ghee."}
                 </p>
-                            <Certificate />
+                <Certificate />
 
                 <div className="mt-6 flex items-end gap-4">
                   <div>
@@ -744,8 +907,8 @@ const GheeProductDetail = () => {
         </div>
       </div>
       <div>
-        <GheeCustomerReview/>
-        <VideoAdvertiseList/>
+        <GheeCustomerReview />
+        <VideoAdvertiseList />
       </div>
     </>
   );
