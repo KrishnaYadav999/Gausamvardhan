@@ -192,20 +192,44 @@ const festiveItems = [
           productImages: p.productImages,
         }));
 
-        setProducts([
-          {
-            id: "banner",
-            isBanner: true,
-            title: "Pure & Authentic Products",
-            subtitle: "GAUSAMVARDHAN",
-            video:
-              "https://res.cloudinary.com/dtvihyts8/video/upload/v1765741394/27b760446327b60270741cf4f4d8ec2f_jgkbkk.mp4",
-          },
-          ...gheeData,
-          ...ganpatiData,
-          ...agarbattiData,
-          ...acharData,
-        ]);
+        // ⭐ 1. sab products combine
+const allProducts = [
+  ...gheeData,
+  ...ganpatiData,
+  ...agarbattiData,
+  ...acharData,
+];
+
+// ⭐ 2. sirf 4+ rating wale products
+const ratedProducts = allProducts.filter(
+  (p) => getAvgRating(p.reviews) >= 4
+);
+
+// ⭐ 3. har category ka sirf 1 best product
+const bestByCategory = Object.values(
+  ratedProducts.reduce((acc, product) => {
+    const tag = product.tag;
+    const rating = getAvgRating(product.reviews);
+
+    if (!acc[tag] || rating > getAvgRating(acc[tag].reviews)) {
+      acc[tag] = product;
+    }
+    return acc;
+  }, {})
+);
+
+// ⭐ 4. FINAL SET
+setProducts([
+  {
+    id: "banner",
+    isBanner: true,
+    title: "Pure & Authentic Products",
+    subtitle: "GAUSAMVARDHAN",
+    video:
+      "https://res.cloudinary.com/dtvihyts8/video/upload/v1765741394/27b760446327b60270741cf4f4d8ec2f_jgkbkk.mp4",
+  },
+  ...bestByCategory,
+]);
       } catch (err) {
         console.error(err);
         toast.error("Failed to load products");
@@ -253,7 +277,7 @@ const festiveItems = [
 
   return (
     <div
-      className="py-16 px-6 relative overflow-hidden bg-cover bg-center"
+      className="pt-0 pb-16 px-6 relative overflow-hidden bg-cover bg-center"
       style={{
         backgroundImage: "url('')",
       }}
@@ -590,7 +614,7 @@ const festiveItems = [
                   e.stopPropagation();
                   handleAddToCart(item);
                 }}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-3"
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-3"
               >
                 <ShoppingCart size={18} /> Add to Cart
               </button>

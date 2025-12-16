@@ -68,64 +68,77 @@ import AllProduct from "./components/AllProduct";
 
 function App() {
   return (
-   <>
-  <Helmet>
-  {/* =========================
+    <>
+      <Helmet>
+        {/* =========================
        PRIMARY TITLE
   ========================== */}
-  <title>
-    Buy Homemade Achar, Pure Desi Ghee, Ganpati Murti, Agarbatti & Pooja Samagri Online | Gausamvardhan
-  </title>
+        <title>
+          Buy Homemade Achar, Pure Desi Ghee, Ganpati Murti, Agarbatti & Pooja
+          Samagri Online | Gausamvardhan
+        </title>
 
-  {/* =========================
+        {/* =========================
        META DESCRIPTION
   ========================== */}
-  <meta
-    name="description"
-    content="Shop authentic homemade achar, pure desi cow ghee, ganpati murti, cow dung products, agarbatti, dhoop cups, masala & pooja essentials online at Gausamvardhan. Traditional recipes, no chemicals, no preservatives. Haldi mirchi amla adrak achar, lal mirchi bharwa achar, mango pickle, kathal ka achar, lemon chili pickle, amla murabba & more."
-  />
+        <meta
+          name="description"
+          content="Shop authentic homemade achar, pure desi cow ghee, ganpati murti, cow dung products, agarbatti, dhoop cups, masala & pooja essentials online at Gausamvardhan. Traditional recipes, no chemicals, no preservatives. Haldi mirchi amla adrak achar, lal mirchi bharwa achar, mango pickle, kathal ka achar, lemon chili pickle, amla murabba & more."
+        />
 
-  {/* =========================
+        {/* =========================
        CANONICAL URL
   ========================== */}
-  <link rel="canonical" href="https://www.gausamvardhan.com/" />
+        <link rel="canonical" href="https://www.gausamvardhan.com/" />
 
-  {/* =========================
+        {/* =========================
        OPEN GRAPH (FB / WhatsApp)
   ========================== */}
-  <meta property="og:title" content="Homemade Achar, Pure Ghee & Pooja Essentials – Gausamvardhan" />
-  <meta
-    property="og:description"
-    content="Buy traditional homemade achar, pure cow ghee, ganpati murti, cow dung dhoop, agarbatti & pooja essentials. Authentic village-style products made with love."
-  />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.gausamvardhan.com/" />
-  <meta property="og:site_name" content="Gausamvardhan" />
-  <meta property="og:image" content="https://www.gausamvardhan.com/images/og-main.jpg" />
+        <meta
+          property="og:title"
+          content="Homemade Achar, Pure Ghee & Pooja Essentials – Gausamvardhan"
+        />
+        <meta
+          property="og:description"
+          content="Buy traditional homemade achar, pure cow ghee, ganpati murti, cow dung dhoop, agarbatti & pooja essentials. Authentic village-style products made with love."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.gausamvardhan.com/" />
+        <meta property="og:site_name" content="Gausamvardhan" />
+        <meta
+          property="og:image"
+          content="https://www.gausamvardhan.com/images/og-main.jpg"
+        />
 
-  {/* =========================
+        {/* =========================
        TWITTER CARD
   ========================== */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Homemade Achar & Pure Desi Products Online | Gausamvardhan" />
-  <meta
-    name="twitter:description"
-    content="Shop homemade achar, pure cow ghee, ganpati murti, cow dung dhoop, agarbatti & pooja samagri online."
-  />
-  <meta name="twitter:image" content="https://www.gausamvardhan.com/images/og-main.jpg" />
-  <meta name="twitter:site" content="@gausamvardhan" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Homemade Achar & Pure Desi Products Online | Gausamvardhan"
+        />
+        <meta
+          name="twitter:description"
+          content="Shop homemade achar, pure cow ghee, ganpati murti, cow dung dhoop, agarbatti & pooja samagri online."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.gausamvardhan.com/images/og-main.jpg"
+        />
+        <meta name="twitter:site" content="@gausamvardhan" />
 
-  {/* =========================
+        {/* =========================
       ROBOTS
   ========================== */}
-  <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
 
-  {/* =========================
+        {/* =========================
        MASTER KEYWORDS (PRO LEVEL)
   ========================== */}
-  <meta
-    name="keywords"
-    content="
+        <meta
+          name="keywords"
+          content="
     homemade achar, traditional indian pickle, desi achar online,
     haldi mirchi amla adrak achar,
     lal mirchi bharwa achar,
@@ -154,123 +167,130 @@ function App() {
 
     gausamvardhan products, organic indian products
     "
-  />
+        />
 
-  {/* =========================
+        {/* =========================
        GEO TARGETING (INDIA)
   ========================== */}
-  <meta name="geo.region" content="IN" />
-  <meta name="geo.placename" content="India" />
-  <meta name="language" content="English,Hindi" />
+        <meta name="geo.region" content="IN" />
+        <meta name="geo.placename" content="India" />
+        <meta name="language" content="English,Hindi" />
+      </Helmet>
 
-</Helmet>
+      <ThemeProvider>
+        <SmoothScroll />
+        <AnimatedText />
+        <Navbar />
+        <NavbarDropdown />
 
-    <ThemeProvider>
-      <SmoothScroll />
-      <AnimatedText />
-      <Navbar />
-      <NavbarDropdown />
+        <Chat />
+        <Toaster position="top-right" reverseOrder={false} />
+        <Ads />
+        <ScrollToTop />
 
-      <Chat />
-      <Toaster position="top-right" reverseOrder={false} />
-      <Ads />
-      <ScrollToTop />
-
-      <Routes>
-        {/* Homepage */}
-        <Route
-          path="/"
-          element={
-            <div className="flex flex-col gap-10">
-              <AcharBanner />
-              <Category />
-              <AllProduct />
-              <div className="">
-                <AcharProductList />
+        <Routes>
+          {/* Homepage */}
+          <Route
+            path="/"
+            element={
+              <div className="flex flex-col gap-10">
+                <AcharBanner />
+                <Category />
+                <div className="-mt-10">
+                  <AllProduct />
+                  <AcharProductList />
+                </div>
+                <AcharBannerTwo />
+                <GanpatiProductList />
+                {/* <CupProductList /> */}
+                <AgarbattiProductList />
+                <GheeProductList />
+                <ServicesNav />
+                {/* <MasalaProductList /> */}
+                {/* <OilProductList /> */}
+                <HomeCertificates />
+                <BeyondProducts />
+                <VideoAdvertiseList />
               </div>
-              <AcharBannerTwo />
-              <GanpatiProductList />
-              {/* <CupProductList /> */}
-              <AgarbattiProductList />
-              <GheeProductList />
-              <ServicesNav />
-              {/* <MasalaProductList /> */}
-              {/* <OilProductList /> */}
-              <HomeCertificates />
-              <BeyondProducts />
-              <VideoAdvertiseList />
-            </div>
-          }
-        />
+            }
+          />
 
-        {/* Auth */}
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/login" element={<LoginFlow />} />
-        <Route path="/about" element={<AboutUS />} />
+          {/* Auth */}
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/login" element={<LoginFlow />} />
+          <Route path="/about" element={<AboutUS />} />
 
-        {/* Profile & Admin */}
-        <Route path="/profile" element={<ProfileDashboard />} />
-        <Route path="/admin" element={<AdminProtected />} />
-        <Route path="/adminworker" element={<AdminProtectWorker />} />
+          {/* Profile & Admin */}
+          <Route path="/profile" element={<ProfileDashboard />} />
+          <Route path="/admin" element={<AdminProtected />} />
+          <Route path="/adminworker" element={<AdminProtectWorker />} />
 
-        {/* Cart & Checkout */}
-        <Route path="/cart" element={<AddToCart />} />
-        <Route path="/checkout" element={<ProceedToCheckout />} />
+          {/* Cart & Checkout */}
+          <Route path="/cart" element={<AddToCart />} />
+          <Route path="/checkout" element={<ProceedToCheckout />} />
 
-        {/* Category Products */}
-        <Route path="/achar-category/:slug" element={<CategoryProducts />} />
-        <Route path="/products/:slug/:id" element={<AcharProductDetail />} />
+          {/* Category Products */}
+          <Route path="/achar-category/:slug" element={<CategoryProducts />} />
+          <Route path="/products/:slug/:id" element={<AcharProductDetail />} />
 
-        <Route path="/ghee/:slug" element={<GheeCategoryProduct />} />
-        <Route path="/ghee-product/:slug/:id" element={<GheeProductDetail />} />
+          <Route path="/ghee/:slug" element={<GheeCategoryProduct />} />
+          <Route
+            path="/ghee-product/:slug/:id"
+            element={<GheeProductDetail />}
+          />
 
-        <Route
-          path="/masala-category/:slug"
-          element={<MasalaCategoryProduct />}
-        />
-        <Route
-          path="/masala-product/:slug/:id"
-          element={<MasalaProductDetail />}
-        />
+          <Route
+            path="/masala-category/:slug"
+            element={<MasalaCategoryProduct />}
+          />
+          <Route
+            path="/masala-product/:slug/:id"
+            element={<MasalaProductDetail />}
+          />
 
-        <Route path="/oil/category/:slug" element={<OilCategoryProduct />} />
-        <Route path="/oil-product/:slug/:id" element={<OilProductDetail />} />
-        {/* <Route path="/cup-category/:slug" element={<CupCategoryProduct />} /> */}
-        {/* <Route path="/cup-product/:slug/:id" element={<CupDetail />} /> */}
-        <Route
-          path="/agarbatti-category/:slug"
-          element={<AgarbattiCategoryProduct />}
-        />
-        <Route
-          path="/agarbatti-product/:slug/:id"
-          element={<AgarbattiDetail />}
-        />
-        <Route
-          path="/ganpati-category/:slug"
-          element={<GanpatiCategoryProduct />}
-        />
-        <Route path="/ganpati-product/:slug/:id" element={<GanpatiDetail />} />
-        <Route path="/products" element={<Products />} />
+          <Route path="/oil/category/:slug" element={<OilCategoryProduct />} />
+          <Route path="/oil-product/:slug/:id" element={<OilProductDetail />} />
+          {/* <Route path="/cup-category/:slug" element={<CupCategoryProduct />} /> */}
+          {/* <Route path="/cup-product/:slug/:id" element={<CupDetail />} /> */}
+          <Route
+            path="/agarbatti-category/:slug"
+            element={<AgarbattiCategoryProduct />}
+          />
+          <Route
+            path="/agarbatti-product/:slug/:id"
+            element={<AgarbattiDetail />}
+          />
+          <Route
+            path="/ganpati-category/:slug"
+            element={<GanpatiCategoryProduct />}
+          />
+          <Route
+            path="/ganpati-product/:slug/:id"
+            element={<GanpatiDetail />}
+          />
+          <Route path="/products" element={<Products />} />
 
-        {/* Orders & Invoices */}
-        <Route path="/order/:id" element={<OrderTracking />} />
-        <Route path="/invoice/:id" element={<Invoice />} />
+          {/* Orders & Invoices */}
+          <Route path="/order/:id" element={<OrderTracking />} />
+          <Route path="/invoice/:id" element={<Invoice />} />
 
-        {/* Support & Policies */}
-        <Route path="/faq" element={<FAQs />} />
-        <Route path="/shipping-returns" element={<ShippingReturns />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/contact" element={<ContactUs />} />
+          {/* Support & Policies */}
+          <Route path="/faq" element={<FAQs />} />
+          <Route path="/shipping-returns" element={<ShippingReturns />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/contact" element={<ContactUs />} />
 
-        <Route path="/developer" element={<Developer />} />
-        <Route path="/GausamvardhanOrganicHandcrafted" element={<GausamvardhanOrganicHandcrafted />} />
-        <Route path="/JoinCollective" element={<JoinCollective />} />
+          <Route path="/developer" element={<Developer />} />
+          <Route
+            path="/GausamvardhanOrganicHandcrafted"
+            element={<GausamvardhanOrganicHandcrafted />}
+          />
+          <Route path="/JoinCollective" element={<JoinCollective />} />
+        </Routes>
 
-      </Routes>
-
-      <Footer />
-    </ThemeProvider>
-   </>
+        <Footer />
+      </ThemeProvider>
+    </>
   );
 }
 

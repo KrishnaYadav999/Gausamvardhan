@@ -320,7 +320,7 @@ export default function GheeCategoryProduct() {
                 className="flex-1"
                 onClick={() => setFilterOpen(false)}
               ></div>
-              <div className="w-72 bg-white h-full shadow-lg p-4 mr-4 overflow-y-auto">
+              <div className="w-72 bg-white h-full shadow-lg p-4  overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-[0.9rem] sm:text-lg font-semibold">
                     Filters

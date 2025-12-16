@@ -21,6 +21,7 @@ import googleauth from "./routes/googleauth.js"
 import videoAdvertiseRoutes from "./routes/videoAdvertiseRoutes.js"
 import agarbattiRoutes from "./routes/agarbattiRoutes.js"
 import ganpatiRoutes from "./routes/ganpatiRoutes.js"
+import newsletterRoutes from "./routes/newsletterRoutes.js"
 
 // seo
 import { SitemapStream, streamToPromise } from "sitemap";
@@ -68,6 +69,7 @@ app.use("/api", chatRoutes);
 app.use("/api/counter", counterRoutes);
 app.use("/api/workeradmin", workerAdminRoutes);
 app.use("/api/videoadvertise", videoAdvertiseRoutes);
+app.use("/api/newsletter", newsletterRoutes)
 
 
 // ser start 

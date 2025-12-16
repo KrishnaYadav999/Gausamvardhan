@@ -1,7 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!email) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await axios.post("/api/newsletter/subscribe", { email });
+      toast.success(res.data.message || "Subscribed successfully");
+      setEmail("");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer
       className="relative w-full bg-white border-t overflow-hidden"
@@ -26,8 +49,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
           {/* Left */}
           <div className="animate-slideUp">
-
-            {/* Logo + Added Image with Made in India */}
+            {/* Logo */}
             <div className="flex items-center gap-4">
               <img
                 src="https://res.cloudinary.com/dtagulyhy/image/upload/v1763540008/gausamvardhan_logo_yqmzpg.png"
@@ -64,10 +86,16 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Your e-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="px-4 py-2.5 w-full outline-none text-green-800 text-sm font-light"
               />
-              <button className="px-5 py-2 text-green-700 hover:bg-green-100 text-lg font-medium transition">
-                →
+              <button
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="px-5 py-2 text-green-700 hover:bg-green-100 text-lg font-medium transition disabled:opacity-50"
+              >
+                {loading ? "..." : "→"}
               </button>
             </div>
 
@@ -101,12 +129,44 @@ export default function Footer() {
             </h3>
 
             <ul className="space-y-2 text-green-700 font-light">
-              <li><a href="/about" className="hover:text-green-500">About Us</a></li>
-              <li><a href="/products" className="hover:text-green-500">Products</a></li>
-              <li><a href="/contact" className="hover:text-green-500">Contact</a></li>
-              <li><a href="/privacy-policy" className="hover:text-green-500">Privacy Policy</a></li>
-              <li><a href="/terms-and-conditions" className="hover:text-green-500">Terms & Conditions</a></li>
-              <li><a href="developer" target="_blank" rel="noreferrer" className="hover:text-green-500">Developer</a></li>
+              <li>
+                <a href="/about" className="hover:text-green-500">
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a href="/products" className="hover:text-green-500">
+                  Products
+                </a>
+              </li>
+              <li>
+                <a href="/contact" className="hover:text-green-500">
+                  Contact
+                </a>
+              </li>
+              <li>
+                <a href="/privacy-policy" className="hover:text-green-500">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/terms-and-conditions"
+                  className="hover:text-green-500"
+                >
+                  Terms & Conditions
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/developer"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-green-500"
+                >
+                  Developer
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -116,15 +176,15 @@ export default function Footer() {
               SIDDHARTH MEP PRIVATE LIMITED (Gausamvardhan)
             </p>
 
-            <p className="mt-3 text-green-700">
-              Registered Office: <br />
-              Pune, Maharashtra, India
+            <p className="mt-3">
+              BLDG NO. A-18 , FLAT NO- 303, DAFFODILS, SHRUSHTI,AMBARNATH THANE,
+              MAHARASHTRA- 421503, India
             </p>
 
             <p className="mt-3">
               <span className="font-medium text-green-800">Email:</span>{" "}
               <a
-                href="mailto:info.siddharthmep@gmail.com"
+                href="mailto:customercare@gausamvardhan.com"
                 className="underline text-green-600"
               >
                 customercare@gausamvardhan.com
@@ -133,7 +193,7 @@ export default function Footer() {
 
             <p className="mt-1">
               <span className="font-medium text-green-800">Phone:</span>{" "}
-              <a href="tel:+918097675222" className="underline text-green-600">
+              <a href="tel:+919326539055" className="underline text-green-600">
                 +91 9326539055
               </a>
             </p>

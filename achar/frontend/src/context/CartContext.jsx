@@ -80,7 +80,7 @@ export const CartProvider = ({ children }) => {
         {
           ...product,
           cartKey, // 🔥 VERY IMPORTANT
-          quantity: 1,
+         quantity: product.quantity || 1,
           basePrice: price,
           currentPrice: price,
           productImages: product.productImages?.length

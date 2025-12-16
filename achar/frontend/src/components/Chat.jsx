@@ -9,7 +9,7 @@ const Chat = () => {
     { from: "bot", text: "Hello, I’m Gausam 🐄. How can I help you today?" }
   ]);
   const [input, setInput] = useState("");
-  const [suggestions, setSuggestions] = useState([]); // suggestions from last response
+  const [suggestions, setSuggestions] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -32,15 +32,28 @@ const Chat = () => {
 
     try {
       const { data } = await axios.post("/api/chat", { message: text });
-      // show matched answer
-      const botMsg = { from: "bot", text: data.answer || "No answer." };
+
+      // Detect if the answer contains email or phone
+      let answer = data.answer || "No answer.";
+      if (answer.includes("Email:")) {
+        answer = answer.split("\n").map((line, idx) => {
+          if (line.toLowerCase().includes("email:")) {
+            const email = line.split("Email:")[1].trim();
+            return <a key={idx} href={`mailto:${email}`} className="text-blue-600 underline">{line}</a>;
+          } else if (line.toLowerCase().includes("phone:")) {
+            const phone = line.split("Phone:")[1].trim();
+            return <a key={idx} href={`tel:${phone}`} className="text-blue-600 underline">{line}</a>;
+          }
+          return <span key={idx}>{line}</span>;
+        });
+      }
+
+      const botMsg = { from: "bot", text: answer };
       pushMessage(botMsg);
 
-      // set suggestions if available (exclude exact matched prompt)
       if (Array.isArray(data.suggestions) && data.suggestions.length) {
-        // filter duplicate
         const filtered = data.suggestions.filter(s => s.prompt !== data.matchedPrompt);
-        setSuggestions(filtered.slice(0, 4)); // keep top 4
+        setSuggestions(filtered.slice(0, 4));
       } else {
         setSuggestions([]);
       }
@@ -51,12 +64,8 @@ const Chat = () => {
   };
 
   const onSuggestionClick = async (sugg) => {
-    // when user clicks a suggestion, send it as a new message
     setInput(sugg.prompt);
-    // optional: auto-send immediately
-    // small delay to let input update
     setTimeout(() => {
-      // emulate submit
       document.getElementById("chat-send-btn")?.click();
     }, 120);
   };
@@ -82,7 +91,7 @@ const Chat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 150, damping: 20 }}
-            className="fixed bottom-5 right-5 w-80 h-96 bg-white shadow-xl rounded-xl flex flex-col overflow-hidden z-50"
+            className="fixed bottom-5 right-5 w-80 sm:w-96 h-96 bg-white shadow-xl rounded-xl flex flex-col overflow-hidden z-50"
           >
             {/* Header */}
             <div className="bg-green-600 text-white px-4 py-2 flex justify-between items-center">
@@ -109,8 +118,10 @@ const Chat = () => {
                   >
                     <div
                       className={`${
-                        m.from === "user" ? "bg-green-600 text-white" : "bg-gray-100 text-gray-900"
-                      } px-3 py-2 rounded-lg max-w-[70%] shadow`}
+                        m.from === "user"
+                          ? "bg-green-600 text-white"
+                          : "bg-gray-100 text-gray-900"
+                      } px-3 py-2 rounded-lg max-w-[70%] shadow break-words`}
                     >
                       {m.text}
                     </div>
@@ -118,7 +129,7 @@ const Chat = () => {
                 ))}
               </AnimatePresence>
 
-              {/* Suggestions UI under messages */}
+              {/* Suggestions */}
               {suggestions.length > 0 && (
                 <div className="my-2">
                   <div className="text-xs text-gray-500 mb-1">Suggestions:</div>
@@ -127,7 +138,7 @@ const Chat = () => {
                       <button
                         key={idx}
                         onClick={() => onSuggestionClick(s)}
-                        className="text-sm px-2 py-1 border rounded-full hover:bg-gray-100"
+                        className="text-sm px-3 py-1 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-400 transition font-medium"
                         title={s.response}
                       >
                         {s.prompt.length > 30 ? s.prompt.slice(0, 30) + "..." : s.prompt}

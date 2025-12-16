@@ -9,18 +9,18 @@ router.post("/chat", chat);
 router.post("/train", train);
 router.get("/prompts", listPrompts);
 
-// ✅ Seed multiple default prompts
+/* -------- DEFAULT TRAINING -------- */
+
 router.get("/train/default", async (req, res) => {
   try {
     const trainingData = [
-      { prompt: "hii", response: "How can I help you today?" },
-      { prompt: "hello", response: "Hello! How are you doing?" },
-      { prompt: "hey", response: "Hey there! How can I assist you?" },
-      { prompt: "good morning", response: "Good morning! Hope you have a great day!" },
-      { prompt: "good night", response: "Good night! Sleep well!" },
-      { prompt: "how are you", response: "I’m just a bot, but I’m doing great! How about you?" },
-      { prompt: "thank you", response: "You’re welcome! Happy to help." },
-      { prompt: "bye", response: "Goodbye! Have a nice day." }
+      { prompt: "hi", response: "Hello! How can I help you?" },
+      { prompt: "hello", response: "Hi there! What are you looking for?" },
+      { prompt: "hey", response: "Hey! Ask me about Pickle, Ghee or Pooja items." },
+      { prompt: "good morning", response: "Good morning! 🌞" },
+      { prompt: "good night", response: "Good night! 🌙" },
+      { prompt: "thank you", response: "You’re welcome 😊" },
+      { prompt: "bye", response: "Goodbye! Visit again." }
     ];
 
     for (const item of trainingData) {
@@ -30,7 +30,7 @@ router.get("/train/default", async (req, res) => {
       }
     }
 
-    return res.json({ success: true, msg: "Default multi training added ✅" });
+    res.json({ success: true, msg: "Default training added ✅" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
