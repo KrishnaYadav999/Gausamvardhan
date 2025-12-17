@@ -26,169 +26,128 @@ export default function Footer() {
   };
 
   return (
-    <footer
-      className="relative w-full bg-white border-t overflow-hidden"
-      style={{ fontFamily: "'Inter', sans-serif" }}
-    >
-      {/* Google Font Import */}
+    <footer className="relative w-full bg-white border-t overflow-hidden font-inter min-h-[700px] md:min-h-[750px]">
+      {/* Google Fonts */}
       <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;600;700&display=swap"
         rel="stylesheet"
       />
 
-      {/* Background Shape */}
+      {/* ✅ BACKGROUND IMAGE — FULLY VISIBLE */}
       <div
-        className="
-    absolute bottom-0 left-0 w-full
-    h-[320px] md:h-[420px]
-    bg-center bg-no-repeat
-    opacity-90 animate-fadeIn
-    bg-contain md:bg-cover
-  "
+        className="absolute inset-0 bg-no-repeat opacity-90 pointer-events-none animate-fadeIn"
         style={{
           backgroundImage:
             "url('https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/footer%20iamge.png')",
+          backgroundSize: "contain",
+          backgroundPosition: "bottom center",
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-6 py-20 animate-fadeUp">
+      {/* CONTENT */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 animate-fadeUp">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-          {/* Left */}
+          {/* LEFT */}
           <div className="animate-slideUp">
-            {/* Logo */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-start gap-4">
               <img
-                src="https://res.cloudinary.com/dtagulyhy/image/upload/v1763540008/gausamvardhan_logo_yqmzpg.png"
+                src="https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/gausamvardhan%20logoo.jpg"
                 className="w-40"
                 alt="logo"
               />
 
-              <div className="flex flex-col items-center mb-[5vh]">
+              <div className="relative">
                 <img
-                  src="https://i.pinimg.com/1200x/fc/1e/aa/fc1eaa7fed0bd14e5b5280ee08aaa280.jpg"
-                  className="w-24 rounded-lg object-cover"
-                  alt="side-img"
+                  src="https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/image%20(36).png"
+                  className=" w-28 rounded-lg object-cover mt-10"
+                  alt="side"
                 />
-                <span className="text-[#5F893F] text-sm mt-[87px] font-semibold absolute">
+                {/* <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[#5F893F] text-sm font-semibold">
                   Made in India
-                </span>
+                </span> */}
               </div>
             </div>
 
-            <h2
-              className="text-xl font-semibold text-green-800 mt-6"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
-            >
+            <h2 className="text-xl font-semibold text-green-800 mt-8 font-montserrat">
               The Organic Way of Life
             </h2>
 
-            <p className="text-base text-green-700 mt-3 leading-6 font-light">
+            <p className="text-green-700 mt-3 leading-6 font-light">
               Subscribe for special offers, newsletters and become a <br />
               part of our movement.
             </p>
 
-            {/* Email Box */}
-            <div className="flex items-center bg-white border border-green-300 rounded-xl mt-6 max-w-md overflow-hidden">
+            {/* EMAIL */}
+            <div className="flex bg-white border border-green-300 rounded-xl mt-6 max-w-md overflow-hidden">
               <input
                 type="email"
                 placeholder="Your e-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="px-4 py-2.5 w-full outline-none text-green-800 text-sm font-light"
+                className="px-4 py-3 w-full outline-none text-green-800 text-sm"
               />
               <button
                 onClick={handleSubscribe}
                 disabled={loading}
-                className="px-5 py-2 text-green-700 hover:bg-green-100 text-lg font-medium transition disabled:opacity-50"
+                className="px-5 text-green-700 hover:bg-green-100 text-lg transition disabled:opacity-50"
               >
                 {loading ? "..." : "→"}
               </button>
             </div>
 
-            {/* Social */}
-            <div className="flex gap-6 mt-8 text-green text-2xl">
+            {/* SOCIAL */}
+            <div className="flex gap-6 mt-8 text-2xl text-green-700">
               <a
                 href="https://www.instagram.com/gau.samvardhan"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
               >
-                <FaInstagram className="cursor-pointer" />
+                <FaInstagram />
               </a>
-
               <a
                 href="https://wa.me/message/U4A6QYNSCD5GH1"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
               >
-                <FaWhatsapp className="cursor-pointer" />
+                <FaWhatsapp />
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="text-green-800 animate-slideUp ml-auto text-right">
-            <h3
-              className="text-lg font-semibold mb-3"
-              style={{ fontFamily: "'Montserrat', sans-serif" }}
-            >
+          {/* QUICK LINKS */}
+          <div className="text-right ml-auto animate-slideUp">
+            <h3 className="text-lg font-semibold mb-3 text-green-800 font-montserrat">
               Quick Links
             </h3>
-
             <ul className="space-y-2 text-green-700 font-light">
-              <li>
-                <a href="/about" className="hover:text-green-500">
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a href="/products" className="hover:text-green-500">
-                  Products
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="hover:text-green-500">
-                  Contact
-                </a>
-              </li>
-              <li>
-                <a href="/privacy-policy" className="hover:text-green-500">
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/terms-and-conditions"
-                  className="hover:text-green-500"
-                >
-                  Terms & Conditions
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/developer"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-green-500"
-                >
-                  Developer
-                </a>
-              </li>
+              {[
+                ["About Us", "/about"],
+                ["Products", "/products"],
+                ["Contact", "/contact"],
+                ["Privacy Policy", "/privacy-policy"],
+                ["Terms & Conditions", "/terms-and-conditions"],
+                ["Developer", "/developer"],
+              ].map(([label, link]) => (
+                <li key={label}>
+                  <a href={link} className="hover:text-green-500">
+                    {label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Right Info */}
-          <div className="text-green-700 text-base leading-7 animate-slideUp font-light">
+          {/* INFO */}
+          <div className="text-green-700 leading-7 animate-slideUp font-light">
             <p className="font-medium text-lg text-green-800">
               SIDDHARTH MEP PRIVATE LIMITED (Gausamvardhan)
             </p>
-
             <p className="mt-3">
-              BLDG NO. A-18 , FLAT NO- 303, DAFFODILS, SHRUSHTI,AMBARNATH THANE,
-              MAHARASHTRA- 421503, India
+              BLDG NO. A-18, FLAT NO-303, DAFFODILS, SHRUSHTI, AMBARNATH,
+              MAHARASHTRA – 421503, India
             </p>
-
             <p className="mt-3">
-              <span className="font-medium text-green-800">Email:</span>{" "}
+              <b>Email:</b>{" "}
               <a
                 href="mailto:customercare@gausamvardhan.com"
                 className="underline text-green-600"
@@ -196,9 +155,8 @@ export default function Footer() {
                 customercare@gausamvardhan.com
               </a>
             </p>
-
             <p className="mt-1">
-              <span className="font-medium text-green-800">Phone:</span>{" "}
+              <b>Phone:</b>{" "}
               <a href="tel:+919326539055" className="underline text-green-600">
                 +91 9326539055
               </a>
@@ -206,13 +164,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-20 border-t pt-6 text-center text-sm text-green animate-fadeUp font-light">
+        <div className="mt-20 border-t pt-6 text-center text-sm text-green-700 font-light">
           © {new Date().getFullYear()} SIDDHARTH MEP PRIVATE LIMITED
           (Gausamvardhan). All Rights Reserved.
         </div>
       </div>
 
-      {/* Animations */}
+      {/* ANIMATIONS */}
       <style>{`
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }
@@ -226,9 +184,9 @@ export default function Footer() {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fadeUp { animation: fadeUp 1s ease-in-out; }
-        .animate-slideUp { animation: slideUp 1.1s ease-in-out; }
-        .animate-fadeIn { animation: fadeIn 1.8s ease-in-out; }
+        .animate-fadeUp { animation: fadeUp 1s ease; }
+        .animate-slideUp { animation: slideUp 1.1s ease; }
+        .animate-fadeIn { animation: fadeIn 1.8s ease; }
       `}</style>
     </footer>
   );

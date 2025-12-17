@@ -55,6 +55,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
     toast.success(`${product.productName} added to cart`);
   };
+  
 
   const avgRating =
     product?.reviews?.length > 0

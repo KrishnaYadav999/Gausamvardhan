@@ -325,6 +325,17 @@ export default function AdminAgarbattiUpdateDelete() {
                 ))}
               </select>
             </div>
+{/* ---------------- Stock Checkbox ---------------- */}
+<div className="mb-2 flex items-center gap-2">
+  <input
+    type="checkbox"
+    name="stock"
+    checked={formData.stock}
+    onChange={handleCheckboxChange}
+    className="w-4 h-4"
+  />
+  <label className="font-medium">In Stock</label>
+</div>
 
             {/* ---------------- Main Images ---------------- */}
             <div className="mb-2">

@@ -25,6 +25,7 @@ const GheeProductUpdateDelete = () => {
     pricePerGram: "",
     category: "",
     moreAboutProduct: [],
+    coupons: [],
   });
 
   // Fetch all products
@@ -55,6 +56,7 @@ const GheeProductUpdateDelete = () => {
 
   // Start editing
   const handleEdit = (product) => {
+     
     setEditingProduct(product._id);
     setFormData({
       title: product.title || "",
@@ -65,13 +67,22 @@ const GheeProductUpdateDelete = () => {
       description: product.description || "",
       specifications: product.specifications || "",
       images: product.images || [],
-      videos: product.videos || [],
-      videoUrl: product.videoUrl || "",
+     videos: product.videos || [], 
       stock: product.stock ?? true,
       stockQuantity: product.stockQuantity || 0,
       pricePerGram: product.pricePerGram || "",
       category: product.category?._id || "",
       moreAboutProduct: product.moreAboutProduct || [],
+     coupons: (product.coupons || []).map((c) => ({
+  code: c.code || "",
+  discountType: c.discountType || "percentage",
+  discountValue: c.discountValue || 0,
+  isPermanent: c.isPermanent ?? false,
+  expiryDate: c.expiryDate || null,
+  usageLimit: c.usageLimit ?? null,
+  isActive: c.isActive ?? true,
+})),
+
     });
   };
 
@@ -184,42 +195,96 @@ const GheeProductUpdateDelete = () => {
                     className="border p-2 rounded"
                   />
 
-                  {/* Images */}
-                  <input
-                    type="text"
-                    value={formData.images.join(", ")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        images: e.target.value.split(",").map((i) => i.trim()),
-                      })
-                    }
-                    placeholder="Image URLs (comma separated)"
-                    className="border p-2 rounded"
-                  />
+                 <h4 className="font-semibold mt-2">Product Images</h4>
+
+{formData.images.map((img, index) => (
+  <div key={index} className="flex gap-2 mb-2">
+    <input
+      type="text"
+      value={img}
+      placeholder="Image URL"
+      onChange={(e) => {
+        const updated = [...formData.images];
+        updated[index] = e.target.value;
+        setFormData({ ...formData, images: updated });
+      }}
+      className="border p-2 rounded w-full"
+    />
+    <button
+      type="button"
+      onClick={() => {
+        const updated = [...formData.images];
+        updated.splice(index, 1);
+        setFormData({ ...formData, images: updated });
+      }}
+      className="bg-red-600 text-white px-2 rounded"
+    >
+      ❌
+    </button>
+  </div>
+))}
+
+<button
+  type="button"
+  onClick={() =>
+    setFormData({
+      ...formData,
+      images: [...formData.images, ""],
+    })
+  }
+  className="bg-blue-600 text-white px-3 py-1 rounded"
+>
+  + Add Image
+</button>
 
                   {/* Videos */}
-                  <input
-                    type="text"
-                    value={formData.videos.join(", ")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        videos: e.target.value.split(",").map((v) => v.trim()),
-                      })
-                    }
-                    placeholder="Video URLs (comma separated)"
-                    className="border p-2 rounded"
-                  />
+                 <h4 className="font-semibold mt-2">Product Videos</h4>
 
-                  <input
-                    type="text"
-                    name="videoUrl"
-                    value={formData.videoUrl}
-                    onChange={handleChange}
-                    placeholder="Main Video URL"
-                    className="border p-2 rounded"
-                  />
+{formData.videos.length === 0 && (
+  <p className="text-sm text-gray-500">No videos added</p>
+)}
+
+{formData.videos.map((video, index) => (
+  <div key={index} className="flex gap-2 mb-2">
+    <input
+      type="text"
+      placeholder="Video URL"
+      value={video}
+      onChange={(e) => {
+        const updated = [...formData.videos];
+        updated[index] = e.target.value;
+        setFormData({ ...formData, videos: updated });
+      }}
+      className="border p-2 rounded w-full"
+    />
+
+    <button
+      type="button"
+      onClick={() => {
+        const updated = formData.videos.filter((_, i) => i !== index);
+        setFormData({ ...formData, videos: updated });
+      }}
+      className="bg-red-600 text-white px-3 rounded"
+    >
+      ❌
+    </button>
+  </div>
+))}
+
+<button
+  type="button"
+  onClick={() =>
+    setFormData({
+      ...formData,
+      videos: [...formData.videos, ""], // ✅ ONLY ONE EMPTY FIELD
+    })
+  }
+  className="bg-blue-600 text-white px-3 py-1 rounded"
+>
+  + Add More Video URL
+</button>
+
+
 
                   <input
                     type="number"
@@ -246,6 +311,149 @@ const GheeProductUpdateDelete = () => {
                     />
                     In Stock
                   </label>
+{/* 🎟️ Coupons */}
+<h4 className="font-semibold mt-4">Coupons</h4>
+
+{formData.coupons.length === 0 && (
+  <p className="text-sm text-gray-500">No coupons added</p>
+)}
+
+{formData.coupons.map((coupon, index) => (
+  <div
+    key={index}
+    className="grid gap-2 border p-3 rounded mb-3 bg-gray-50"
+  >
+    <input
+      type="text"
+      placeholder="Coupon Code"
+      value={coupon.code}
+      className="border p-2 rounded"
+      onChange={(e) => {
+        const updated = [...formData.coupons];
+        updated[index].code = e.target.value.toUpperCase();
+        setFormData({ ...formData, coupons: updated });
+      }}
+    />
+
+    <select
+      value={coupon.discountType}
+      className="border p-2 rounded"
+      onChange={(e) => {
+        const updated = [...formData.coupons];
+        updated[index].discountType = e.target.value;
+        setFormData({ ...formData, coupons: updated });
+      }}
+    >
+      <option value="">Select Discount Type</option>
+      <option value="percentage">Percentage (%)</option>
+      <option value="flat">Flat (₹)</option>
+    </select>
+
+    <input
+      type="number"
+      placeholder="Discount Value"
+      value={coupon.discountValue}
+      className="border p-2 rounded"
+      onChange={(e) => {
+        const updated = [...formData.coupons];
+        updated[index].discountValue = Number(e.target.value);
+        setFormData({ ...formData, coupons: updated });
+      }}
+    />
+
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={coupon.isPermanent}
+        onChange={(e) => {
+          const updated = [...formData.coupons];
+          updated[index].isPermanent = e.target.checked;
+          updated[index].expiryDate = e.target.checked ? null : coupon.expiryDate;
+          setFormData({ ...formData, coupons: updated });
+        }}
+      />
+      Permanent Coupon
+    </label>
+
+    {!coupon.isPermanent && (
+      <input
+        type="date"
+        value={
+          coupon.expiryDate
+            ? new Date(coupon.expiryDate).toISOString().split("T")[0]
+            : ""
+        }
+        className="border p-2 rounded"
+        onChange={(e) => {
+          const updated = [...formData.coupons];
+          updated[index].expiryDate = e.target.value;
+          setFormData({ ...formData, coupons: updated });
+        }}
+      />
+    )}
+
+    <input
+      type="number"
+      placeholder="Usage Limit (optional)"
+      value={coupon.usageLimit ?? ""}
+      className="border p-2 rounded"
+      onChange={(e) => {
+        const updated = [...formData.coupons];
+        updated[index].usageLimit =
+          e.target.value === "" ? null : Number(e.target.value);
+        setFormData({ ...formData, coupons: updated });
+      }}
+    />
+
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={coupon.isActive}
+        onChange={(e) => {
+          const updated = [...formData.coupons];
+          updated[index].isActive = e.target.checked;
+          setFormData({ ...formData, coupons: updated });
+        }}
+      />
+      Active
+    </label>
+
+    <button
+      type="button"
+      className="bg-red-600 text-white px-3 py-1 rounded"
+      onClick={() => {
+        const updated = formData.coupons.filter((_, i) => i !== index);
+        setFormData({ ...formData, coupons: updated });
+      }}
+    >
+      ❌ Remove Coupon
+    </button>
+  </div>
+))}
+
+<button
+  type="button"
+  className="bg-blue-600 text-white px-3 py-1 rounded"
+  onClick={() =>
+    setFormData({
+      ...formData,
+      coupons: [
+        ...formData.coupons,
+        {
+          code: "",
+          discountType: "percentage",
+          discountValue: 0,
+          isPermanent: false,
+          expiryDate: null,
+          usageLimit: null,
+          isActive: true,
+        },
+      ],
+    })
+  }
+>
+  + Add Coupon
+</button>
 
                   {/* More About Product */}
                   <h4 className="font-semibold mt-2">More About Product</h4>

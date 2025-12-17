@@ -2,155 +2,207 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { FiSend, FiMoon, FiSun } from "react-icons/fi";
+import { IoClose } from "react-icons/io5";
 
 const Chat = () => {
   const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(
+    localStorage.getItem("chat-dark") === "true"
+  );
+
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Hello, I’m Gausam. How can I help you today?" }
+    {
+      from: "bot",
+      text: "Hello 👋 I’m **Gausam Assistant**.\nHow can I help you today?",
+      time: new Date(),
+    },
   ]);
+
   const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const messagesEndRef = useRef(null);
 
-  const logoUrl = "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/chatbot.png";
+  const logo =
+    "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/chatbot.png";
 
+  /* Auto scroll */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, suggestions]);
+  }, [messages, typing, suggestions]);
+
+  /* Persist theme */
+  useEffect(() => {
+    localStorage.setItem("chat-dark", dark);
+  }, [dark]);
 
   const pushMessage = (msg) => {
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => [...prev, { ...msg, time: new Date() }]);
   };
 
   const sendMessage = async (e) => {
     e?.preventDefault();
-    const text = input.trim();
-    if (!text) return;
+    if (!input.trim()) return;
 
-    const userMsg = { from: "user", text };
-    pushMessage(userMsg);
+    const text = input.trim();
+    pushMessage({ from: "user", text });
     setInput("");
     setSuggestions([]);
+    setTyping(true);
 
     try {
       const { data } = await axios.post("/api/chat", { message: text });
+      setTyping(false);
 
-      // Detect if the answer contains email or phone
-      let answer = data.answer || "No answer.";
-      if (answer.includes("Email:")) {
-        answer = answer.split("\n").map((line, idx) => {
-          if (line.toLowerCase().includes("email:")) {
-            const email = line.split("Email:")[1].trim();
-            return <a key={idx} href={`mailto:${email}`} className="text-blue-600 underline">{line}</a>;
-          } else if (line.toLowerCase().includes("phone:")) {
-            const phone = line.split("Phone:")[1].trim();
-            return <a key={idx} href={`tel:${phone}`} className="text-blue-600 underline">{line}</a>;
-          }
-          return <span key={idx}>{line}</span>;
-        });
+      pushMessage({
+        from: "bot",
+        text: data.answer || "Sorry, I couldn’t understand that.",
+      });
+
+      if (Array.isArray(data.suggestions)) {
+        setSuggestions(data.suggestions.slice(0, 4));
       }
-
-      const botMsg = { from: "bot", text: answer };
-      pushMessage(botMsg);
-
-      if (Array.isArray(data.suggestions) && data.suggestions.length) {
-        const filtered = data.suggestions.filter(s => s.prompt !== data.matchedPrompt);
-        setSuggestions(filtered.slice(0, 4));
-      } else {
-        setSuggestions([]);
-      }
-    } catch (err) {
-      console.error(err);
-      pushMessage({ from: "bot", text: "Server error. Try again later." });
+    } catch {
+      setTyping(false);
+      pushMessage({
+        from: "bot",
+        text: "⚠️ Server error. Please try again later.",
+      });
     }
   };
 
-  const onSuggestionClick = async (sugg) => {
-    setInput(sugg.prompt);
-    setTimeout(() => {
-      document.getElementById("chat-send-btn")?.click();
-    }, 120);
+  const sendSuggestion = (text) => {
+    setInput(text);
+    setTimeout(() => document.getElementById("chat-send")?.click(), 100);
   };
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating Button */}
       {!open && (
-        <motion.div
+        <motion.button
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="fixed bottom-5 right-5 w-14 h-14 bg-green-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-green-700 z-50"
+          whileHover={{ scale: 1.1 }}
           onClick={() => setOpen(true)}
+          className="fixed bottom-6 right-6 w-16 h-16 rounded-full
+                     bg-gradient-to-br from-emerald-500 to-green-600
+                     shadow-2xl flex items-center justify-center z-50"
         >
-          <img src={logoUrl} alt="Chatbot Logo" className="w-10 h-10 rounded-full" />
-        </motion.div>
+          <img src={logo} alt="chat" className="w-10 h-10 rounded-full" />
+        </motion.button>
       )}
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 150, damping: 20 }}
-            className="fixed bottom-5 right-5 w-80 sm:w-96 h-96 bg-white shadow-xl rounded-xl flex flex-col overflow-hidden z-50"
+            exit={{ opacity: 0, y: 40, scale: 0.95 }}
+            transition={{ duration: 0.35 }}
+            className={`fixed bottom-6 right-6 w-[380px] h-[580px]
+              rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border
+              ${
+                dark
+                  ? "bg-gray-900 text-white border-white/10"
+                  : "bg-white/80 backdrop-blur-2xl border-white/40"
+              }`}
           >
             {/* Header */}
-            <div className="bg-green-600 text-white px-4 py-2 flex justify-between items-center">
-              <span className="font-semibold flex items-center gap-2">
-                <img src={logoUrl} alt="Chatbot Logo" className="w-6 h-6 rounded-full" />
-                Gausam
-              </span>
-              <button
-                onClick={() => setOpen(false)}
-                className="text-white font-bold hover:scale-110 transition"
-              >
-                ✕
-              </button>
+            <div
+              className={`flex items-center justify-between px-4 py-3
+                ${
+                  dark
+                    ? "bg-gray-800"
+                    : "bg-gradient-to-r from-emerald-600 to-green-500 text-white"
+                }`}
+            >
+              <div className="flex items-center gap-3">
+                <img src={logo} className="w-9 h-9 rounded-full border" />
+                <div>
+                  <div className="font-semibold">Gausam Assistant</div>
+                  <div className="text-xs flex items-center gap-1 opacity-80">
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                    Online
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setDark(!dark)}
+                  className="hover:scale-110 transition"
+                >
+                  {dark ? <FiSun /> : <FiMoon />}
+                </button>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-xl hover:rotate-90 transition"
+                >
+                  <IoClose />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 p-2 overflow-y-auto">
-              <AnimatePresence>
-                {messages.map((m, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: m.from === "user" ? 50 : -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className={`mb-2 flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`${
+            <div className="flex-1 px-4 py-3 overflow-y-auto space-y-4">
+              {messages.map((m, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex ${
+                    m.from === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[75%] px-4 py-3 text-sm shadow-lg whitespace-pre-wrap
+                      ${
                         m.from === "user"
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-100 text-gray-900"
-                      } px-3 py-2 rounded-lg max-w-[70%] shadow break-words`}
-                    >
-                      {m.text}
+                          ? "bg-gradient-to-br from-emerald-600 to-green-500 text-white rounded-2xl rounded-br-sm"
+                          : dark
+                          ? "bg-gray-800 text-white rounded-2xl rounded-bl-sm"
+                          : "bg-white text-gray-800 rounded-2xl rounded-bl-sm"
+                      }`}
+                  >
+                    {m.text}
+                    <div className="text-[10px] mt-1 opacity-50 text-right">
+                      {m.time.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Typing */}
+              {typing && (
+                <div className="flex gap-1 text-xs opacity-60">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" />
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce delay-150" />
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce delay-300" />
+                </div>
+              )}
 
               {/* Suggestions */}
               {suggestions.length > 0 && (
-                <div className="my-2">
-                  <div className="text-xs text-gray-500 mb-1">Suggestions:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {suggestions.map((s, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => onSuggestionClick(s)}
-                        className="text-sm px-3 py-1 border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-400 transition font-medium"
-                        title={s.response}
-                      >
-                        {s.prompt.length > 30 ? s.prompt.slice(0, 30) + "..." : s.prompt}
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => sendSuggestion(s.prompt)}
+                      className={`px-3 py-1.5 text-xs rounded-full border transition
+                        ${
+                          dark
+                            ? "bg-gray-800 border-white/10 hover:bg-gray-700"
+                            : "bg-white hover:bg-emerald-50 hover:border-emerald-400"
+                        }`}
+                    >
+                      {s.prompt}
+                    </button>
+                  ))}
                 </div>
               )}
 
@@ -158,20 +210,35 @@ const Chat = () => {
             </div>
 
             {/* Input */}
-            <form onSubmit={sendMessage} className="flex border-t p-2 gap-2">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type message..."
-                className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-green-300"
-              />
-              <button
-                id="chat-send-btn"
-                type="submit"
-                className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-              >
-                Send
-              </button>
+            <form
+              onSubmit={sendMessage}
+              className={`p-3 border-t ${
+                dark ? "border-white/10" : "bg-white/80 backdrop-blur"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type your message..."
+                  className={`flex-1 px-4 py-2 rounded-full outline-none text-sm
+                    ${
+                      dark
+                        ? "bg-gray-800 text-white border border-white/10"
+                        : "bg-white border focus:ring-2 focus:ring-emerald-400"
+                    }`}
+                />
+                <button
+                  id="chat-send"
+                  type="submit"
+                  className="w-11 h-11 rounded-full
+                             bg-gradient-to-br from-emerald-600 to-green-500
+                             text-white flex items-center justify-center
+                             hover:scale-105 transition"
+                >
+                  <FiSend />
+                </button>
+              </div>
             </form>
           </motion.div>
         )}

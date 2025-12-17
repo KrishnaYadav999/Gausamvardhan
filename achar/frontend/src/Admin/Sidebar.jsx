@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Menu,
+  Eye,
   UserPlus,
   MapPin,
   Boxes,
@@ -14,12 +15,10 @@ import {
 } from "lucide-react";
 
 const Sidebar = ({ setActive }) => {
-  const [open, setOpen] = useState(true);
-
-  // Track active menu
+  const [open, setOpen] = useState(true); // Hamburger toggle
+  const [visible, setVisible] = useState(true); // Eye toggle
   const [activeItem, setActiveItem] = useState("");
 
-  // Menu item + icons mapping
   const menuItems = [
     { label: "DASHBOARD", icon: <LayoutDashboard size={18} /> },
     { label: "WORKER CREATE", icon: <UserPlus size={18} /> },
@@ -45,7 +44,7 @@ const Sidebar = ({ setActive }) => {
     { label: "adminganpaticreate", icon: <Settings size={18} /> },
     { label: "adminganpatimanage", icon: <Settings size={18} /> },
     { label: "cupcreate", icon: <BadgePercent size={18} /> },
-    { label: "USERS", icon: <Users size={18} /> },
+    
   ];
 
   const handleClick = (label) => {
@@ -53,6 +52,16 @@ const Sidebar = ({ setActive }) => {
     setActive(key);
     setActiveItem(key);
   };
+
+  // If sidebar is hidden, show only the eye icon to bring it back
+  if (!visible)
+    return (
+      <div className="fixed top-3 left-3 z-[1000]">
+        <button onClick={() => setVisible(true)}>
+          <Eye size={22} className="cursor-pointer text-gray-600 hover:text-black" />
+        </button>
+      </div>
+    );
 
   return (
     <div
@@ -63,13 +72,21 @@ const Sidebar = ({ setActive }) => {
         overflow-y-auto
       `}
     >
-      {/* Toggle Button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="absolute top-3 right-3 text-gray-600 hover:text-black"
-      >
-        <Menu size={22} />
-      </button>
+      {/* Top Buttons */}
+      <div className="flex justify-between items-center px-3 py-3">
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-gray-600 hover:text-black"
+        >
+          <Menu size={22} />
+        </button>
+        <button
+          onClick={() => setVisible(false)}
+          className="text-gray-600 hover:text-black"
+        >
+          <Eye size={22} />
+        </button>
+      </div>
 
       <div className="px-3 py-5 h-full">
         {open && (
@@ -89,7 +106,6 @@ const Sidebar = ({ setActive }) => {
                 onClick={() => handleClick(item.label)}
                 className={`relative flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer
                   font-medium text-sm transition group
-                  
                   ${isActive ? "bg-green-500 text-white shadow-md" : "hover:bg-gray-200"}
                 `}
               >

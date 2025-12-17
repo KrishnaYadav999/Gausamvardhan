@@ -33,11 +33,11 @@ const getPriceByWeight = (product, weight) => {
 };
 
 // Ganpati pack pricing
-const getPriceByGanpatiPack = (packs, selectedPack) => {
-  if (!packs?.length || !selectedPack) return 0;
-  const found = packs.find((p) => p.name === selectedPack);
-  return found ? Number(found.price) : 0;
+const getPriceByGanpatiPack = (packs = [], selectedPack) => {
+  const pack = packs.find(p => p.name === selectedPack) || packs[0];
+  return Number(pack?.price) || 0;
 };
+
 
 const getDiscountPercent = (cut, current) => {
   if (!cut || !current || cut <= current) return 0;
@@ -67,16 +67,15 @@ const HolidayPicks = () => {
     }
   };
 
-const festiveItems = [
-  "🌶️", // Mirchi
-  "🫚", // Adrak
-  "🫙", // Achar Jar
-  "🧈", // Ghee
-  "🥛", // Dairy products
-  "🌿", // Natural / organic touch
-  "🍋",
-];
-
+  const festiveItems = [
+    "🌶️", // Mirchi
+    "🫚", // Adrak
+    "🫙", // Achar Jar
+    "🧈", // Ghee
+    "🥛", // Dairy products
+    "🌿", // Natural / organic touch
+    "🍋",
+  ];
 
   // mouse hover sliding
 
@@ -87,6 +86,8 @@ const festiveItems = [
   const handleMouseLeave = () => {
     isHoveringRef.current = false;
   };
+
+
 
   // smoot sliding
 
@@ -138,98 +139,108 @@ const festiveItems = [
           axios.get(`${BASE_URL}/products`),
         ]);
 
-        const gheeData = ghee.data.map((p) => {
-          const weights = p.pricePerGram?.split(",") || [];
-          const defaultWeight = weights.length
-            ? weights[0].split("=")[0].trim()
-            : "";
-          return {
-            ...p,
-            tag: "Ghee",
-            productName: p.title,
-            cutPrice: p.cutPrice,
-            currentPrice: p.currentPrice,
-            selectedWeight: defaultWeight, // ✅ default weight
-            productImages: p.images,
-          };
-        });
+       const gheeData = ghee.data.map((p) => {
+  const weights = p.pricePerGram?.split(",") || [];
+  const defaultWeight = weights.length ? weights[0].split("=")[0].trim() : "";
+  return {
+    ...p,
+    tag: "Ghee",
+    productName: p.title,
+    cutPrice: p.cutPrice,
+    currentPrice: p.currentPrice,
+    selectedWeight: defaultWeight,
+    productImages: p.images,
+    isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
+  };
+});
 
-        const ganpatiData = ganpati.data.map((p) => {
-          const defaultPack = p.packs?.[0]?.name || "";
-          return {
-            ...p,
-            tag: "Ganpati",
-            productName: p.title,
-            cutPrice: p.cut_price,
-            currentPrice: p.current_price,
-            packs: p.packs || [],
-            selectedPack: defaultPack, // ✅ default pack
-            productImages: p.images,
-          };
-        });
 
-        const agarbattiData = agarbatti.data.map((p) => ({
-          ...p,
-          tag: "Agarbatti",
-          productName: p.productName || p.title,
-          cutPrice: p.cutPrice,
-          currentPrice: p.currentPrice,
-          selectedWeight: p.pricePerGram
-            ? p.pricePerGram.split(",")[0].split("=")[0].trim()
-            : "", // ✅ default weight if any
-          productImages: p.productImages,
-        }));
+      const ganpatiData = ganpati.data.map((p) => {
+  const firstPack = p.packs?.[0];
+  return {
+    ...p,
+    tag: "Ganpati",
+    productName: p.title,
+    cutPrice: Number(p.cut_price) || 0,
+    packs: p.packs || [],
+    selectedPack: firstPack?.name || "",
+    currentPrice: Number(firstPack?.price) || 0, // 🔥 IMPORTANT
+    productImages: p.images,
+    isOutOfStock:
+      !p.packs || p.packs.every(pack => pack.stockQuantity <= 0),
+  };
+});
 
-        const acharData = achar.data.map((p) => ({
-          ...p,
-          tag: "Achar",
-          productName: p.productName,
-          cutPrice: p.cutPrice,
-          currentPrice: p.currentPrice,
-          selectedWeight: p.pricePerGram
-            ? p.pricePerGram.split(",")[0].split("=")[0].trim()
-            : "", // ✅ default weight if any
-          productImages: p.productImages,
-        }));
+
+
+       const agarbattiData = agarbatti.data.map((p) => {
+  return {
+    ...p,
+    tag: "Agarbatti",
+    productName: p.productName || p.title,
+    cutPrice: p.cutPrice,
+    currentPrice: p.currentPrice,
+    selectedWeight: p.pricePerGram
+      ? p.pricePerGram.split(",")[0].split("=")[0].trim()
+      : "", // default weight if any
+    productImages: p.productImages,
+    isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
+  };
+});
+
+
+       const acharData = achar.data.map((p) => {
+  return {
+    ...p,
+    tag: "Achar",
+    productName: p.productName,
+    cutPrice: p.cutPrice,
+    currentPrice: p.currentPrice,
+    selectedWeight: p.pricePerGram ? p.pricePerGram.split(",")[0].split("=")[0].trim() : "",
+    productImages: p.productImages,
+    isOutOfStock: p.stock === false || p.stockQuantity <= 0, // अगर स्टॉक नहीं है तो आउट ऑफ स्टॉक मानें
+  };
+});
+
 
         // ⭐ 1. sab products combine
-const allProducts = [
-  ...gheeData,
-  ...ganpatiData,
-  ...agarbattiData,
-  ...acharData,
-];
+        const allProducts = [
+          ...gheeData,
+          ...ganpatiData,
+          ...agarbattiData,
+          ...acharData,
+        ];
 
-// ⭐ 2. sirf 4+ rating wale products
-const ratedProducts = allProducts.filter(
-  (p) => getAvgRating(p.reviews) >= 4
-);
+        // ⭐ 2. sirf 4+ rating wale products
+        const ratedProducts = allProducts.filter(
+          (p) => getAvgRating(p.reviews) >= 4
+        );
 
-// ⭐ 3. har category ka sirf 1 best product
-const bestByCategory = Object.values(
-  ratedProducts.reduce((acc, product) => {
-    const tag = product.tag;
-    const rating = getAvgRating(product.reviews);
+        // ⭐ 3. har category ka sirf 1 best product
+        const bestByCategory = Object.values(
+          ratedProducts.reduce((acc, product) => {
+            const tag = product.tag;
+            const rating = getAvgRating(product.reviews);
 
-    if (!acc[tag] || rating > getAvgRating(acc[tag].reviews)) {
-      acc[tag] = product;
-    }
-    return acc;
-  }, {})
-);
+            if (!acc[tag] || rating > getAvgRating(acc[tag].reviews)) {
+              acc[tag] = product;
+            }
+            return acc;
+          }, {})
+        );
 
-// ⭐ 4. FINAL SET
-setProducts([
-  {
-    id: "banner",
-    isBanner: true,
-    title: "Pure & Authentic Products",
-    subtitle: "GAUSAMVARDHAN",
-    video:
-      "https://res.cloudinary.com/dtvihyts8/video/upload/v1765741394/27b760446327b60270741cf4f4d8ec2f_jgkbkk.mp4",
-  },
-  ...bestByCategory,
-]);
+        // ⭐ 4. FINAL SET
+        setProducts([
+          {
+            id: "banner",
+            isBanner: true,
+            title: "Pure & Authentic Products",
+            subtitle: "GAUSAMVARDHAN",
+            video:
+              "https://res.cloudinary.com/dtvihyts8/video/upload/v1765741394/27b760446327b60270741cf4f4d8ec2f_jgkbkk.mp4",
+          },
+          ...bestByCategory,
+        ]);
       } catch (err) {
         console.error(err);
         toast.error("Failed to load products");
@@ -263,7 +274,12 @@ setProducts([
       price = getPriceByGanpatiPack(product.packs, product.selectedPack);
     }
 
-    addToCart({ ...product, selectedPrice: price });
+    addToCart({
+  ...product,
+  selectedPrice: Number(price) || 0,
+  quantity: 1,
+});
+
     toast.success(`${product.productName} added to cart`);
   };
 
@@ -282,62 +298,75 @@ setProducts([
         backgroundImage: "url('')",
       }}
     >
-    <Helmet>
-  {/* =========================
+      <Helmet>
+        {/* =========================
       🏆 BEST SELLING PRODUCTS – TITLE
   ========================== */}
-  <title>
-    Best Selling Homemade Achar, Pure Desi Ghee, Ganpati Murti, Agarbatti & Pooja Products | Gausamvardhan
-  </title>
+        <title>
+          Best Selling Homemade Achar, Pure Desi Ghee, Ganpati Murti, Agarbatti
+          & Pooja Products | Gausamvardhan
+        </title>
 
-  {/* =========================
+        {/* =========================
       📄 META DESCRIPTION (HIGH CTR)
   ========================== */}
-  <meta
-    name="description"
-    content="Discover best selling products at Gausamvardhan – homemade achar, pure desi cow ghee, ganpati murti, agarbatti, dhoop cups, cow dung products & pooja essentials. Top selling haldi mirchi amla adrak achar, lal mirchi bharwa achar, mango pickle, kathal ka achar, lemon chili pickle, amla murabba & more. Traditional, chemical-free, made in India."
-  />
+        <meta
+          name="description"
+          content="Discover best selling products at Gausamvardhan – homemade achar, pure desi cow ghee, ganpati murti, agarbatti, dhoop cups, cow dung products & pooja essentials. Top selling haldi mirchi amla adrak achar, lal mirchi bharwa achar, mango pickle, kathal ka achar, lemon chili pickle, amla murabba & more. Traditional, chemical-free, made in India."
+        />
 
-  {/* =========================
+        {/* =========================
       🔗 CANONICAL
   ========================== */}
-  <link rel="canonical" href="https://www.gausamvardhan.com/" />
+        <link rel="canonical" href="https://www.gausamvardhan.com/" />
 
-  {/* =========================
+        {/* =========================
       🌐 OPEN GRAPH (SOCIAL SHARE)
   ========================== */}
-  <meta property="og:title" content="Best Selling Indian Homemade Products – Gausamvardhan" />
-  <meta
-    property="og:description"
-    content="Shop India’s most loved homemade achar, pure ghee, ganpati murti, agarbatti, dhoop & pooja products. Authentic village-style, no preservatives."
-  />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.gausamvardhan.com/" />
-  <meta property="og:site_name" content="Gausamvardhan" />
-  <meta property="og:image" content="https://www.gausamvardhan.com/images/best-selling-og.jpg" />
+        <meta
+          property="og:title"
+          content="Best Selling Indian Homemade Products – Gausamvardhan"
+        />
+        <meta
+          property="og:description"
+          content="Shop India’s most loved homemade achar, pure ghee, ganpati murti, agarbatti, dhoop & pooja products. Authentic village-style, no preservatives."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.gausamvardhan.com/" />
+        <meta property="og:site_name" content="Gausamvardhan" />
+        <meta
+          property="og:image"
+          content="https://www.gausamvardhan.com/images/best-selling-og.jpg"
+        />
 
-  {/* =========================
+        {/* =========================
       🐦 TWITTER
   ========================== */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Best Selling Homemade Achar & Desi Products | Gausamvardhan" />
-  <meta
-    name="twitter:description"
-    content="Explore best selling achar, ghee, agarbatti, dhoop, ganpati murti & pooja essentials online."
-  />
-  <meta name="twitter:image" content="https://www.gausamvardhan.com/images/best-selling-og.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Best Selling Homemade Achar & Desi Products | Gausamvardhan"
+        />
+        <meta
+          name="twitter:description"
+          content="Explore best selling achar, ghee, agarbatti, dhoop, ganpati murti & pooja essentials online."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.gausamvardhan.com/images/best-selling-og.jpg"
+        />
 
-  {/* =========================
+        {/* =========================
       🤖 ROBOTS
   ========================== */}
-  <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
 
-  {/* =========================
+        {/* =========================
       🔥 MEGA KEYWORDS (AMAZON LEVEL)
   ========================== */}
-  <meta
-    name="keywords"
-    content="
+        <meta
+          name="keywords"
+          content="
     best selling products india,
     trending indian products,
     top selling homemade products,
@@ -395,15 +424,15 @@ setProducts([
 
     gausamvardhan best sellers
     "
-  />
+        />
 
-  {/* =========================
+        {/* =========================
       📍 GEO TARGET
   ========================== */}
-  <meta name="geo.region" content="IN" />
-  <meta name="geo.placename" content="India" />
-  <meta name="language" content="English,Hindi" />
-</Helmet>
+        <meta name="geo.region" content="IN" />
+        <meta name="geo.placename" content="India" />
+        <meta name="language" content="English,Hindi" />
+      </Helmet>
       <div className="relative">
         {/* 🎆 ROCKET CELEBRATION LAYER (TOP) */}
         <div className="absolute inset-x-0 top-0 h-48 pointer-events-none z-20 overflow-visible">
@@ -483,12 +512,13 @@ setProducts([
       >
         {products.map((item, index) => {
           // ---------------- CALCULATE DISPLAYED PRICE ----------------
-          const displayedPrice =
-            item.tag === "Ghee" && item.pricePerGram
-              ? getPriceByWeight(item, item.selectedWeight)
-              : item.packs?.length
-              ? getPriceByGanpatiPack(item.packs, item.selectedPack)
-              : Number(item.currentPrice); // ensure number
+         const displayedPrice =
+  item.tag === "Ghee"
+    ? getPriceByWeight(item, item.selectedWeight)
+    : item.tag === "Ganpati"
+    ? getPriceByGanpatiPack(item.packs, item.selectedPack)
+    : Number(item.currentPrice) || 0;
+
 
           // ---------------- RENDER BANNER ----------------
           if (item.isBanner) {
@@ -609,15 +639,21 @@ setProducts([
               )}
 
               {/* ---------------- ADD TO CART ---------------- */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddToCart(item);
-                }}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-3"
-              >
-                <ShoppingCart size={18} /> Add to Cart
-              </button>
+            <button
+  onClick={(e) => {
+    e.stopPropagation();
+    if (!item.isOutOfStock) handleAddToCart(item);
+  }}
+  disabled={item.isOutOfStock}
+  className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
+    item.isOutOfStock
+      ? "bg-gray-400 cursor-not-allowed text-white"
+      : "bg-green-700 hover:bg-green-800 text-white"
+  }`}
+>
+  {item.isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+</button>
+
             </div>
           );
         })}{" "}

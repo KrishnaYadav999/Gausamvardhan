@@ -254,6 +254,15 @@ const AdminGetDeleteProduct = () => {
                     onChange={handleChange}
                     className="border px-2 py-1 rounded w-full"
                   />
+                  <label className="flex items-center gap-2 mt-2">
+  <input
+    type="checkbox"
+    name="stock"
+    checked={editForm.stock}
+    onChange={handleChange}
+  />
+  In Stock
+</label>
                   <textarea
                     name="tasteDescription"
                     placeholder="Taste Description"
@@ -301,29 +310,45 @@ const AdminGetDeleteProduct = () => {
                     onChange={handleChange}
                     className="border px-2 py-1 rounded w-full"
                   />
-
+<h3 className="font-semibold mt-3">Product Images</h3>
                   {/* Product Images */}
-                  <label className="font-semibold mt-2">Product Images (comma separated)</label>
-                  <input
-                    type="text"
-                    placeholder="Enter image URLs"
-                    value={editForm.productImages.join(", ")}
-                    onChange={handleProductImagesChange}
-                    className="border px-2 py-1 rounded w-full"
-                  />
-                  {editForm.productImages.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {editForm.productImages.map((img, i) => (
-                        <img
-                          key={i}
-                          src={img}
-                          alt={`preview-${i}`}
-                          className="w-20 h-20 object-cover border rounded"
-                        />
-                      ))}
-                    </div>
-                  )}
+                 {editForm.productImages.map((img, idx) => (
+  <div key={idx} className="flex gap-2 items-center mb-2">
+    <input
+      type="text"
+      value={img}
+      onChange={(e) => {
+        const updated = [...editForm.productImages];
+        updated[idx] = e.target.value;
+        setEditForm({ ...editForm, productImages: updated });
+      }}
+      placeholder="Image URL"
+      className="border px-2 py-1 rounded w-full"
+    />
+    <button
+      onClick={() => {
+        const updated = [...editForm.productImages];
+        updated.splice(idx, 1);
+        setEditForm({ ...editForm, productImages: updated });
+      }}
+      className="bg-red-500 text-white px-2 py-1 rounded"
+    >
+      ❌
+    </button>
+  </div>
+))}
 
+<button
+  onClick={() =>
+    setEditForm({
+      ...editForm,
+      productImages: [...editForm.productImages, ""],
+    })
+  }
+  className="bg-blue-500 text-white px-3 py-1 rounded"
+>
+  + Add Image
+</button>
                   {/* Video URL */}
                   <input
                     type="text"
@@ -369,21 +394,61 @@ const AdminGetDeleteProduct = () => {
                     onChange={(e) => handleChange(e, "moreAboutThisPack")}
                     className="border px-2 py-1 rounded w-full"
                   />
-                  <input
-                    type="text"
-                    placeholder="Images (comma separated)"
-                    value={editForm.moreAboutThisPack.images.join(", ")}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        moreAboutThisPack: {
-                          ...editForm.moreAboutThisPack,
-                          images: e.target.value.split(",").map((url) => url.trim()),
-                        },
-                      })
-                    }
-                    className="border px-2 py-1 rounded w-full"
-                  />
+                 <h4 className="font-medium mt-2">More About Pack Images</h4>
+
+{editForm.moreAboutThisPack.images.map((img, idx) => (
+  <div key={idx} className="flex gap-2 mb-2">
+    <input
+      type="text"
+      value={img}
+      onChange={(e) => {
+        const updated = [...editForm.moreAboutThisPack.images];
+        updated[idx] = e.target.value;
+        setEditForm({
+          ...editForm,
+          moreAboutThisPack: {
+            ...editForm.moreAboutThisPack,
+            images: updated,
+          },
+        });
+      }}
+      className="border px-2 py-1 rounded w-full"
+      placeholder="Image URL"
+    />
+    <button
+      onClick={() => {
+        const updated = [...editForm.moreAboutThisPack.images];
+        updated.splice(idx, 1);
+        setEditForm({
+          ...editForm,
+          moreAboutThisPack: {
+            ...editForm.moreAboutThisPack,
+            images: updated,
+          },
+        });
+      }}
+      className="bg-red-500 text-white px-2 rounded"
+    >
+      ❌
+    </button>
+  </div>
+))}
+
+<button
+  onClick={() =>
+    setEditForm({
+      ...editForm,
+      moreAboutThisPack: {
+        ...editForm.moreAboutThisPack,
+        images: [...editForm.moreAboutThisPack.images, ""],
+      },
+    })
+  }
+  className="bg-blue-500 text-white px-3 py-1 rounded"
+>
+  + Add Image
+</button>
+
 
                   {/* More About Product */}
                   <h3 className="font-semibold mt-3">More About Product</h3>
