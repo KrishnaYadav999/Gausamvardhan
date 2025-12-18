@@ -143,7 +143,7 @@ const GheeProductDetail = () => {
     const qty = weightQuantities[selectedWeight] || 1;
     const price = getPrice(product, selectedWeight);
 
-    addToCart({
+    const added = addToCart({
       _id: product._id,
       productName: product.title || product.productName,
       selectedWeight,
@@ -153,12 +153,13 @@ const GheeProductDetail = () => {
       cutPrice: parseFloat(product.cutPrice) || 0,
       productImages: product.images || [],
     });
-
-    toast.success(
-      `${
-        product.title || product.productName
-      } (${selectedWeight}) x${qty} added to cart!`
-    );
+    if (added) {
+      toast.success(
+        `${
+          product.title || product.productName
+        } (${selectedWeight}) x${qty} added to cart!`
+      );
+    }
   };
 
   const handleBuyNow = () => {

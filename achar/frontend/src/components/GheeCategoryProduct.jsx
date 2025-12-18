@@ -48,7 +48,7 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (isOutOfStock) return toast.error("❌ Out of stock");
     if (!selectedWeight) return toast.error("❌ Select weight");
 
-    addToCart({
+    const added = addToCart({
        ...product,
       productName: product.title,
       selectedWeight,
@@ -57,7 +57,9 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       cutPrice: product.cutPrice || 0,
       productImages: product.images || [],
     });
+    if (added) {
     toast.success(`🛒 ${product.title} (${selectedWeight}) added!`);
+  }
   };
 
   const weights = product.pricePerGram

@@ -105,7 +105,7 @@ const GanpatiDetail = () => {
       return;
     }
     const qty = packQuantities[selectedPack] || 1;
-    addToCart({
+    const added =addToCart({
       ...product,
       selectedPack,
       selectedPrice: getPrice(product, selectedPack),
@@ -113,7 +113,9 @@ const GanpatiDetail = () => {
       totalPrice: getPrice(product, selectedPack) * qty,
       productImages: product.images || [],
     });
-    toast.success(`${product.title} (${selectedPack}) x${qty} added to cart!`);
+    if(added){
+toast.success(`${product.title} (${selectedPack}) x${qty} added to cart!`);
+    }
   };
 
   const handleBuyNow = () => {

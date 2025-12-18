@@ -10,7 +10,7 @@ import { Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import PoojaEssentialsCustomerReview from "./PoojaEssentialsCustomerReview";
 import Certificate from "./Certificate";
-import VideoAdvertiseList from "./VideoAdvertiseList"
+import VideoAdvertiseList from "./VideoAdvertiseList";
 
 const HERO_IMAGE_URL = "/mnt/data/4dc83e6e-457a-4813-963c-0fe8fa4f6c1e.png";
 
@@ -107,7 +107,7 @@ const AgarbattiProductDetail = () => {
       return;
     }
     const qty = packQuantities[selectedPack] || 1;
-    addToCart({
+    const added = addToCart({
       ...product,
       selectedPack,
       selectedPrice: getPrice(product, selectedPack),
@@ -115,7 +115,11 @@ const AgarbattiProductDetail = () => {
       totalPrice: getPrice(product, selectedPack) * qty,
       productImages: product.images || [],
     });
-    toast.success(`${product.title} (${selectedPack}) x${qty} added to cart!`);
+    if (added) {
+      toast.success(
+        `${product.title} (${selectedPack}) x${qty} added to cart!`
+      );
+    }
   };
 
   const handleBuyNow = () => {
@@ -298,152 +302,151 @@ const AgarbattiProductDetail = () => {
                 ))}
               </div>
 
-                {/* MOBILE PURCHASE CARD */}
-                            <div className="block md:hidden mt-6 bg-white rounded-2xl p-4 shadow-lg">
-                              <h1 className="text-xl font-bold text-gray-900">
-                                {product.title || product.productName}
-                              </h1>
-              
-                              {/* Rating */}
-                              <div className="flex items-center mt-2 space-x-2">
-                                <div className="flex">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      size={16}
-                                      className={
-                                        i < Math.round(Number(averageRating) || 0)
-                                          ? "text-yellow-400 fill-yellow-400"
-                                          : "text-gray-300"
-                                      }
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-xs text-gray-600">
-                                  ({totalReviews} reviews)
-                                </span>
-                              </div>
-              
-                              <p className="mt-4 text-gray-700 text-[0.95rem]">
-                                {product.description || "Beautiful premium Ganpati idol."}
-                              </p>
-              
-                              <Certificate />
-              
-                              {/* Price */}
-                              <div className="mt-3 text-2xl font-bold text-green-600">
-                                ₹
-                                {getPrice(product, selectedPack) *
-                                  (packQuantities[selectedPack] || 1)}
-                              </div>
-              
-                              {product.cut_price && (
-                                <div className="line-through text-gray-400">
-                                  ₹{product.cut_price}
-                                </div>
-                              )}
-              
-                              {/* PACK OPTIONS */}
-                              {product.packs?.length > 0 && (
-                                <div className="mt-4">
-                                  <p className="font-medium text-gray-700 mb-2 text-sm">
-                                    Select Pack
-                                  </p>
-              
-                                  <div className="flex flex-col gap-2">
-                                    {product.packs.map((pack, idx) => (
-                                      <div
-                                        key={idx}
-                                        onClick={() => setSelectedPack(pack.name)}
-                                        className={`flex items-center justify-between border p-2 rounded-lg ${
-                                          selectedPack === pack.name
-                                            ? "border-green-600 bg-green-50"
-                                            : "border-gray-200"
-                                        }`}
-                                      >
-                                        <span className="text-sm font-medium">
-                                          {pack.name} – ₹{getPrice(product, pack.name)}
-                                        </span>
-              
-                                        <div className="flex items-center gap-2">
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              updatePackQuantity(pack.name, -1);
-                                            }}
-                                            className="px-2 border rounded"
-                                          >
-                                            -
-                                          </button>
-              
-                                          <span className="text-sm">
-                                            {packQuantities[pack.name] || 1}
-                                          </span>
-              
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              updatePackQuantity(pack.name, 1);
-                                            }}
-                                            className="px-2 border rounded"
-                                          >
-                                            +
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-              
-                              {/* CTA BUTTONS */}
-                              <div className="mt-6 grid grid-cols-1 gap-3">
-                                <button
-                                  onClick={handleAddToCart}
-                                  disabled={isOutOfStock}
-                                  className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
-                                    isOutOfStock
-                                      ? "bg-gray-400 cursor-not-allowed"
-                                      : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
-                                  }`}
-                                >
-                                  {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
-                                </button>
-              
-                                <button
-                                  onClick={handleBuyNow}
-                                  disabled={isOutOfStock}
-                                  className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
-                                    isOutOfStock
-                                      ? "bg-gray-300 cursor-not-allowed"
-                                      : "bg-yellow-400 hover:bg-yellow-500"
-                                  }`}
-                                >
-                                  {isOutOfStock ? "Out of Stock" : "💳 Shop Now"}
-                                </button>
-                              </div>
-                              <Features />
-                              {/* PRODUCT DETAILS */}
-                              <div className="mt-6">
-                                <h3 className="text-lg font-semibold mb-2">
-                                  Product Details
-                                </h3>
-                                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                                  {productDetails.map(
-                                    (item) =>
-                                      item.value && (
-                                        <li key={item.key}>
-                                          <span className="font-medium text-gray-900">
-                                            {item.label}:
-                                          </span>{" "}
-                                          {item.value}
-                                        </li>
-                                      )
-                                  )}
-                                </ul>
-                              </div>
-                            </div>
-              
+              {/* MOBILE PURCHASE CARD */}
+              <div className="block md:hidden mt-6 bg-white rounded-2xl p-4 shadow-lg">
+                <h1 className="text-xl font-bold text-gray-900">
+                  {product.title || product.productName}
+                </h1>
+
+                {/* Rating */}
+                <div className="flex items-center mt-2 space-x-2">
+                  <div className="flex">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={
+                          i < Math.round(Number(averageRating) || 0)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-gray-600">
+                    ({totalReviews} reviews)
+                  </span>
+                </div>
+
+                <p className="mt-4 text-gray-700 text-[0.95rem]">
+                  {product.description || "Beautiful premium Ganpati idol."}
+                </p>
+
+                <Certificate />
+
+                {/* Price */}
+                <div className="mt-3 text-2xl font-bold text-green-600">
+                  ₹
+                  {getPrice(product, selectedPack) *
+                    (packQuantities[selectedPack] || 1)}
+                </div>
+
+                {product.cut_price && (
+                  <div className="line-through text-gray-400">
+                    ₹{product.cut_price}
+                  </div>
+                )}
+
+                {/* PACK OPTIONS */}
+                {product.packs?.length > 0 && (
+                  <div className="mt-4">
+                    <p className="font-medium text-gray-700 mb-2 text-sm">
+                      Select Pack
+                    </p>
+
+                    <div className="flex flex-col gap-2">
+                      {product.packs.map((pack, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedPack(pack.name)}
+                          className={`flex items-center justify-between border p-2 rounded-lg ${
+                            selectedPack === pack.name
+                              ? "border-green-600 bg-green-50"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          <span className="text-sm font-medium">
+                            {pack.name} – ₹{getPrice(product, pack.name)}
+                          </span>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updatePackQuantity(pack.name, -1);
+                              }}
+                              className="px-2 border rounded"
+                            >
+                              -
+                            </button>
+
+                            <span className="text-sm">
+                              {packQuantities[pack.name] || 1}
+                            </span>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updatePackQuantity(pack.name, 1);
+                              }}
+                              className="px-2 border rounded"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA BUTTONS */}
+                <div className="mt-6 grid grid-cols-1 gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                    className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition ${
+                      isOutOfStock
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "🛒 Add to Cart"}
+                  </button>
+
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={isOutOfStock}
+                    className={`w-full py-3 rounded-xl text-lg font-semibold text-gray-800 transition ${
+                      isOutOfStock
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-yellow-400 hover:bg-yellow-500"
+                    }`}
+                  >
+                    {isOutOfStock ? "Out of Stock" : "💳 Shop Now"}
+                  </button>
+                </div>
+                <Features />
+                {/* PRODUCT DETAILS */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Product Details
+                  </h3>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    {productDetails.map(
+                      (item) =>
+                        item.value && (
+                          <li key={item.key}>
+                            <span className="font-medium text-gray-900">
+                              {item.label}:
+                            </span>{" "}
+                            {item.value}
+                          </li>
+                        )
+                    )}
+                  </ul>
+                </div>
+              </div>
 
               {/* MORE ABOUT */}
               <div className="mt-6 bg-white p-6 rounded-2xl shadow">
@@ -527,18 +530,17 @@ const AgarbattiProductDetail = () => {
               )}
             </div>
             {/* PRODUCT VIDEO — MOBILE & TABLET ONLY */}
-{product.videoUrl && (
-  <div className="mt-6 block lg:hidden">
-    <div className="bg-white p-4 rounded-2xl shadow">
-      <h4 className="font-semibold mb-2">Product Video</h4>
-      <ProductVideo
-        videoUrl={product.videoUrl}
-        thumbnail={product.images?.[0]}
-      />
-    </div>
-  </div>
-)}
-
+            {product.videoUrl && (
+              <div className="mt-6 block lg:hidden">
+                <div className="bg-white p-4 rounded-2xl shadow">
+                  <h4 className="font-semibold mb-2">Product Video</h4>
+                  <ProductVideo
+                    videoUrl={product.videoUrl}
+                    thumbnail={product.images?.[0]}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* RIGHT SIDE */}
             <div className="hidden md:block sticky top-6 self-start">
@@ -569,7 +571,7 @@ const AgarbattiProductDetail = () => {
                 <p className="mt-4 text-gray-700 text-[0.95rem]">
                   {product.description || "Premium handcrafted agarbatti."}
                 </p>
-                 <Certificate />
+                <Certificate />
 
                 <div className="mt-6 flex items-end gap-4">
                   <div>
@@ -747,7 +749,6 @@ const AgarbattiProductDetail = () => {
                     </p>
                   </div>
                 ))}
-                
               </div>
             </div>
           )}
@@ -783,7 +784,7 @@ const AgarbattiProductDetail = () => {
         </div>
       </div>
       <div>
-        <PoojaEssentialsCustomerReview/>
+        <PoojaEssentialsCustomerReview />
         <VideoAdvertiseList />
       </div>
     </>

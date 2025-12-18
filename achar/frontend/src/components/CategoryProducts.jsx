@@ -55,7 +55,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (isOutOfStock) return toast.error("Out of stock");
     if (!selectedWeight) return toast.error("Select weight");
 
-    addToCart({
+   const added = addToCart({
        ...product,
       productName: product.productName,
       selectedWeight,
@@ -65,7 +65,9 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       productImages: product.productImages || [],
     });
 
-    toast.success(`${product.productName} added`);
+    if (added) {
+    toast.success(`${product.productName} added to cart 🛒`);
+  }
   };
 
   return (

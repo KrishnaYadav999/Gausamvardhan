@@ -1,23 +1,29 @@
-// client/src/components/Chat.jsx
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSend, FiMoon, FiSun } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
+import ReactMarkdown from "react-markdown";
+
+const STORAGE_KEY = "gausam-chat-history";
+const THEME_KEY = "chat-dark";
 
 const Chat = () => {
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(
-    localStorage.getItem("chat-dark") === "true"
-  );
+  const [dark, setDark] = useState(localStorage.getItem(THEME_KEY) === "true");
 
-  const [messages, setMessages] = useState([
-    {
-      from: "bot",
-      text: "Hello 👋 I’m **Gausam Assistant**.\nHow can I help you today?",
-      time: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved
+      ? JSON.parse(saved).map((m) => ({ ...m, time: new Date(m.time) }))
+      : [
+          {
+            from: "bot",
+            text: "Hello 👋 I’m **Gausam Assistant**.\nHow can I help you today?",
+            time: new Date(),
+          },
+        ];
+  });
 
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -32,18 +38,47 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing, suggestions]);
 
+  /* Persist chat */
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
   /* Persist theme */
   useEffect(() => {
-    localStorage.setItem("chat-dark", dark);
+    localStorage.setItem(THEME_KEY, dark);
   }, [dark]);
+
+  /* Lock body scroll when chat is open */
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [open]);
 
   const pushMessage = (msg) => {
     setMessages((prev) => [...prev, { ...msg, time: new Date() }]);
   };
 
+  /* Typing animation */
+  const streamBotMessage = (fullText) => {
+    let index = 0;
+    pushMessage({ from: "bot", text: "" });
+
+    const interval = setInterval(() => {
+      index++;
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].text = fullText.slice(0, index);
+        return updated;
+      });
+      if (index >= fullText.length) clearInterval(interval);
+    }, 22);
+  };
+
   const sendMessage = async (e) => {
     e?.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || typing) return;
 
     const text = input.trim();
     pushMessage({ from: "user", text });
@@ -54,11 +89,7 @@ const Chat = () => {
     try {
       const { data } = await axios.post("/api/chat", { message: text });
       setTyping(false);
-
-      pushMessage({
-        from: "bot",
-        text: data.answer || "Sorry, I couldn’t understand that.",
-      });
+      streamBotMessage(data.answer || "Sorry, I couldn’t understand that.");
 
       if (Array.isArray(data.suggestions)) {
         setSuggestions(data.suggestions.slice(0, 4));
@@ -73,6 +104,7 @@ const Chat = () => {
   };
 
   const sendSuggestion = (text) => {
+    if (typing) return;
     setInput(text);
     setTimeout(() => document.getElementById("chat-send")?.click(), 100);
   };
@@ -87,8 +119,8 @@ const Chat = () => {
           whileHover={{ scale: 1.1 }}
           onClick={() => setOpen(true)}
           className="fixed bottom-6 right-6 w-16 h-16 rounded-full
-                     bg-gradient-to-br from-emerald-500 to-green-600
-                     shadow-2xl flex items-center justify-center z-50"
+          bg-gradient-to-br from-emerald-500 to-green-600
+          shadow-2xl flex items-center justify-center z-50"
         >
           <img src={logo} alt="chat" className="w-10 h-10 rounded-full" />
         </motion.button>
@@ -101,22 +133,23 @@ const Chat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ duration: 0.35 }}
-            className={`fixed bottom-6 right-6 w-[380px] h-[580px]
-              rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border
-              ${
-                dark
-                  ? "bg-gray-900 text-white border-white/10"
-                  : "bg-white/80 backdrop-blur-2xl border-white/40"
-              }`}
+            className={`fixed bottom-[env(safe-area-inset-bottom,1rem)] right-4
+            w-[92vw] max-w-[380px]
+            h-[65vh] max-h-[520px]
+            rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border
+            ${
+              dark
+                ? "bg-gray-900 text-white border-white/10"
+                : "bg-white/80 backdrop-blur-2xl border-white/40"
+            }`}
           >
             {/* Header */}
             <div
-              className={`flex items-center justify-between px-4 py-3
-                ${
-                  dark
-                    ? "bg-gray-800"
-                    : "bg-gradient-to-r from-emerald-600 to-green-500 text-white"
-                }`}
+              className={`flex items-center justify-between px-4 py-3 ${
+                dark
+                  ? "bg-gray-800"
+                  : "bg-gradient-to-r from-emerald-600 to-green-500 text-white"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <img src={logo} className="w-9 h-9 rounded-full border" />
@@ -130,16 +163,10 @@ const Chat = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setDark(!dark)}
-                  className="hover:scale-110 transition"
-                >
+                <button onClick={() => setDark(!dark)}>
                   {dark ? <FiSun /> : <FiMoon />}
                 </button>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-xl hover:rotate-90 transition"
-                >
+                <button onClick={() => setOpen(false)} className="text-xl">
                   <IoClose />
                 </button>
               </div>
@@ -158,15 +185,15 @@ const Chat = () => {
                 >
                   <div
                     className={`max-w-[75%] px-4 py-3 text-sm shadow-lg whitespace-pre-wrap
-                      ${
-                        m.from === "user"
-                          ? "bg-gradient-to-br from-emerald-600 to-green-500 text-white rounded-2xl rounded-br-sm"
-                          : dark
-                          ? "bg-gray-800 text-white rounded-2xl rounded-bl-sm"
-                          : "bg-white text-gray-800 rounded-2xl rounded-bl-sm"
-                      }`}
+                    ${
+                      m.from === "user"
+                        ? "bg-gradient-to-br from-emerald-600 to-green-500 text-white rounded-2xl rounded-br-sm"
+                        : dark
+                        ? "bg-gray-800 text-white rounded-2xl rounded-bl-sm"
+                        : "bg-white text-gray-800 rounded-2xl rounded-bl-sm"
+                    }`}
                   >
-                    {m.text}
+                    <ReactMarkdown>{m.text}</ReactMarkdown>
                     <div className="text-[10px] mt-1 opacity-50 text-right">
                       {m.time.toLocaleTimeString([], {
                         hour: "2-digit",
@@ -177,7 +204,6 @@ const Chat = () => {
                 </motion.div>
               ))}
 
-              {/* Typing */}
               {typing && (
                 <div className="flex gap-1 text-xs opacity-60">
                   <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" />
@@ -186,19 +212,17 @@ const Chat = () => {
                 </div>
               )}
 
-              {/* Suggestions */}
               {suggestions.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {suggestions.map((s, i) => (
                     <button
                       key={i}
                       onClick={() => sendSuggestion(s.prompt)}
-                      className={`px-3 py-1.5 text-xs rounded-full border transition
-                        ${
-                          dark
-                            ? "bg-gray-800 border-white/10 hover:bg-gray-700"
-                            : "bg-white hover:bg-emerald-50 hover:border-emerald-400"
-                        }`}
+                      className={`px-3 py-1.5 text-xs rounded-full border transition ${
+                        dark
+                          ? "bg-gray-800 border-white/10 hover:bg-gray-700"
+                          : "bg-white hover:bg-emerald-50 hover:border-emerald-400"
+                      }`}
                     >
                       {s.prompt}
                     </button>
@@ -221,20 +245,21 @@ const Chat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type your message..."
-                  className={`flex-1 px-4 py-2 rounded-full outline-none text-sm
-                    ${
-                      dark
-                        ? "bg-gray-800 text-white border border-white/10"
-                        : "bg-white border focus:ring-2 focus:ring-emerald-400"
-                    }`}
+                  disabled={typing}
+                  className={`flex-1 px-4 py-2 rounded-full outline-none text-sm ${
+                    dark
+                      ? "bg-gray-800 text-white border border-white/10"
+                      : "bg-white border focus:ring-2 focus:ring-emerald-400"
+                  }`}
                 />
                 <button
                   id="chat-send"
                   type="submit"
+                  disabled={typing}
                   className="w-11 h-11 rounded-full
-                             bg-gradient-to-br from-emerald-600 to-green-500
-                             text-white flex items-center justify-center
-                             hover:scale-105 transition"
+                  bg-gradient-to-br from-emerald-600 to-green-500
+                  text-white flex items-center justify-center
+                  hover:scale-105 transition disabled:opacity-50"
                 >
                   <FiSend />
                 </button>

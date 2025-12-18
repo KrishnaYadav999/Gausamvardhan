@@ -49,10 +49,13 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     if (!user) {
-      if (window.confirm("Please login to add items to cart")) {
-        navigate("/signin");
-      }
-      return;
+      toast.error("Please login to add items to cart");
+
+  // optional small delay so toast dikhe
+  setTimeout(() => {
+    navigate("/signin");
+  }, 1200);
+      return false;
     }
 
     const price = parseFloat(product.selectedPrice) || 0;
@@ -70,7 +73,10 @@ export const CartProvider = ({ children }) => {
         const updated = [...prev];
         updated[index] = {
           ...updated[index],
-        quantity: Math.min(99, updated[index].quantity + (product.quantity || 1)),
+          quantity: Math.min(
+            99,
+            updated[index].quantity + (product.quantity || 1)
+          ),
         };
         return updated;
       }
@@ -80,7 +86,7 @@ export const CartProvider = ({ children }) => {
         {
           ...product,
           cartKey, // 🔥 VERY IMPORTANT
-         quantity: product.quantity || 1,
+          quantity: product.quantity || 1,
           basePrice: price,
           currentPrice: price,
           productImages: product.productImages?.length
@@ -92,6 +98,7 @@ export const CartProvider = ({ children }) => {
         ...prev,
       ];
     });
+    return true;
   };
 
   // Update quantity

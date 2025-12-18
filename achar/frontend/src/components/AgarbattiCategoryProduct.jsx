@@ -30,30 +30,29 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
   const avgRating =
     ratingCount > 0
       ? (
-          product.reviews.reduce((a, r) => a + (r.rating || 0), 0) /
-          ratingCount
+          product.reviews.reduce((a, r) => a + (r.rating || 0), 0) / ratingCount
         ).toFixed(1)
       : "0.0";
 
   const openProduct = () => {
-    if (!isOut)
-      navigate(`/agarbatti-product/${product.slug}/${product._id}`);
+    if (!isOut) navigate(`/agarbatti-product/${product.slug}/${product._id}`);
   };
 
   const addCart = (e) => {
     e.stopPropagation();
     if (isOut) return toast.error("❌ Out of stock");
 
-    addToCart({
-       ...product,
+    const added = addToCart({
+      ...product,
       productName: product.title,
       quantity: 1,
       selectedPrice,
       selectedPack: currentPack?.name,
       productImages: product.images,
     });
-
-    toast.success(`🛒 ${product.title} (${currentPack?.name}) added!`);
+    if (added) {
+      toast.success(`🛒 ${product.title} (${currentPack?.name}) added!`);
+    }
   };
 
   return (
@@ -191,55 +190,48 @@ export default function AgarbattiCategoryProduct() {
     load();
   }, [slug]);
 
-const handleFilter = useCallback(
-  (filters) => {
-    let temp = [...products];
+  const handleFilter = useCallback(
+    (filters) => {
+      let temp = [...products];
 
-    // CATEGORY
-    if (filters.category) {
-      temp = temp.filter(
-        (p) =>
-          p.category === filters.category ||
-          p.categoryId === filters.category
-      );
-    }
+      // CATEGORY
+      if (filters.category) {
+        temp = temp.filter(
+          (p) =>
+            p.category === filters.category || p.categoryId === filters.category
+        );
+      }
 
-    // PRICE
-    temp = temp.filter((p) => {
-      const price =
-        p.currentPrice ||
-        p.current_price ||
-        p.packs?.[0]?.price ||
-        0;
-      return price >= filters.price[0] && price <= filters.price[1];
-    });
-
-    // RATING
-    if (filters.rating > 0) {
+      // PRICE
       temp = temp.filter((p) => {
-        if (!p.reviews || p.reviews.length === 0) return false;
-
-        const avg =
-          p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-          p.reviews.length;
-
-        return avg >= filters.rating;
+        const price =
+          p.currentPrice || p.current_price || p.packs?.[0]?.price || 0;
+        return price >= filters.price[0] && price <= filters.price[1];
       });
-    }
 
-    // STOCK
-    if (filters.stock) {
-      temp = temp.filter(
-        (p) => p.stock !== false && p.stockQuantity > 0
-      );
-    }
+      // RATING
+      if (filters.rating > 0) {
+        temp = temp.filter((p) => {
+          if (!p.reviews || p.reviews.length === 0) return false;
 
-    // ✅ CORRECT STATE SETTER
-    setFilteredProducts(temp);
-  },
-  [products]
-);
+          const avg =
+            p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+            p.reviews.length;
 
+          return avg >= filters.rating;
+        });
+      }
+
+      // STOCK
+      if (filters.stock) {
+        temp = temp.filter((p) => p.stock !== false && p.stockQuantity > 0);
+      }
+
+      // ✅ CORRECT STATE SETTER
+      setFilteredProducts(temp);
+    },
+    [products]
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -265,7 +257,12 @@ const handleFilter = useCallback(
         <div className="flex gap-6">
           {/* Sidebar */}
           <div className="hidden md:block w-64 shrink-0 sticky top-24 mr-4">
-            <Filter minPrice={0} maxPrice={2000} categories={[]} onFilterChange={handleFilter} />
+            <Filter
+              minPrice={0}
+              maxPrice={2000}
+              categories={[]}
+              onFilterChange={handleFilter}
+            />
           </div>
 
           {/* Drawer */}
@@ -311,7 +308,10 @@ const handleFilter = useCallback(
           </div>
         </div>
       </div>
-         <div> <VideoAdvertiseList /> </div>
+      <div>
+        {" "}
+        <VideoAdvertiseList />{" "}
+      </div>
     </div>
   );
 }

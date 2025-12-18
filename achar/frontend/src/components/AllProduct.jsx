@@ -34,10 +34,9 @@ const getPriceByWeight = (product, weight) => {
 
 // Ganpati pack pricing
 const getPriceByGanpatiPack = (packs = [], selectedPack) => {
-  const pack = packs.find(p => p.name === selectedPack) || packs[0];
+  const pack = packs.find((p) => p.name === selectedPack) || packs[0];
   return Number(pack?.price) || 0;
 };
-
 
 const getDiscountPercent = (cut, current) => {
   if (!cut || !current || cut <= current) return 0;
@@ -86,8 +85,6 @@ const HolidayPicks = () => {
   const handleMouseLeave = () => {
     isHoveringRef.current = false;
   };
-
-
 
   // smoot sliding
 
@@ -139,69 +136,68 @@ const HolidayPicks = () => {
           axios.get(`${BASE_URL}/products`),
         ]);
 
-       const gheeData = ghee.data.map((p) => {
-  const weights = p.pricePerGram?.split(",") || [];
-  const defaultWeight = weights.length ? weights[0].split("=")[0].trim() : "";
-  return {
-    ...p,
-    tag: "Ghee",
-    productName: p.title,
-    cutPrice: p.cutPrice,
-    currentPrice: p.currentPrice,
-    selectedWeight: defaultWeight,
-    productImages: p.images,
-    isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
-  };
-});
+        const gheeData = ghee.data.map((p) => {
+          const weights = p.pricePerGram?.split(",") || [];
+          const defaultWeight = weights.length
+            ? weights[0].split("=")[0].trim()
+            : "";
+          return {
+            ...p,
+            tag: "Ghee",
+            productName: p.title,
+            cutPrice: p.cutPrice,
+            currentPrice: p.currentPrice,
+            selectedWeight: defaultWeight,
+            productImages: p.images,
+            isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
+          };
+        });
 
+        const ganpatiData = ganpati.data.map((p) => {
+          const firstPack = p.packs?.[0];
+          return {
+            ...p,
+            tag: "Ganpati",
+            productName: p.title,
+            cutPrice: Number(p.cut_price) || 0,
+            packs: p.packs || [],
+            selectedPack: firstPack?.name || "",
+            currentPrice: Number(firstPack?.price) || 0, // 🔥 IMPORTANT
+            productImages: p.images,
+            isOutOfStock:
+              !p.packs || p.packs.every((pack) => pack.stockQuantity <= 0),
+          };
+        });
 
-      const ganpatiData = ganpati.data.map((p) => {
-  const firstPack = p.packs?.[0];
-  return {
-    ...p,
-    tag: "Ganpati",
-    productName: p.title,
-    cutPrice: Number(p.cut_price) || 0,
-    packs: p.packs || [],
-    selectedPack: firstPack?.name || "",
-    currentPrice: Number(firstPack?.price) || 0, // 🔥 IMPORTANT
-    productImages: p.images,
-    isOutOfStock:
-      !p.packs || p.packs.every(pack => pack.stockQuantity <= 0),
-  };
-});
+        const agarbattiData = agarbatti.data.map((p) => {
+          return {
+            ...p,
+            tag: "Agarbatti",
+            productName: p.productName || p.title,
+            cutPrice: p.cutPrice,
+            currentPrice: p.currentPrice,
+            selectedWeight: p.pricePerGram
+              ? p.pricePerGram.split(",")[0].split("=")[0].trim()
+              : "", // default weight if any
+            productImages: p.productImages,
+            isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
+          };
+        });
 
-
-
-       const agarbattiData = agarbatti.data.map((p) => {
-  return {
-    ...p,
-    tag: "Agarbatti",
-    productName: p.productName || p.title,
-    cutPrice: p.cutPrice,
-    currentPrice: p.currentPrice,
-    selectedWeight: p.pricePerGram
-      ? p.pricePerGram.split(",")[0].split("=")[0].trim()
-      : "", // default weight if any
-    productImages: p.productImages,
-    isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
-  };
-});
-
-
-       const acharData = achar.data.map((p) => {
-  return {
-    ...p,
-    tag: "Achar",
-    productName: p.productName,
-    cutPrice: p.cutPrice,
-    currentPrice: p.currentPrice,
-    selectedWeight: p.pricePerGram ? p.pricePerGram.split(",")[0].split("=")[0].trim() : "",
-    productImages: p.productImages,
-    isOutOfStock: p.stock === false || p.stockQuantity <= 0, // अगर स्टॉक नहीं है तो आउट ऑफ स्टॉक मानें
-  };
-});
-
+        const acharData = achar.data.map((p) => {
+          return {
+            ...p,
+            tag: "Achar",
+            productName: p.productName,
+            cutPrice: p.cutPrice,
+            currentPrice: p.currentPrice,
+            selectedWeight: p.pricePerGram
+              ? p.pricePerGram.split(",")[0].split("=")[0].trim()
+              : "",
+            productImages: p.productImages,
+            isOutOfStock: p.stock === false || p.stockQuantity <= 0, // अगर स्टॉक नहीं है तो आउट ऑफ स्टॉक मानें
+          };
+        });
 
         // ⭐ 1. sab products combine
         const allProducts = [
@@ -274,13 +270,10 @@ const HolidayPicks = () => {
       price = getPriceByGanpatiPack(product.packs, product.selectedPack);
     }
 
-    addToCart({
-  ...product,
-  selectedPrice: Number(price) || 0,
-  quantity: 1,
-});
-
-    toast.success(`${product.productName} added to cart`);
+    const added = addToCart({ ...product, selectedPrice: price });
+    if (added) {
+      toast.success(`${product.productName} added to cart`);
+    }
   };
 
   if (loading) {
@@ -512,13 +505,12 @@ const HolidayPicks = () => {
       >
         {products.map((item, index) => {
           // ---------------- CALCULATE DISPLAYED PRICE ----------------
-         const displayedPrice =
-  item.tag === "Ghee"
-    ? getPriceByWeight(item, item.selectedWeight)
-    : item.tag === "Ganpati"
-    ? getPriceByGanpatiPack(item.packs, item.selectedPack)
-    : Number(item.currentPrice) || 0;
-
+          const displayedPrice =
+            item.tag === "Ghee"
+              ? getPriceByWeight(item, item.selectedWeight)
+              : item.tag === "Ganpati"
+              ? getPriceByGanpatiPack(item.packs, item.selectedPack)
+              : Number(item.currentPrice) || 0;
 
           // ---------------- RENDER BANNER ----------------
           if (item.isBanner) {
@@ -639,21 +631,20 @@ const HolidayPicks = () => {
               )}
 
               {/* ---------------- ADD TO CART ---------------- */}
-            <button
-  onClick={(e) => {
-    e.stopPropagation();
-    if (!item.isOutOfStock) handleAddToCart(item);
-  }}
-  disabled={item.isOutOfStock}
-  className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
-    item.isOutOfStock
-      ? "bg-gray-400 cursor-not-allowed text-white"
-      : "bg-green-700 hover:bg-green-800 text-white"
-  }`}
->
-  {item.isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
-</button>
-
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!item.isOutOfStock) handleAddToCart(item);
+                }}
+                disabled={item.isOutOfStock}
+                className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
+                  item.isOutOfStock
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-green-700 hover:bg-green-800 text-white"
+                }`}
+              >
+                {item.isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+              </button>
             </div>
           );
         })}{" "}

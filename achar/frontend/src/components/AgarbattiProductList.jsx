@@ -35,7 +35,7 @@ const AgarbattiCard = ({ product, selectedPack, updatePack }) => {
     e.stopPropagation();
     if (isOutOfStock) return toast.error("Out of stock");
 
-    addToCart({
+    const added = addToCart({
       ...product,
       productName: product.title,
       quantity: 1,
@@ -44,8 +44,9 @@ const AgarbattiCard = ({ product, selectedPack, updatePack }) => {
       selectedPack,
       productImages: product.images,
     });
-
-    toast.success(`${product.title} added to cart`);
+if(added ){
+toast.success(`${product.title} added to cart`);
+}
   };
 
   return (

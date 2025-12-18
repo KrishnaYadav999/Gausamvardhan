@@ -124,7 +124,7 @@ const AcharProductDetail = () => {
 
     const qty = weightQuantities[selectedWeight] || 1;
 
-    addToCart({
+    const added = addToCart({
       ...product,
       selectedWeight,
       selectedPrice: getPrice(product, selectedWeight),
@@ -132,9 +132,11 @@ const AcharProductDetail = () => {
       totalPrice: getPrice(product, selectedWeight) * qty,
     });
 
+   if (added) {
     toast.success(
-      `${product.productName} (${selectedWeight}) x${qty} added to cart!`
+      `${product.productName} (${selectedWeight}) x${qty} added to cart 🛒`
     );
+  }
   };
 
   const handleBuyNow = () => {

@@ -24,7 +24,9 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
     if (!prod) return 0;
     if (!packName || !prod.packs) return Number(prod.current_price || 0);
     const found = prod.packs.find((p) => p.name === packName);
-    return found ? Number(found.price || found.mrp || found.price) : Number(prod.current_price || 0);
+    return found
+      ? Number(found.price || found.mrp || found.price)
+      : Number(prod.current_price || 0);
   };
 
   const selectedPrice = getPrice(product, selectedPack);
@@ -44,7 +46,7 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
     const qty = 1;
 
     // Spread the whole product (so coupons and other fields come through)
-    addToCart({
+    const added = addToCart({
       ...product,
       selectedPack,
       selectedPrice: selectedPrice,
@@ -52,8 +54,9 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
       totalPrice: selectedPrice * qty,
       productImages: product.images || [],
     });
-
-    toast.success(`${product.title} added`);
+    if (added) {
+      toast.success(`${product.title} added`);
+    }
   };
 
   return (
@@ -200,47 +203,46 @@ export default function GanpatiCategoryProduct() {
   }, [slug]);
 
   /* Filter Logic */
- const handleFilter = useCallback(
-   (filters) => {
-     let temp = [...products];
- 
-     // CATEGORY
-     if (filters.category) {
-       temp = temp.filter(
-         (p) => p.category === filters.category || p.categoryId === filters.category
-       );
-     }
- 
-     // PRICE
-     temp = temp.filter((p) => {
-       const price = Number(p.currentPrice || 0);
-       return price >= filters.price[0] && price <= filters.price[1];
-     });
- 
-     // RATING (from reviews)
-     if (filters.rating > 0) {
-       temp = temp.filter((p) => {
-         if (!p.reviews || p.reviews.length === 0) return false;
- 
-         const avg =
-           p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-           p.reviews.length;
- 
-         return avg >= filters.rating;
-       });
-     }
- 
-     // STOCK
-     if (filters.stock) {
-       temp = temp.filter(
-         (p) => p.stock !== false && p.stockQuantity > 0
-       );
-     }
- 
-     setFiltered(temp);
-   },
-   [products]
- );
+  const handleFilter = useCallback(
+    (filters) => {
+      let temp = [...products];
+
+      // CATEGORY
+      if (filters.category) {
+        temp = temp.filter(
+          (p) =>
+            p.category === filters.category || p.categoryId === filters.category
+        );
+      }
+
+      // PRICE
+      temp = temp.filter((p) => {
+        const price = Number(p.currentPrice || 0);
+        return price >= filters.price[0] && price <= filters.price[1];
+      });
+
+      // RATING (from reviews)
+      if (filters.rating > 0) {
+        temp = temp.filter((p) => {
+          if (!p.reviews || p.reviews.length === 0) return false;
+
+          const avg =
+            p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+            p.reviews.length;
+
+          return avg >= filters.rating;
+        });
+      }
+
+      // STOCK
+      if (filters.stock) {
+        temp = temp.filter((p) => p.stock !== false && p.stockQuantity > 0);
+      }
+
+      setFiltered(temp);
+    },
+    [products]
+  );
 
   const pageTitle = `${slug.toLowerCase()} ganpati products | gausamvardhan`;
   const pageDescription = `Shop premium ${slug.toLowerCase()} ganpati products online at GausamVardhan. Pure, natural, multiple packs available.`;
@@ -323,7 +325,7 @@ export default function GanpatiCategoryProduct() {
         </div>
 
         {/* Mobile Filter Drawer */}
-        {filterOpen && ( 
+        {filterOpen && (
           <div className="fixed inset-0 flex bg-black bg-opacity-50 z-[999]">
             <div className="flex-1" onClick={() => setFilterOpen(false)}></div>
 
@@ -364,7 +366,10 @@ export default function GanpatiCategoryProduct() {
           )}
         </div>
       </div>
-         <div> <VideoAdvertiseList /> </div>
+      <div>
+        {" "}
+        <VideoAdvertiseList />{" "}
+      </div>
     </div>
   );
 }

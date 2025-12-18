@@ -42,7 +42,7 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
   const handleAddToCart = (e) => {
     e.stopPropagation();
 
-    addToCart({
+    const added = addToCart({
       ...product,
       productName: product.title,
       selectedWeight,
@@ -51,8 +51,9 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
       cutPrice: cutPrice,
       productImages: product.images,
     });
-
-    toast.success(`${product.title} added to cart`);
+    if (added) {
+      toast.success(`${product.title} added to cart`);
+    }
   };
 
   const goToDetail = () => {

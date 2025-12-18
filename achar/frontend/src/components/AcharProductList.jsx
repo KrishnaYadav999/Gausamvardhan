@@ -3,7 +3,7 @@
 ----------------------------------------------------*/
 import React, { useEffect, useState, useContext, useRef } from "react";
 import axios from "axios";
-import { useNavigate , Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import toast from "react-hot-toast";
 import { FaHeart, FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -43,7 +43,7 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (isOutOfStock) return toast.error("Product is out of stock");
     if (!selectedWeight) return toast.error("Please select weight");
 
-    addToCart({
+    const added = addToCart({
       ...product,
       productName: product.productName,
       selectedWeight,
@@ -53,9 +53,10 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       productImages: product.productImages || [],
     });
 
-    toast.success(`${product.productName} added to cart`);
+    if (added) {
+      toast.success(`${product.productName} added to cart`);
+    }
   };
-  
 
   const avgRating =
     product?.reviews?.length > 0
