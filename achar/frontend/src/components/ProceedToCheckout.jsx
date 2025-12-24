@@ -10,11 +10,8 @@ const ProceedToCheckout = () => {
   const { cartItems, totalPrice } = useContext(CartContext);
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [shippingCharge, setShippingCharge] = useState(0);
-  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
-
- 
-  
+  // const [shippingCharge, setShippingCharge] = useState(0);
+  // const [isLoadingShipping, setIsLoadingShipping] = useState(false);
 
   const [shippingAddress, setShippingAddress] = useState({
     name: "",
@@ -26,67 +23,65 @@ const ProceedToCheckout = () => {
     phone: "",
   });
 
- 
-  
   // -------------------------------
-// CALCULATE TOTAL CART WEIGHT IN GRAMS & KG
-// -------------------------------
- // NEW: Chargeable weight = max(actual weight, volumetric weight)
-const totalCartWeightGrams = cartItems.reduce((total, item) => {
-  if (!item.selectedWeight) return total;
+  // CALCULATE TOTAL CART WEIGHT IN GRAMS & KG
+  // -------------------------------
+  // NEW: Chargeable weight = max(actual weight, volumetric weight)
+  // const totalCartWeightGrams = cartItems.reduce((total, item) => {
+  //   if (!item.selectedWeight) return total;
 
-  // Convert selected weight to grams
-  let actualWeight = 0;
-  const w = item.selectedWeight.toString().toLowerCase();
-  if (w.includes("kg")) actualWeight = parseFloat(w) * 1000;
-  else if (w.includes("g")) actualWeight = parseFloat(w);
+  //   // Convert selected weight to grams
+  //   let actualWeight = 0;
+  //   const w = item.selectedWeight.toString().toLowerCase();
+  //   if (w.includes("kg")) actualWeight = parseFloat(w) * 1000;
+  //   else if (w.includes("g")) actualWeight = parseFloat(w);
 
-  // Default dimensions in cm if not provided
-  const l = item.length || 10;
-  const b = item.breadth || 10;
-  const h = item.height || 10;
+  //   // Default dimensions in cm if not provided
+  //   const l = item.length || 10;
+  //   const b = item.breadth || 10;
+  //   const h = item.height || 10;
 
-  // Volumetric weight (grams) formula used by Delhivery: (L*B*H)/5000*1000
-  const volumetricWeight = (l * b * h) / 5000 * 1000;
+  //   // Volumetric weight (grams) formula used by Delhivery: (L*B*H)/5000*1000
+  //   const volumetricWeight = (l * b * h) / 5000 * 1000;
 
-  // Chargeable weight = max(actual weight, volumetric weight)
-  const chargeableWeight = Math.max(actualWeight, volumetricWeight);
+  //   // Chargeable weight = max(actual weight, volumetric weight)
+  //   const chargeableWeight = Math.max(actualWeight, volumetricWeight);
 
-  return total + chargeableWeight;
-}, 0);
-// -------------------------------
-// CALL SHIPPING API WHEN PINCODE IS ENTERED
-// -------------------------------
-useEffect(() => {
-  const pin = shippingAddress.pincode;
-  if (pin.length === 6) fetchShippingCharge(pin);
-}, [shippingAddress.pincode]);
+  //   return total + chargeableWeight;
+  // }, 0);
+  // -------------------------------
+  // CALL SHIPPING API WHEN PINCODE IS ENTERED
+  // -------------------------------
+  // useEffect(() => {
+  //   const pin = shippingAddress.pincode;
+  //   if (pin.length === 6) fetchShippingCharge(pin);
+  // }, [shippingAddress.pincode]);
 
-const fetchShippingCharge = async (pincode) => {
-  try {
-    setIsLoadingShipping(true);
+  // const fetchShippingCharge = async (pincode) => {
+  //   try {
+  //     setIsLoadingShipping(true);
 
-    const res = await axios.post("/api/orders/shipping/calculate", {
-     pickupPincode: "421505",
-  destinationPincode: pincode,
-  totalWeight: totalCartWeightGrams, // already updated
-  isCOD: false,                  // Prepaid shipment
-    });
+  //     const res = await axios.post("/api/orders/shipping/calculate", {
+  //      pickupPincode: "421505",
+  //   destinationPincode: pincode,
+  //   totalWeight: totalCartWeightGrams, // already updated
+  //   isCOD: false,                  // Prepaid shipment
+  //     });
 
-    if (res.data.success) {
-      setShippingCharge(res.data.charges || 0);
-    } else {
-      setShippingCharge(0);
-      console.warn("Delhivery response not valid:", res.data);
-    }
-  } catch (err) {
-    console.error("Shipping calc error:", err.response?.data || err.message);
-    setShippingCharge(0);
-  } finally {
-    setIsLoadingShipping(false);
-  }
-};
-  
+  //     if (res.data.success) {
+  //       setShippingCharge(res.data.charges || 0);
+  //     } else {
+  //       setShippingCharge(0);
+  //       console.warn("Delhivery response not valid:", res.data);
+  //     }
+  //   } catch (err) {
+  //     console.error("Shipping calc error:", err.response?.data || err.message);
+  //     setShippingCharge(0);
+  //   } finally {
+  //     setIsLoadingShipping(false);
+  //   }
+  // };
+
   // Prefill name if logged in
   useEffect(() => {
     if (user) {
@@ -117,83 +112,83 @@ const fetchShippingCharge = async (pincode) => {
   };
 
   // ✅ GST Calculation (12%)
-// ✅ GST Calculation (5%)
-const gstRate = 0.05;
-const gstAmount = totalPrice * gstRate;
+  // ✅ GST Calculation (5%)
+  const gstRate = 0.05;
+  const gstAmount = totalPrice * gstRate;
 
-const FREE_SHIPPING_LIMIT = 500;
-const isFreeShipping = totalPrice >= FREE_SHIPPING_LIMIT;
+  // const FREE_SHIPPING_LIMIT = 500;
+  // const isFreeShipping = totalPrice >= FREE_SHIPPING_LIMIT;
 
-// 🟢 Final Shipping Charge
-const finalShippingCharge = isFreeShipping ? 0 : shippingCharge;
+  // 🟢 Final Shipping Charge
+  // const finalShippingCharge = isFreeShipping ? 0 : shippingCharge;
 
-// 🟢 FINAL AMOUNT
-const finalAmount = totalPrice + gstAmount + finalShippingCharge;
-useEffect(() => {
-  const pin = shippingAddress.pincode;
+  // 🟢 FINAL AMOUNT
+  const finalAmount = totalPrice + gstAmount; //finalShippingCharge
+  // useEffect(() => {
+  //   const pin = shippingAddress.pincode;
 
-  if (isFreeShipping) {
-    setShippingCharge(0);
-    return;
-  }
+  //   if (isFreeShipping) {
+  //     setShippingCharge(0);
+  //     return;
+  //   }
 
-  if (pin.length === 6) fetchShippingCharge(pin);
-}, [shippingAddress.pincode, isFreeShipping]);
+  //   if (pin.length === 6) fetchShippingCharge(pin);
+  // }, [shippingAddress.pincode, isFreeShipping]);
 
-const handleCOD = async () => {
-  if (!user) return toast("Please log in to continue.");
-  if (!cartItems.length) return toast("Your cart is empty.");
+  const handleCOD = async () => {
+    if (!user) return toast("Please log in to continue.");
+    if (!cartItems.length) return toast("Your cart is empty.");
 
-  const validationError = isShippingValid();
-  if (validationError) return toast(validationError);
+    const validationError = isShippingValid();
+    if (validationError) return toast(validationError);
 
-  try {
-    const products = cartItems.map((item) => ({
-      productType:
-        item.productType ||
-        (item.category === "Oil"
-          ? "OilProduct"
-          : item.category === "Masala"
-          ? "MasalaProduct"
-          : item.category === "Ghee"
-          ? "GheeProduct"
-          : item.category === "Agarbatti"
-          ? "AgarbattiProduct"
-          : item.category === "Ganpati"
-          ? "GanpatiProduct"
-          : "Product"),
-      product: item._id,
-      quantity: item.quantity || 1,
-      price: item.currentPrice || 0,
-      name:
-        item.category === "Agarbatti"
-          ? item.title
-          : item.productName || item.title || item.name,
-      image: item.productImages?.[0],
-      weight: item.selectedWeight || null,
-      volume: item.selectedVolume || null,
-      pack: item.selectedPack || null,
-    }));
+    try {
+      const products = cartItems.map((item) => ({
+        productType:
+          item.productType ||
+          (item.category === "Oil"
+            ? "OilProduct"
+            : item.category === "Masala"
+            ? "MasalaProduct"
+            : item.category === "Ghee"
+            ? "GheeProduct"
+            : item.category === "Agarbatti"
+            ? "AgarbattiProduct"
+            : item.category === "Ganpati"
+            ? "GanpatiProduct"
+            : "Product"),
+        product: item._id,
+        quantity: item.quantity || 1,
+        price: item.currentPrice || 0,
+        name:
+          item.category === "Agarbatti"
+            ? item.title
+            : item.productName || item.title || item.name,
+        image: item.productImages?.[0],
+        weight: item.selectedWeight || null,
+        volume: item.selectedVolume || null,
+        pack: item.selectedPack || null,
+      }));
 
-    const res = await axios.post("/api/orders/create-order", {
-      userId: user._id || user.id,
-      products,
-      totalAmount: finalAmount,
-      shippingAddress,
-       email: user.email, 
-      paymentMethod: "COD", // 🔥 NEW
-      paymentStatus: "Pending", // 🔥 NEW
-    });
+      const res = await axios.post("/api/orders/create-order", {
+        userId: user._id || user.id,
+        products,
+        totalAmount: finalAmount,
+        shippingAddress,
+        email: user.email,
+        paymentMethod: "COD", // 🔥 NEW
+        paymentStatus: "Pending", // 🔥 NEW
+      });
 
-    if (!res.data.success) return toast(res.data.message);
+      if (!res.data.success) return toast(res.data.message);
 
-    toast("✅ Order placed successfully with Cash on Delivery!");
-    navigate("/profile");
-  } catch (err) {
-    console.error("COD Order Error:", err);
-    toast("Failed to place COD order. Please try again.");
-  }
-};
+      toast("✅ Order placed successfully with Cash on Delivery!");
+      navigate("/profile");
+    } catch (err) {
+      console.error("COD Order Error:", err);
+      toast("Failed to place COD order. Please try again.");
+    }
+  };
 
   // ✅ Payment Handler
   const handlePayment = async () => {
@@ -206,42 +201,41 @@ const handleCOD = async () => {
 
     try {
       // Map products properly for backend
-       console.log("Cart Items at Checkout:", cartItems);
+      console.log("Cart Items at Checkout:", cartItems);
       const products = cartItems.map((item) => ({
-        
         productType:
           item.productType ||
-    (item.category === "Oil"
-      ? "OilProduct"
-      : item.category === "Masala"
-      ? "MasalaProduct"
-      : item.category === "Ghee"
-      ? "GheeProduct"
-      : item.category === "Agarbatti"
-      ? "AgarbattiProduct"
-      : item.category === "Ganpati"
-      ? "GanpatiProduct"
-      : "Product"),
+          (item.category === "Oil"
+            ? "OilProduct"
+            : item.category === "Masala"
+            ? "MasalaProduct"
+            : item.category === "Ghee"
+            ? "GheeProduct"
+            : item.category === "Agarbatti"
+            ? "AgarbattiProduct"
+            : item.category === "Ganpati"
+            ? "GanpatiProduct"
+            : "Product"),
         product: item._id,
         quantity: item.quantity || 1,
         price: item.currentPrice || 0,
-       name: item.category === "Agarbatti" ? item.title : item.productName || item.title || item.name,
+        name:
+          item.category === "Agarbatti"
+            ? item.title
+            : item.productName || item.title || item.name,
         image: item.productImages?.[0],
         weight: item.selectedWeight || null,
         volume: item.selectedVolume || null,
-        pack: item.selectedPack || null, 
+        pack: item.selectedPack || null,
       }));
 
       // ✅ Create order with GST included
-      const res = await axios.post(
-        "/api/orders/create-order",
-        {
-          userId: user._id || user.id,
-          products,
-          totalAmount: finalAmount,
-          shippingAddress,
-        }
-      );
+      const res = await axios.post("/api/orders/create-order", {
+        userId: user._id || user.id,
+        products,
+        totalAmount: finalAmount,
+        shippingAddress,
+      });
 
       if (!res.data.success) return toast(res.data.message);
 
@@ -256,14 +250,11 @@ const handleCOD = async () => {
         order_id: razorpayOrder.id,
         handler: async (response) => {
           try {
-            const verifyRes = await axios.post(
-              "/api/orders/verify-payment",
-              {
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              }
-            );
+            const verifyRes = await axios.post("/api/orders/verify-payment", {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
 
             if (verifyRes.data.success) {
               toast("✅ Payment Successful! Thank you for shopping.");
@@ -325,7 +316,6 @@ const handleCOD = async () => {
               key={`${item._id}-${item.selectedWeight}-${item.selectedVolume}`}
               className="flex justify-between items-center border p-4 rounded-xl shadow-sm bg-white hover:shadow-md transition"
             >
-              
               <div className="flex items-center space-x-4">
                 <img
                   src={item.productImages?.[0]}
@@ -333,12 +323,13 @@ const handleCOD = async () => {
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div>
-                  
                   <h2 className="font-semibold text-lg">
-  {item.productName || item.title || item.name}{" "}
-  {item.category === "Agarbatti" && item.selectedPack ? `(${item.selectedPack})` : ""}
-</h2>
-                  
+                    {item.productName || item.title || item.name}{" "}
+                    {item.category === "Agarbatti" && item.selectedPack
+                      ? `(${item.selectedPack})`
+                      : ""}
+                  </h2>
+
                   {item.selectedWeight && (
                     <p className="text-gray-500 text-sm">
                       Weight: {item.selectedWeight}
@@ -349,11 +340,11 @@ const handleCOD = async () => {
                       Volume: {item.selectedVolume}
                     </p>
                   )}
-                    {item.selectedPack && (
-    <p className="text-gray-500 text-sm">
-      Pack: {item.selectedPack}
-    </p>
-  )}
+                  {item.selectedPack && (
+                    <p className="text-gray-500 text-sm">
+                      Pack: {item.selectedPack}
+                    </p>
+                  )}
                   <p className="text-green-600 font-bold mt-1">
                     ₹{(item.currentPrice || 0) * (item.quantity || 1)}
                   </p>
@@ -367,9 +358,7 @@ const handleCOD = async () => {
 
           {/* Shipping Address */}
           <div className="border p-6 rounded-xl shadow-md bg-white mt-6">
-            <h2 className="font-semibold text-lg mb-4">
-              📦 Shipping Address
-            </h2>
+            <h2 className="font-semibold text-lg mb-4">📦 Shipping Address</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Name */}
               <div>
@@ -389,9 +378,7 @@ const handleCOD = async () => {
 
               {/* Phone */}
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Phone
-                </label>
+                <label className="block text-sm font-medium mb-1">Phone</label>
                 <input
                   type="tel"
                   name="phone"
@@ -483,7 +470,6 @@ const handleCOD = async () => {
 
         {/* ---------------- RIGHT SIDE ---------------- */}
         <div className="border p-6 rounded-xl shadow-md bg-white space-y-4">
-
           <h2 className="font-semibold text-lg">🧾 Order Summary</h2>
 
           <div className="divide-y text-sm">
@@ -511,36 +497,35 @@ const handleCOD = async () => {
           </div>
           {/* Shipping Charges */}
 
-<div className="flex justify-between text-sm font-medium">
-  <span>
-    Delivery Charges{" "}
-    {!isFreeShipping && (
-      <span className="text-xs text-gray-400">
-        (Free above ₹{FREE_SHIPPING_LIMIT})
-      </span>
-    )}
-  </span>
+          {/* <div className="flex justify-between text-sm font-medium">
+            <span>
+              Delivery Charges{" "}
+              {!isFreeShipping && (
+                <span className="text-xs text-gray-400">
+                  (Free above ₹{FREE_SHIPPING_LIMIT})
+                </span>
+              )}
+            </span>
 
-  {isFreeShipping ? (
-    <span className="text-green-600 font-bold">FREE </span>
-  ) : isLoadingShipping ? (
-    <span>Calculating...</span>
-  ) : (
-    <span className="text-blue-600">₹{shippingCharge}</span>
-  )}
-</div>
-
+            {isFreeShipping ? (
+              <span className="text-green-600 font-bold">FREE </span>
+            ) : isLoadingShipping ? (
+              <span>Calculating...</span>
+            ) : (
+              <span className="text-blue-600">₹{shippingCharge}</span>
+            )}
+          </div> */}
 
           <div className="flex justify-between text-lg font-bold pt-3 border-t">
             <span>Total</span>
             <span className="text-green-600">₹{finalAmount.toFixed(2)}</span>
           </div>
-<button
-  onClick={handleCOD}
-  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg shadow-lg transition mb-3"
->
-  🚚 Cash on Delivery (COD)
-</button>
+          <button
+            onClick={handleCOD}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg shadow-lg transition mb-3"
+          >
+            🚚 Cash on Delivery (COD)
+          </button>
 
           <button
             onClick={handlePayment}

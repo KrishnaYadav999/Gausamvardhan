@@ -29,6 +29,8 @@ const Chat = () => {
   const [typing, setTyping] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const messagesEndRef = useRef(null);
+  const typingIntervalRef = useRef(null);
+
 
   const logo =
     "https://gausamvardhan.sfo3.cdn.digitaloceanspaces.com/chatbot.png";
@@ -48,12 +50,10 @@ const Chat = () => {
     localStorage.setItem(THEME_KEY, dark);
   }, [dark]);
 
-  /* Lock body scroll when chat is open */
+  /* Lock body scroll */
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    return () => (document.body.style.overflow = "auto");
   }, [open]);
 
   const pushMessage = (msg) => {
@@ -62,19 +62,29 @@ const Chat = () => {
 
   /* Typing animation */
   const streamBotMessage = (fullText) => {
-    let index = 0;
-    pushMessage({ from: "bot", text: "" });
+  // ⛔ old typing stop
+  if (typingIntervalRef.current) {
+    clearInterval(typingIntervalRef.current);
+    typingIntervalRef.current = null;
+  }
 
-    const interval = setInterval(() => {
-      index++;
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1].text = fullText.slice(0, index);
-        return updated;
-      });
-      if (index >= fullText.length) clearInterval(interval);
-    }, 22);
-  };
+  let index = 0;
+  pushMessage({ from: "bot", text: "" });
+
+  typingIntervalRef.current = setInterval(() => {
+    index++;
+    setMessages((prev) => {
+      const updated = [...prev];
+      updated[updated.length - 1].text = fullText.slice(0, index);
+      return updated;
+    });
+
+    if (index >= fullText.length) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+  }, 22);
+};
 
   const sendMessage = async (e) => {
     e?.preventDefault();
@@ -103,11 +113,22 @@ const Chat = () => {
     }
   };
 
-  const sendSuggestion = (text) => {
-    if (typing) return;
-    setInput(text);
-    setTimeout(() => document.getElementById("chat-send")?.click(), 100);
-  };
+const sendSuggestion = (text) => {
+  // ⛔ typing immediately stop
+  if (typingIntervalRef.current) {
+    clearInterval(typingIntervalRef.current);
+    typingIntervalRef.current = null;
+  }
+
+  setTyping(false);
+  setSuggestions([]);
+  setInput(text);
+
+  setTimeout(() => {
+    document.getElementById("chat-send")?.click();
+  }, 50);
+};
+
 
   return (
     <>
@@ -118,11 +139,16 @@ const Chat = () => {
           animate={{ scale: 1 }}
           whileHover={{ scale: 1.1 }}
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 w-16 h-16 rounded-full
-          bg-gradient-to-br from-emerald-500 to-green-600
+          className="fixed bottom-4 right-4 
+          w-12 h-12 sm:w-16 sm:h-16 
+          rounded-full bg-gradient-to-br from-emerald-500 to-green-600
           shadow-2xl flex items-center justify-center z-50"
         >
-          <img src={logo} alt="chat" className="w-10 h-10 rounded-full" />
+          <img
+            src={logo}
+            alt="chat"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border"
+          />
         </motion.button>
       )}
 
@@ -134,8 +160,8 @@ const Chat = () => {
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ duration: 0.35 }}
             className={`fixed bottom-[env(safe-area-inset-bottom,1rem)] right-4
-            w-[92vw] max-w-[380px]
-            h-[65vh] max-h-[520px]
+            w-[90vw] sm:w-[92vw] max-w-[380px]
+            h-[45vh] sm:h-[65vh] max-h-[520px]
             rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border
             ${
               dark
@@ -145,7 +171,7 @@ const Chat = () => {
           >
             {/* Header */}
             <div
-              className={`flex items-center justify-between px-4 py-3 ${
+              className={`flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 ${
                 dark
                   ? "bg-gray-800"
                   : "bg-gradient-to-r from-emerald-600 to-green-500 text-white"
@@ -184,7 +210,8 @@ const Chat = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[75%] px-4 py-3 text-sm shadow-lg whitespace-pre-wrap
+                    className={`max-w-[75%] px-3 py-2 sm:px-4 sm:py-3
+                    text-[13px] sm:text-sm shadow-lg whitespace-pre-wrap
                     ${
                       m.from === "user"
                         ? "bg-gradient-to-br from-emerald-600 to-green-500 text-white rounded-2xl rounded-br-sm"
@@ -212,6 +239,7 @@ const Chat = () => {
                 </div>
               )}
 
+              {/* ✅ Suggestions BACK */}
               {suggestions.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {suggestions.map((s, i) => (
@@ -256,10 +284,9 @@ const Chat = () => {
                   id="chat-send"
                   type="submit"
                   disabled={typing}
-                  className="w-11 h-11 rounded-full
+                  className="w-9 h-9 sm:w-11 sm:h-11 rounded-full
                   bg-gradient-to-br from-emerald-600 to-green-500
-                  text-white flex items-center justify-center
-                  hover:scale-105 transition disabled:opacity-50"
+                  text-white flex items-center justify-center"
                 >
                   <FiSend />
                 </button>

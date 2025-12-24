@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
 
 const images = [
@@ -35,8 +35,15 @@ const SignIn = () => {
 
       loginUser(res.data.user, res.data.token);
 
-      toast.success("Google Login Successful!");
+
+      toast.success("Google Login Successful 🎉", {
+      duration: 2000,
+    });
+
+    // ✅ DELAY NAVIGATION (CRITICAL)
+    setTimeout(() => {
       navigate("/");
+    }, 1200);
     } catch (err) {
       toast.error(err.response?.data?.message || "Google Login Failed");
     }
@@ -103,7 +110,6 @@ const SignIn = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 py-8">
-      <Toaster />
 
       {/* FULL CARD */}
       <div

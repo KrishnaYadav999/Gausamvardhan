@@ -61,6 +61,8 @@ const HolidayPicks = () => {
       navigate(`/ghee-product/${product.slug}/${product._id}`);
     } else if (product.tag === "Ganpati") {
       navigate(`/ganpati-product/${product.slug}/${product._id}`);
+    } else if (product.tag === "Agarbatti") {
+      navigate(`/agarbatti-product/${product.slug}/${product._id}`);
     } else {
       navigate(`/products/${product.category?.slug}/${product._id}`);
     }
@@ -170,17 +172,18 @@ const HolidayPicks = () => {
         });
 
         const agarbattiData = agarbatti.data.map((p) => {
+          const defaultPack = p.packs?.[0]?.name || "";
+
           return {
             ...p,
             tag: "Agarbatti",
-            productName: p.productName || p.title,
-            cutPrice: p.cutPrice,
-            currentPrice: p.currentPrice,
-            selectedWeight: p.pricePerGram
-              ? p.pricePerGram.split(",")[0].split("=")[0].trim()
-              : "", // default weight if any
-            productImages: p.productImages,
-            isOutOfStock: p.stock === false || p.stockQuantity <= 0, // इसे यहाँ जोड़ें
+            productName: p.title,
+            packs: p.packs || [],
+            selectedPack: defaultPack,
+            cutPrice: p.cut_price || p.packs?.[0]?.oldPrice || 0,
+            currentPrice: p.packs?.[0]?.price || 0,
+            productImages: p.images, // 🔥 FIXED
+            isOutOfStock: p.stock === false || p.stockQuantity <= 0,
           };
         });
 
@@ -270,7 +273,11 @@ const HolidayPicks = () => {
       price = getPriceByGanpatiPack(product.packs, product.selectedPack);
     }
 
-    const added = addToCart({ ...product, selectedPrice: price });
+    const added = addToCart({
+      ...product,
+      quantity: 1,
+      selectedPrice: Number(price),
+    });
     if (added) {
       toast.success(`${product.productName} added to cart`);
     }
@@ -510,6 +517,9 @@ const HolidayPicks = () => {
               ? getPriceByWeight(item, item.selectedWeight)
               : item.tag === "Ganpati"
               ? getPriceByGanpatiPack(item.packs, item.selectedPack)
+              : item.tag === "Agarbatti"
+              ? item.packs?.find((p) => p.name === item.selectedPack)?.price ||
+                item.currentPrice
               : Number(item.currentPrice) || 0;
 
           // ---------------- RENDER BANNER ----------------
