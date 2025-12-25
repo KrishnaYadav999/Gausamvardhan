@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
 import { FaHeart } from "react-icons/fa";
+import GanpatiSkeletonCard from "../components/skeletons/GanpatiSkeletonCard";
 import { Helmet } from "react-helmet-async";
 import VideoAdvertiseList from "./VideoAdvertiseList";
 
@@ -16,6 +17,7 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
   const { addToCart } = useContext(CartContext);
   const [hover, setHover] = useState(false);
   const navigate = useNavigate();
+  
 
   const isOutOfStock = !product.stock || product.stockQuantity <= 0;
 
@@ -182,25 +184,38 @@ export default function GanpatiCategoryProduct() {
   // selectedPack is an object mapping productId -> packName (default to first pack)
   const [selectedPack, setSelectedPack] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const { data } = await axios.get(`/api/ganpati/category/${slug}`);
-        setProducts(data);
-        setFiltered(data);
 
-        const defaults = {};
-        data.forEach((p) => {
-          if (p.packs?.length > 0) defaults[p._id] = p.packs[0].name;
-        });
-        setSelectedPack(defaults);
-      } catch {
-        toast.error("Failed to load");
-      }
-    };
-    loadProducts();
-  }, [slug]);
+ useEffect(() => {
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.get(
+        `/api/ganpati/category/${slug}`
+      );
+
+      setProducts(data);
+      setFiltered(data);
+
+      const defaults = {};
+      data.forEach((p) => {
+        if (p.packs?.length > 0) {
+          defaults[p._id] = p.packs[0].name;
+        }
+      });
+      setSelectedPack(defaults);
+    } catch {
+      toast.error("Failed to load");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadProducts();
+}, [slug]);
+
 
   /* Filter Logic */
   const handleFilter = useCallback(
@@ -347,24 +362,29 @@ export default function GanpatiCategoryProduct() {
         )}
 
         {/* PRODUCT GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
-          {filtered.length === 0 ? (
-            <p className="text-gray-600 col-span-full text-center py-20 text-[0.9rem]">
-              No products found.
-            </p>
-          ) : (
-            filtered.map((p) => (
-              <GanpatiCard
-                key={p._id}
-                product={p}
-                selectedPack={selectedPack[p._id]}
-                setSelectedPack={(val) =>
-                  setSelectedPack((prev) => ({ ...prev, [p._id]: val }))
-                }
-              />
-            ))
-          )}
-        </div>
+       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
+  {loading ? (
+    Array.from({ length: 8 }).map((_, i) => (
+      <GanpatiSkeletonCard key={i} />
+    ))
+  ) : filtered.length === 0 ? (
+    <p className="text-gray-600 col-span-full text-center py-20 text-[0.9rem]">
+      No products found.
+    </p>
+  ) : (
+    filtered.map((p) => (
+      <GanpatiCard
+        key={p._id}
+        product={p}
+        selectedPack={selectedPack[p._id]}
+        setSelectedPack={(val) =>
+          setSelectedPack((prev) => ({ ...prev, [p._id]: val }))
+        }
+      />
+    ))
+  )}
+</div>
+
       </div>
       <div>
         {" "}

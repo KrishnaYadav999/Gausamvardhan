@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 import { CartContext } from "../context/CartContext";
 import toast from "react-hot-toast";
 import StarRating from "../components/StarRating";
+import AllProductSkeletonCard from "../components/skeletons/AllProductSkeletonCard";
 import { Helmet } from "react-helmet-async";
 
 const BASE_URL = "/api";
@@ -283,13 +284,14 @@ const HolidayPicks = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="py-20 text-center text-gray-500 text-lg">
-        Loading products...
-      </div>
-    );
-  }
+{loading && (
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    {Array.from({ length: 8 }).map((_, i) => (
+      <AllProductSkeletonCard key={i} />
+    ))}
+  </div>
+)}
+
 
   return (
     <div

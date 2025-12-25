@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CategorySkeletonItem from "../components/skeletons/CategorySkeletonItem";
 import { Helmet } from "react-helmet-async";
 
 const translations = {
@@ -35,29 +36,34 @@ const Category = () => {
   const [fadeState, setFadeState] = useState({});
   const [heading, setHeading] = useState("Categories");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await axios.get("/api/categories");
-        setCategories(data);
+ useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
 
-        const initNames = {};
-        const initFade = {};
-        data.forEach((cat) => {
-          initNames[cat._id] = cat.name;
-          initFade[cat._id] = true;
-        });
+      const { data } = await axios.get("/api/categories");
+      setCategories(data);
 
-        setDisplayNames(initNames);
-        setFadeState(initFade);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
+      const initNames = {};
+      const initFade = {};
+      data.forEach((cat) => {
+        initNames[cat._id] = cat.name;
+        initFade[cat._id] = true;
+      });
 
-    fetchCategories();
-  }, []);
+      setDisplayNames(initNames);
+      setFadeState(initFade);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCategories();
+}, []);
 
   useEffect(() => {
     if (!categories.length) return;
@@ -256,45 +262,49 @@ const Category = () => {
           "
           style={{ WebkitOverflowScrolling: "touch" }}
         >
-          {categories.map((cat) => (
-            <div
-              key={cat._id}
-              onClick={() => handleCategoryClick(cat)}
-              className="category-item flex flex-col items-center cursor-pointer snap-start min-w-[110px] md:min-w-[140px]"
-            >
-              <div
-                className="
-                  w-24 h-24 
-                  sm:w-28 sm:h-28 
-                  md:w-32 md:h-32
-                  rounded-full 
-                  overflow-hidden 
-                  bg-white 
-                  flex items-center justify-center
-                  transition-all duration-500
-                "
-              >
-                <img
-                  src={cat.image || "https://via.placeholder.com/300"}
-                  className="w-full h-full object-cover"
-                  alt={cat.name}
-                />
-              </div>
+          {loading
+  ? Array.from({ length: 8 }).map((_, i) => (
+      <CategorySkeletonItem key={i} />
+    ))
+  : categories.map((cat) => (
+      <div
+        key={cat._id}
+        onClick={() => handleCategoryClick(cat)}
+        className="category-item flex flex-col items-center cursor-pointer snap-start min-w-[110px] md:min-w-[140px]"
+      >
+        <div
+          className="
+            w-24 h-24 
+            sm:w-28 sm:h-28 
+            md:w-32 md:h-32
+            rounded-full 
+            overflow-hidden 
+            bg-white 
+            flex items-center justify-center
+            transition-all duration-500
+          "
+        >
+          <img
+            src={cat.image || "https://via.placeholder.com/300"}
+            className="w-full h-full object-cover"
+            alt={cat.name}
+          />
+        </div>
 
-              <p
-                className={`
-                  text-[#25421C] font-semibold text-sm sm:text-base mt-2 text-center transition-all duration-300
-                  ${
-                    fadeState[cat._id]
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-2"
-                  }
-                `}
-              >
-                {displayNames[cat._id]}
-              </p>
-            </div>
-          ))}
+        <p
+          className={`
+            text-[#25421C] font-semibold text-sm sm:text-base mt-2 text-center transition-all duration-300
+            ${
+              fadeState[cat._id]
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-2"
+            }
+          `}
+        >
+          {displayNames[cat._id]}
+        </p>
+      </div>
+    ))}
         </div>
       </div>
     </div>

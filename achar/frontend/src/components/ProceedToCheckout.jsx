@@ -113,8 +113,8 @@ const ProceedToCheckout = () => {
 
   // ✅ GST Calculation (12%)
   // ✅ GST Calculation (5%)
-  const gstRate = 0.05;
-  const gstAmount = totalPrice * gstRate;
+  // const gstRate = 0.05;
+  // const gstAmount = totalPrice * gstRate;
 
   // const FREE_SHIPPING_LIMIT = 500;
   // const isFreeShipping = totalPrice >= FREE_SHIPPING_LIMIT;
@@ -123,7 +123,7 @@ const ProceedToCheckout = () => {
   // const finalShippingCharge = isFreeShipping ? 0 : shippingCharge;
 
   // 🟢 FINAL AMOUNT
-  const finalAmount = totalPrice + gstAmount; //finalShippingCharge
+  const finalAmount = totalPrice// + gstAmount; //finalShippingCharge
   // useEffect(() => {
   //   const pin = shippingAddress.pincode;
 
@@ -493,7 +493,7 @@ const ProceedToCheckout = () => {
           </div>
           <div className="flex justify-between text-sm text-gray-600">
             <span>All Inclusive Price</span>
-            <span>₹{gstAmount.toFixed(2)}</span>
+            {/* <span>₹{gstAmount.toFixed(2)}</span> */}
           </div>
           {/* Shipping Charges */}
 

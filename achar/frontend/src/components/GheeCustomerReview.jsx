@@ -69,9 +69,9 @@ const GheeCustomerReview = ({ image, onSubmitted }) => {
 
       <button
         onClick={() => setIsModalOpen(true)}
-        className="w-full bg-yellow-500 text-white py-2.5 rounded-lg font-semibold text-md shadow-md hover:bg-yellow-600 transition-all"
+        className="px-4 py-2 bg-yellow-500 text-white rounded-md font-medium text-sm shadow-sm hover:bg-yellow-600 transition-colors duration-200"
       >
-        ✨ Add Review
+        Add Your Review
       </button>
 
       {/* MODAL */}

@@ -4,6 +4,7 @@ import axios from "axios";
 import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
+import AllProductSkeletonCard from "../components/skeletons/AllProductSkeletonCard";
 import Filter from "../components/Filter";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
@@ -176,11 +177,13 @@ export default function GheeCategoryProduct() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedWeights, setSelectedWeights] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
   // FETCH PRODUCTS
   useEffect(() => {
     const load = async () => {
       try {
+        setLoading(true);
         const { data } = await axios.get(`/api/ghee-products/category/${slug}`);
         setProducts(data);
         setFilteredProducts(data);
@@ -194,6 +197,9 @@ export default function GheeCategoryProduct() {
       } catch {
         toast.error("Failed to load products");
       }
+      finally {
+      setLoading(false); // ✅ important
+    }
     };
     load();
   }, [slug]);
@@ -382,24 +388,29 @@ const handleFilter = useCallback(
           )}
 
           {/* PRODUCT GRID */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
-            {filteredProducts.length === 0 ? (
-              <p className="text-gray-600 text-[0.9rem] col-span-full text-center py-20">
-                No products found.
-              </p>
-            ) : (
-              filteredProducts.map((p) => (
-                <GheeProductCard
-                  key={p._id}
-                  product={p}
-                  selectedWeight={selectedWeights[p._id]}
-                  setSelectedWeight={(w) =>
-                    setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
-                  }
-                />
-              ))
-            )}
-          </div>
+         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
+  {loading ? (
+    Array.from({ length: 8 }).map((_, i) => (
+      <AllProductSkeletonCard key={i} />
+    ))
+  ) : filteredProducts.length === 0 ? (
+    <p className="text-gray-600 text-[0.9rem] col-span-full text-center py-20">
+      No products found.
+    </p>
+  ) : (
+    filteredProducts.map((p) => (
+      <GheeProductCard
+        key={p._id}
+        product={p}
+        selectedWeight={selectedWeights[p._id]}
+        setSelectedWeight={(w) =>
+          setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
+        }
+      />
+    ))
+  )}
+</div>
+
         </div>
       </div>
          <div> <VideoAdvertiseList /> </div>

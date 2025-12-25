@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "./Filter";
 import AcharAdvertizeBanner from "../components/AcharAdvertizeBanner";
+import AcharProductSkeletonCard from "../components/skeletons/AcharProductSkeletonCard";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
 import VideoAdvertiseList from "./VideoAdvertiseList";
@@ -55,8 +56,8 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     if (isOutOfStock) return toast.error("Out of stock");
     if (!selectedWeight) return toast.error("Select weight");
 
-   const added = addToCart({
-       ...product,
+    const added = addToCart({
+      ...product,
       productName: product.productName,
       selectedWeight,
       quantity: 1,
@@ -66,8 +67,8 @@ const AcharProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
     });
 
     if (added) {
-    toast.success(`${product.productName} added to cart 🛒`);
-  }
+      toast.success(`${product.productName} added to cart 🛒`);
+    }
   };
 
   return (
@@ -196,12 +197,16 @@ export default function CategoryProducts() {
   const [filteredProducts, setFiltered] = useState([]);
   const [selectedWeights, setSelectedWeights] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // FETCH PRODUCTS
   useEffect(() => {
     const load = async () => {
       try {
+        setLoading(true);
+
         const { data } = await axios.get(`/api/products/category/${slug}`);
+
         setProducts(data);
         setFiltered(data);
 
@@ -212,55 +217,56 @@ export default function CategoryProducts() {
           }
         });
         setSelectedWeights(defaults);
-      } catch {
+      } catch (err) {
         toast.error("Failed to load products");
+      } finally {
+        setLoading(false);
       }
     };
+
     load();
   }, [slug]);
 
- const handleFilter = useCallback(
-  (filters) => {
-    let temp = [...products];
+  const handleFilter = useCallback(
+    (filters) => {
+      let temp = [...products];
 
-    // CATEGORY
-    if (filters.category) {
-      temp = temp.filter(
-        (p) => p.category === filters.category || p.categoryId === filters.category
-      );
-    }
+      // CATEGORY
+      if (filters.category) {
+        temp = temp.filter(
+          (p) =>
+            p.category === filters.category || p.categoryId === filters.category
+        );
+      }
 
-    // PRICE
-    temp = temp.filter((p) => {
-      const price = Number(p.currentPrice || 0);
-      return price >= filters.price[0] && price <= filters.price[1];
-    });
-
-    // RATING (from reviews)
-    if (filters.rating > 0) {
+      // PRICE
       temp = temp.filter((p) => {
-        if (!p.reviews || p.reviews.length === 0) return false;
-
-        const avg =
-          p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-          p.reviews.length;
-
-        return avg >= filters.rating;
+        const price = Number(p.currentPrice || 0);
+        return price >= filters.price[0] && price <= filters.price[1];
       });
-    }
 
-    // STOCK
-    if (filters.stock) {
-      temp = temp.filter(
-        (p) => p.stock !== false && p.stockQuantity > 0
-      );
-    }
+      // RATING (from reviews)
+      if (filters.rating > 0) {
+        temp = temp.filter((p) => {
+          if (!p.reviews || p.reviews.length === 0) return false;
 
-    setFiltered(temp);
-  },
-  [products]
-);
+          const avg =
+            p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+            p.reviews.length;
 
+          return avg >= filters.rating;
+        });
+      }
+
+      // STOCK
+      if (filters.stock) {
+        temp = temp.filter((p) => p.stock !== false && p.stockQuantity > 0);
+      }
+
+      setFiltered(temp);
+    },
+    [products]
+  );
 
   return (
     <>
@@ -388,7 +394,11 @@ export default function CategoryProducts() {
 
             {/* PRODUCT GRID */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
-              {filteredProducts.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <AcharProductSkeletonCard key={i} />
+                ))
+              ) : filteredProducts.length === 0 ? (
                 <p className="text-gray-600 col-span-full text-center py-16 sm:py-20">
                   No products found.
                 </p>
@@ -407,7 +417,10 @@ export default function CategoryProducts() {
             </div>
           </div>
         </div>
-          <div> <VideoAdvertiseList /> </div>
+        <div>
+          {" "}
+          <VideoAdvertiseList />{" "}
+        </div>
       </div>
     </>
   );

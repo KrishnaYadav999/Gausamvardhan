@@ -166,6 +166,126 @@ function App() {
     अगरबत्ती, गणपति मूर्ति,
 
     gausamvardhan products, organic indian products
+
+    Gau Samvardhan
+
+Gausam Vardhan
+
+Gausamvardhan
+
+Gau-samvardhan
+
+Gau Sam Vardhan
+
+Gausamvardan
+
+Gau samvardan
+
+Gausamvardhaan
+
+Gausamvardhn
+
+Gau Samvardhanr
+
+Gauvardhan
+
+Samvardhan
+
+GauSam
+
+GSV
+
+गौसंवर्धन
+
+गौ समवर्धन
+
+गौसंवर्धान
+
+गौ-समवर्धन
+
+Gausamvardhan Amla Murabba
+
+Gau Samvardhan Pickle
+
+Gausamvardhan Ghee
+
+Gau Samvardhan Desi Products
+
+Gausamvardhan Organic
+
+GauShyam Vardanagar
+
+Gausam Vardhanagar
+
+GauSamVardhan Store
+
+GausamVardhan Online
+
+Gausamvardhan India
+
+GausamVardhan Shop
+
+Gau Samvardhan Store
+
+Gausam Vardhan Online Shop
+
+GauSamVardhan Organic
+
+Gausam Vardhan Products
+
+Gau Sam Vardhan India
+
+Gausamvardhan Shop Online
+
+GauSam Vardhan Murabba
+
+Gausam Vardhan Pickles
+
+GausamVardhan Ghee Online
+
+GausamVardhan Desi Products
+
+गौ-संवर्धन
+
+गौ सं वर्धान
+
+गौसं वर्धन
+
+गौ-सं वर्धन
+
+गौसमवर्धन स्टोर
+
+Gausamvardhan Amla Murabba Online
+
+Gausamvardhan Desi Pickle
+
+Gau Samvardhan Organic Ghee
+
+Gausamvardhan Herbal Achar
+
+Gausamvardhan Handmade Pickle
+
+Gausamvardhan Ayurvedic Products
+
+Gausamvardhanr
+
+Gausamvardahn
+
+Gau Samvardhanr
+
+GauSamVardhn
+
+Gausamvardan Online
+
+Best Amla Murabba in India
+
+Traditional Indian Pickles Online
+
+Organic Desi Ghee Store
+
+Handmade Village Style Achar
+
+Chemical Free Pickles India
     "
         />
 

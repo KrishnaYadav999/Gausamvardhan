@@ -29,9 +29,7 @@ const AcharCustomerReview = ({ image }) => {
         name,
         comment: review,
         rating,
-        images: images
-          ? images.split(",").map((url) => url.trim())
-          : [],
+        images: images ? images.split(",").map((url) => url.trim()) : [],
       });
 
       toast.success("Review added successfully!");
@@ -48,7 +46,6 @@ const AcharCustomerReview = ({ image }) => {
 
   return (
     <div className="max-w-lg mx-auto mt-10">
-
       {/* IMAGE */}
       {image && (
         <img
@@ -61,7 +58,7 @@ const AcharCustomerReview = ({ image }) => {
       {/* BUTTON TO OPEN MODAL */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="w-full bg-yellow-500 text-white py-3 rounded-lg font-semibold text-lg shadow-md hover:bg-yellow-600 transition-all duration-300"
+        className="px-4 py-2 bg-yellow-500 text-white rounded-md font-medium text-sm shadow-sm hover:bg-yellow-600 transition-colors duration-200"
       >
         Add Your Review
       </button>
@@ -70,7 +67,6 @@ const AcharCustomerReview = ({ image }) => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md relative shadow-xl">
-
             {/* CLOSE BUTTON */}
             <button
               onClick={() => setIsModalOpen(false)}
@@ -132,7 +128,6 @@ const AcharCustomerReview = ({ image }) => {
             >
               Submit Review
             </button>
-
           </div>
         </div>
       )}

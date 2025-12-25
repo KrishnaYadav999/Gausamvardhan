@@ -15,6 +15,7 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
   const [hovered, setHovered] = useState(false);
+const isOutOfStock = product.stock === false || product.stockQuantity <= 0;
 
   if (!product) return null;
 
@@ -41,8 +42,8 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-
-    const added = addToCart({
+  if (isOutOfStock) return toast.error("Out of stock");
+    const added =  addToCart({
       ...product,
       productName: product.title,
       selectedWeight,
@@ -51,12 +52,14 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
       cutPrice: cutPrice,
       productImages: product.images,
     });
-    if (added) {
-      toast.success(`${product.title} added to cart`);
-    }
+if(added){
+   toast.success(`${product.title} added to cart`);
+}
+    
   };
 
   const goToDetail = () => {
+      if (isOutOfStock) return; 
     navigate(`/ghee-product/${product.slug}/${product._id}`);
   };
 
@@ -76,6 +79,7 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
       onMouseLeave={() => setHovered(false)}
       style={{ fontFamily: "Inter" }}
     >
+      
       {/* IMAGE */}
       <div className="relative h-[260px] overflow-hidden rounded-t-2xl bg-gray-50">
         <img
@@ -92,6 +96,13 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
             }`}
           />
         )}
+{isOutOfStock && (
+  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <span className="bg-red-600 text-white px-4 py-1 rounded-lg text-sm font-bold shadow">
+      OUT OF STOCK
+    </span>
+  </div>
+)}
 
         {/* HEART */}
         <span
@@ -138,9 +149,12 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
         {product.pricePerGram && (
           <select
             value={selectedWeight}
+            disabled={isOutOfStock}
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => updateWeight(e.target.value)}
-            className="w-full border px-4 py-2 text-sm font-medium text-gray-700 border-gray-300"
+            className={`w-full border px-4 py-2 text-sm font-medium text-gray-700 border-gray-300 rounded ${
+    isOutOfStock ? "bg-gray-200 cursor-not-allowed text-gray-500" : ""
+  }`}
           >
             {product.pricePerGram.split(",").map((i) => {
               const weight = i.split("=")[0].trim();
@@ -155,7 +169,12 @@ const GheeProductCard = ({ product, selectedWeight, updateWeight }) => {
 
         <button
           onClick={handleAddToCart}
-          className="w-full py-3 font-semibold text-sm tracking-wide mt-4 bg-green-700 hover:bg-green-800 text-white"
+          disabled={isOutOfStock}
+  className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 rounded ${
+    isOutOfStock
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-green-700 hover:bg-green-800 text-white"
+  }`}
         >
           ADD TO CART
         </button>

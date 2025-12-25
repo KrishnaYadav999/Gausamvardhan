@@ -6,6 +6,7 @@ import { CartContext } from "../context/CartContext";
 import toast, { Toaster } from "react-hot-toast";
 import { FiFilter, FiX } from "react-icons/fi";
 import Filter from "../components/Filter";
+import AgarbattiSkeletonCard from "../components/skeletons/AgarbattiSkeletonCard";
 import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
 import VideoAdvertiseList from "./VideoAdvertiseList";
@@ -169,24 +170,33 @@ export default function AgarbattiCategoryProduct() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedPack, setSelectedPack] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
+        setLoading(true);
+
         const { data } = await axios.get(`/api/agarbatti/category/${slug}`);
+
         const items = Array.isArray(data) ? data : [];
         setProducts(items);
         setFilteredProducts(items);
 
         const defaults = {};
         items.forEach((p) => {
-          if (p.packs?.length > 0) defaults[p._id] = p.packs[0].name;
+          if (p.packs?.length > 0) {
+            defaults[p._id] = p.packs[0].name;
+          }
         });
         setSelectedPack(defaults);
       } catch {
         toast.error("Failed to load");
+      } finally {
+        setLoading(false);
       }
     };
+
     load();
   }, [slug]);
 
@@ -289,7 +299,11 @@ export default function AgarbattiCategoryProduct() {
 
           {/* Product Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <AgarbattiSkeletonCard key={i} />
+              ))
+            ) : filteredProducts.length === 0 ? (
               <p className="text-gray-600 col-span-full text-center py-20">
                 No products available
               </p>

@@ -7,6 +7,7 @@ import ProductVideo from "../components/ProductVideo"; // same component used in
 import toast from "react-hot-toast";
 import Features from "./Features";
 import { Star } from "lucide-react";
+import ProductDetailSkeleton from "../components/ProductDetailSkeleton";
 import ImageZoom from "./ImageZoom";
 import Certificate from "./Certificate";
 import { Helmet } from "react-helmet-async";
@@ -27,6 +28,8 @@ const GheeProductDetail = () => {
   const [similarProducts, setSimilarProducts] = useState([]);
   const zoomRef = useRef();
   const [zoomStyle, setZoomStyle] = useState({});
+
+   const [currentPage, setCurrentPage] = useState(1);
 
   // Helper to compute price from pricePerGram or currentPrice
   const getPrice = (prod, weight) => {
@@ -113,12 +116,19 @@ const GheeProductDetail = () => {
   }, [product, id]);
 
   if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500 text-lg">
-        Loading ghee product...
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
+
+   const REVIEWS_PER_PAGE = 4;
+  const reviews = product.reviews || [];
+
+  const totalPages = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
+
+  const paginatedReviews = reviews.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
+
 
   const isOutOfStock = !product.stock;
 
@@ -818,61 +828,171 @@ const GheeProductDetail = () => {
             </div>
           </div>
 
-          {/* REVIEWS */}
-          {product.reviews?.length > 0 && (
-            <div className="mt-10">
-              <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-
-              <div className="space-y-4">
-                {product.reviews.map((rev, i) => (
-                  <div key={i} className="bg-white p-4 rounded-xl shadow-sm">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-9 h-9 bg-green-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                        {rev.name?.charAt(0)?.toUpperCase() || "U"}
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900 text-sm">
-                          {rev.name}
-                        </div>
-
-                        <div className="flex mt-1">
-                          {Array.from({ length: Number(rev.rating) || 0 }).map(
-                            (_, idx) => (
+          {/* REVIEWS SUMMARY */}
+                  {product.reviews?.length > 0 && (
+                    <div className="mt-14">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                        Customer Reviews
+                      </h3>
+        
+                      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 mb-8">
+                        {/* Left: Average Rating */}
+                        <div className="flex flex-col items-center">
+                          <div className="flex items-center gap-2 mb-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
                               <Star
-                                key={idx}
-                                size={14}
-                                className="text-yellow-400 fill-yellow-400"
+                                key={i}
+                                size={20}
+                                className={
+                                  i < Math.round(product.rating || 0)
+                                    ? "text-yellow-400 fill-yellow-400"
+                                    : "text-gray-300"
+                                }
                               />
-                            )
-                          )}
+                            ))}
+                          </div>
+                          <div className="text-green-600 font-semibold text-lg">
+                            {product.rating?.toFixed(2) || "0.0"} out of 5
+                          </div>
+                          <div className="text-gray-500 text-sm">
+                            Based on {product.reviews.length} reviews
+                          </div>
+                          <GheeCustomerReview />
+                        </div>
+        
+                        {/* Right: Rating Breakdown */}
+                        <div className="w-full max-w-md">
+                          {Array.from({ length: 5 }, (_, i) => {
+                            const starCount = 5 - i;
+                            const count = product.reviews.filter(
+                              (r) => Math.round(r.rating) === starCount
+                            ).length;
+                            const percentage =
+                              (count / product.reviews.length) * 100 || 0;
+        
+                            return (
+                              <div
+                                key={i}
+                                className="flex items-center gap-2 text-sm mb-2"
+                              >
+                                <span className="w-10">{starCount}★</span>
+                                <div className="flex-1 bg-gray-200 h-3 rounded overflow-hidden">
+                                  <div
+                                    className="bg-yellow-400 h-3 rounded"
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                                <span className="w-6 text-right">{count}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    </div>
-
-                    <p className="text-gray-700 leading-snug">{rev.comment}</p>
-
-                    {rev.images?.length > 0 && (
-                      <div className="flex mt-3 gap-2 flex-wrap">
-                        {rev.images.map((img, idx) => (
-                          <img
-                            key={idx}
-                            src={img}
-                            alt={`review-${idx}`}
-                            className="w-20 h-20 rounded-lg object-cover"
-                          />
+        
+                      {/* REVIEW CARDS */}
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        {paginatedReviews.map((rev, i) => (
+                          <div
+                            key={i}
+                            className="bg-white rounded-2xl p-5 shadow-md hover:shadow-lg transition"
+                          >
+                            {/* HEADER */}
+                            <div className="flex items-center gap-4 mb-3">
+                              <div className="relative">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white font-bold text-lg">
+                                  {rev.name?.charAt(0)?.toUpperCase()}
+                                </div>
+                                <span className="absolute -bottom-1 -right-1 bg-yellow-400 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">
+                                  ★ {rev.rating}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900">
+                                  {rev.name}
+                                </p>
+                                <div className="flex">
+                                  {Array.from({ length: 5 }).map((_, idx) => (
+                                    <Star
+                                      key={idx}
+                                      size={14}
+                                      className={
+                                        idx < Number(rev.rating)
+                                          ? "text-yellow-400 fill-yellow-400"
+                                          : "text-gray-300"
+                                      }
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+        
+                            {/* COMMENT */}
+                            <p className="text-gray-700 text-sm leading-relaxed">
+                              “{rev.comment}”
+                            </p>
+        
+                            {/* IMAGES */}
+                            {rev.images?.length > 0 && (
+                              <div className="flex gap-2 mt-4 flex-wrap">
+                                {rev.images.map((img, idx) => (
+                                  <img
+                                    key={idx}
+                                    src={img}
+                                    alt={`review-${idx}`}
+                                    className="w-20 h-20 rounded-xl object-cover border"
+                                  />
+                                ))}
+                              </div>
+                            )}
+        
+                            {/* DATE */}
+                            <p className="text-xs text-gray-400 mt-4">
+                              {new Date(rev.createdAt).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          </div>
                         ))}
                       </div>
-                    )}
-
-                    <p className="text-gray-400 text-xs mt-2">
-                      {new Date(rev.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+        
+                      {/* PAGINATION */}
+                      {totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-3 mt-8">
+                          <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage((p) => p - 1)}
+                            className="px-4 py-2 rounded-lg border text-sm disabled:opacity-40 hover:bg-gray-100"
+                          >
+                            ← Prev
+                          </button>
+        
+                          {Array.from({ length: totalPages }).map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setCurrentPage(i + 1)}
+                              className={`w-9 h-9 rounded-full text-sm font-medium transition ${
+                                currentPage === i + 1
+                                  ? "bg-green-600 text-white"
+                                  : "border hover:bg-gray-100"
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+        
+                          <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage((p) => p + 1)}
+                            className="px-4 py-2 rounded-lg border text-sm disabled:opacity-40 hover:bg-gray-100"
+                          >
+                            Next →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
           {/* SIMILAR PRODUCTS */}
           {similarProducts.length > 0 && (
             <div className="mt-12">
@@ -908,7 +1028,6 @@ const GheeProductDetail = () => {
         </div>
       </div>
       <div>
-        <GheeCustomerReview />
         <VideoAdvertiseList />
       </div>
     </>

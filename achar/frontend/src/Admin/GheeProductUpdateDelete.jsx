@@ -26,6 +26,7 @@ const GheeProductUpdateDelete = () => {
     category: "",
     moreAboutProduct: [],
     coupons: [],
+     reviews: [],
   });
 
   // Fetch all products
@@ -82,7 +83,7 @@ const GheeProductUpdateDelete = () => {
   usageLimit: c.usageLimit ?? null,
   isActive: c.isActive ?? true,
 })),
-
+reviews: product.reviews || [],
     });
   };
 
@@ -454,6 +455,94 @@ const GheeProductUpdateDelete = () => {
 >
   + Add Coupon
 </button>
+// Inside GheeProductUpdateDelete component, in the form for editing product:
+
+{/* Reviews Section */}
+<h4 className="font-semibold mt-4">Customer Reviews</h4>
+{formData.reviews && formData.reviews.length > 0 ? (
+  <div className="mb-3 border p-3 rounded">
+    {formData.reviews.map((r, idx) => (
+      <div key={idx} className="flex justify-between items-center mb-2 border-b pb-1">
+        <div>
+          <p className="font-semibold">{r.name} - ⭐ {r.rating}</p>
+          <p>{r.comment}</p>
+          {r.images?.length > 0 && (
+            <div className="flex gap-2 mt-1">
+              {r.images.map((img, i) => (
+                <img key={i} src={img} alt="Review" className="w-12 h-12 object-cover rounded" />
+              ))}
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const updatedReviews = [...formData.reviews];
+            updatedReviews.splice(idx, 1);
+            setFormData({ ...formData, reviews: updatedReviews });
+          }}
+          className="bg-red-600 text-white px-2 py-1 rounded"
+        >
+          Delete
+        </button>
+      </div>
+    ))}
+  </div>
+) : (
+  <p className="text-gray-500 mb-3">No reviews yet.</p>
+)}
+
+{/* Add New Review */}
+<div className="mb-4 border p-3 rounded">
+  <h5 className="font-semibold mb-2">Add New Review</h5>
+  <input
+    type="text"
+    placeholder="Reviewer Name"
+    value={formData.newReviewName || ""}
+    onChange={(e) => setFormData({ ...formData, newReviewName: e.target.value })}
+    className="w-full border rounded px-2 py-1 mb-2"
+  />
+  <input
+    type="number"
+    placeholder="Rating"
+    value={formData.newReviewRating || ""}
+    onChange={(e) => setFormData({ ...formData, newReviewRating: e.target.value })}
+    className="w-full border rounded px-2 py-1 mb-2"
+  />
+  <textarea
+    placeholder="Comment"
+    value={formData.newReviewComment || ""}
+    onChange={(e) => setFormData({ ...formData, newReviewComment: e.target.value })}
+    className="w-full border rounded px-2 py-1 mb-2"
+  />
+
+  <button
+    type="button"
+    onClick={() => {
+      if (!formData.newReviewName || !formData.newReviewComment || !formData.newReviewRating) {
+        return toast.error("Please fill all review fields");
+      }
+      const newReview = {
+        name: formData.newReviewName,
+        rating: Number(formData.newReviewRating),
+        comment: formData.newReviewComment,
+        images: [], // optionally add review image support here
+      };
+      setFormData({
+        ...formData,
+        reviews: [...(formData.reviews || []), newReview],
+        newReviewName: "",
+        newReviewRating: "",
+        newReviewComment: "",
+      });
+      toast.success("Review added");
+    }}
+    className="bg-green-600 text-white px-3 py-1 rounded"
+  >
+    Add Review
+  </button>
+</div>
+
 
                   {/* More About Product */}
                   <h4 className="font-semibold mt-2">More About Product</h4>

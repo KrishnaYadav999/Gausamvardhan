@@ -96,9 +96,9 @@ const AddToCart = () => {
     setTimeout(() => setShowSuccess(false), 2600);
   };
 
-  const gstRate = 0.05;
-  const gstAmount = (totalPrice - (discountAmount || 0)) * gstRate;
-  const finalAmount = totalPrice - (discountAmount || 0) + gstAmount;
+  // const gstRate = 0.05;
+  // const gstAmount = (totalPrice - (discountAmount || 0)) * gstRate;
+  const finalAmount = totalPrice - (discountAmount || 0);// + gstAmount;
 
   /* ---------------------------------------------------
         EMPTY CART – BEST UI ANIMATION
@@ -355,7 +355,7 @@ const AddToCart = () => {
 
               <SummaryRow
                 label="All Inclusive Price"
-                value={formatPrice(gstAmount)}
+                // value={formatPrice(gstAmount)}
               />
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-1">
