@@ -22,6 +22,7 @@ import videoAdvertiseRoutes from "./routes/videoAdvertiseRoutes.js"
 import agarbattiRoutes from "./routes/agarbattiRoutes.js"
 import ganpatiRoutes from "./routes/ganpatiRoutes.js"
 import newsletterRoutes from "./routes/newsletterRoutes.js"
+import invoiceRoutes from "./routes/invoiceRoutes.js";
 
 // seo
 import { SitemapStream, streamToPromise } from "sitemap";
@@ -51,7 +52,10 @@ app.use(
 
 app.use(cookieParser());
 
+
+
 // Routes
+app.use("/api/invoice", invoiceRoutes);
 app.use("/googleauth", googleauth);
 app.use("/api/agarbatti", agarbattiRoutes);
 app.use("/api/auth", authRoutes);
