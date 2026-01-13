@@ -10,6 +10,8 @@ import GanpatiSkeletonCard from "../components/skeletons/GanpatiSkeletonCard";
 import { Helmet } from "react-helmet-async";
 import VideoAdvertiseList from "./VideoAdvertiseList";
 
+const COMING_SOON = true;
+
 /* ===================================================
    CARD COMPONENT
 =================================================== */
@@ -17,7 +19,6 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
   const { addToCart } = useContext(CartContext);
   const [hover, setHover] = useState(false);
   const navigate = useNavigate();
-  
 
   const isOutOfStock = !product.stock || product.stockQuantity <= 0;
 
@@ -42,6 +43,8 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
 
   const add = (e) => {
     e.stopPropagation();
+
+    if (COMING_SOON) return toast("Coming Soon 🚧"); // ❌ prevents adding to cart
     if (isOutOfStock) return toast.error("Out of Stock");
     if (!selectedPack) return toast.error("Select pack");
 
@@ -69,9 +72,13 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
       ${isOutOfStock ? "opacity-60 cursor-not-allowed" : ""}`}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        onClick={() =>
-          navigate(`/ganpati-product/${product.slug}/${product._id}`)
-        }
+        onClick={() => {
+          if (COMING_SOON) {
+            toast("Coming Soon 🚧"); // ❌ prevents opening product page
+            return;
+          }
+          navigate(`/ganpati-product/${product.slug}/${product._id}`);
+        }}
       >
         {/* Image */}
         <div className="relative h-40 sm:h-48 md:h-[250px] overflow-hidden rounded-t-2xl bg-gray-100">
@@ -109,6 +116,24 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
             </span>
           )}
         </div>
+
+        {COMING_SOON && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] animate-fadeIn" />
+
+            <div className="relative px-7 py-6 rounded-2xl bg-black/60 border border-yellow-400/40 shadow-[0_0_45px_rgba(255,215,0,0.35)] text-center animate-popIn">
+              <h3 className="text-white text-xl sm:text-2xl font-extrabold tracking-[0.35em] animate-pulseGlow">
+                COMING&nbsp;SOON
+              </h3>
+              <div className="mt-3 h-[2px] w-24 mx-auto bg-gradient-to-r from-transparent via-yellow-400 to-transparent animate-shimmer" />
+              <p className="mt-3 text-yellow-200 text-xs sm:text-sm tracking-wide animate-fadeUp">
+                Ganpati Collection
+              </p>
+              <span className="absolute -top-3 -right-3 w-3 h-3 bg-yellow-400 rounded-full animate-float" />
+              <span className="absolute -bottom-3 -left-3 w-2 h-2 bg-orange-400 rounded-full animate-float delay-200" />
+            </div>
+          </div>
+        )}
 
         {/* Details */}
         <div className="px-3 py-3 flex flex-col flex-1">
@@ -158,15 +183,20 @@ const GanpatiCard = ({ product, selectedPack, setSelectedPack }) => {
           {/* Add Btn */}
           <button
             onClick={add}
-            disabled={isOutOfStock}
-            className={`w-full py-2 
-          text-[0.9rem] sm:text-sm font-semibold rounded-lg transition ${
-            isOutOfStock
-              ? "bg-gray-400 text-gray-700"
-              : "bg-orange-600 hover:bg-orange-700 text-white"
-          }`}
+            disabled={isOutOfStock || COMING_SOON} // ❌ disables button
+            className={`... ${
+              COMING_SOON
+                ? "bg-gray-500 text-white cursor-not-allowed" // style for coming soon
+                : isOutOfStock
+                ? "bg-gray-400 text-gray-700"
+                : "bg-orange-600 hover:bg-orange-700 text-white"
+            }`}
           >
-            {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+            {COMING_SOON
+              ? "COMING SOON" // button text
+              : isOutOfStock
+              ? "OUT OF STOCK"
+              : "ADD TO CART"}
           </button>
         </div>
       </div>
@@ -186,36 +216,32 @@ export default function GanpatiCategoryProduct() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
 
- useEffect(() => {
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
+        const { data } = await axios.get(`/api/ganpati/category/${slug}`);
 
-      const { data } = await axios.get(
-        `/api/ganpati/category/${slug}`
-      );
+        setProducts(data);
+        setFiltered(data);
 
-      setProducts(data);
-      setFiltered(data);
+        const defaults = {};
+        data.forEach((p) => {
+          if (p.packs?.length > 0) {
+            defaults[p._id] = p.packs[0].name;
+          }
+        });
+        setSelectedPack(defaults);
+      } catch {
+        toast.error("Failed to load");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const defaults = {};
-      data.forEach((p) => {
-        if (p.packs?.length > 0) {
-          defaults[p._id] = p.packs[0].name;
-        }
-      });
-      setSelectedPack(defaults);
-    } catch {
-      toast.error("Failed to load");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  loadProducts();
-}, [slug]);
-
+    loadProducts();
+  }, [slug]);
 
   /* Filter Logic */
   const handleFilter = useCallback(
@@ -362,29 +388,28 @@ export default function GanpatiCategoryProduct() {
         )}
 
         {/* PRODUCT GRID */}
-       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
-  {loading ? (
-    Array.from({ length: 8 }).map((_, i) => (
-      <GanpatiSkeletonCard key={i} />
-    ))
-  ) : filtered.length === 0 ? (
-    <p className="text-gray-600 col-span-full text-center py-20 text-[0.9rem]">
-      No products found.
-    </p>
-  ) : (
-    filtered.map((p) => (
-      <GanpatiCard
-        key={p._id}
-        product={p}
-        selectedPack={selectedPack[p._id]}
-        setSelectedPack={(val) =>
-          setSelectedPack((prev) => ({ ...prev, [p._id]: val }))
-        }
-      />
-    ))
-  )}
-</div>
-
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 flex-1">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <GanpatiSkeletonCard key={i} />
+            ))
+          ) : filtered.length === 0 ? (
+            <p className="text-gray-600 col-span-full text-center py-20 text-[0.9rem]">
+              No products found.
+            </p>
+          ) : (
+            filtered.map((p) => (
+              <GanpatiCard
+                key={p._id}
+                product={p}
+                selectedPack={selectedPack[p._id]}
+                setSelectedPack={(val) =>
+                  setSelectedPack((prev) => ({ ...prev, [p._id]: val }))
+                }
+              />
+            ))
+          )}
+        </div>
       </div>
       <div>
         {" "}

@@ -207,15 +207,42 @@ export const getLowStockProducts = async (req, res) => {
   try {
     const threshold = Number(req.query.threshold) || 5;
 
-    const lowStockProducts = await Product.find({
-      stockQuantity: { $lte: threshold },
+    const products = await Product.find({
+      $or: [
+        { stockQuantity: { $lte: threshold } },
+        { stockStatus: "OUT_OF_STOCK" },
+      ],
     })
-      .select("productName stockQuantity productImages")
+      .select(
+        "productName productImages stockQuantity stockStatus lastStockUpdatedAt stockHistory"
+      )
       .sort({ stockQuantity: 1 });
 
-    res.json(lowStockProducts);
+    // 🔥 Professional response formatting
+    const formattedProducts = products.map((p) => ({
+      id: p._id,
+      productName: p.productName,
+      image: p.productImages?.[0] || "/no-image.png",
+
+      stockQuantity: p.stockQuantity,
+      stockStatus: p.stockStatus,
+
+      lastStockUpdatedAt: p.lastStockUpdatedAt,
+
+      // latest stock record (date + quantity)
+      lastStockRecord:
+        p.stockHistory && p.stockHistory.length > 0
+          ? p.stockHistory[p.stockHistory.length - 1]
+          : null,
+    }));
+
+    res.json({
+      totalLowStockProducts: formattedProducts.length,
+      threshold,
+      products: formattedProducts,
+    });
   } catch (error) {
-    console.error("Error fetching low stock Achar products:", error);
+    console.error("Error fetching low stock products:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

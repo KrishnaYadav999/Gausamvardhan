@@ -11,8 +11,10 @@ import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
 import VideoAdvertiseList from "./VideoAdvertiseList";
 
+const COMING_SOON = true;
+
 /* ---------------------------------------------------
-    PRODUCT CARD (Ghee UI Applied)
+    PRODUCT CARD (Ghee-Style UI)
 ----------------------------------------------------*/
 const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
   const { addToCart } = useContext(CartContext);
@@ -41,6 +43,7 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
 
   const addCart = (e) => {
     e.stopPropagation();
+    if (COMING_SOON) return toast("Coming Soon 🚧");
     if (isOut) return toast.error("❌ Out of stock");
 
     const added = addToCart({
@@ -58,7 +61,7 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
 
   return (
     <div
-      className={`bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full ${
+      className={`bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full relative ${
         isOut ? "opacity-60" : ""
       }`}
       onClick={openProduct}
@@ -102,9 +105,30 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
         )}
       </div>
 
+      {/* COMING SOON Overlay */}
+      {COMING_SOON && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] animate-fadeIn" />
+          <div
+            className="relative px-6 py-5 rounded-2xl bg-black/60 border border-white/20 
+          shadow-[0_0_40px_rgba(255,215,0,0.25)]
+          animate-popIn text-center"
+          >
+            <h3 className="text-white text-xl font-extrabold tracking-[0.3em] animate-pulseGlow">
+              COMING&nbsp;SOON
+            </h3>
+            <div className="mt-2 h-[2px] w-20 mx-auto bg-gradient-to-r from-transparent via-yellow-400 to-transparent animate-shimmer" />
+            <p className="mt-2 text-yellow-200 text-xs tracking-wide animate-fadeUp">
+              Premium Fragrance
+            </p>
+            <div className="absolute -top-3 -right-3 w-3 h-3 bg-yellow-400 rounded-full animate-float" />
+            <div className="absolute -bottom-3 -left-3 w-2 h-2 bg-orange-400 rounded-full animate-float delay-200" />
+          </div>
+        </div>
+      )}
+
       {/* DETAILS */}
       <div className="px-4 py-3 flex flex-col flex-1">
-        {/* Name + Price */}
         <div className="flex justify-between items-start mb-1">
           <h3 className="font-semibold text-[0.9rem] sm:text-base text-gray-900 w-[70%] line-clamp-2">
             {product.title}
@@ -114,12 +138,10 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
           </p>
         </div>
 
-        {/* Tagline */}
         <p className="text-[0.75rem] sm:text-sm text-gray-500 mb-2">
           Premium Fragrance
         </p>
 
-        {/* ⭐ Rating */}
         <div className="flex items-center gap-1 mb-2 text-[0.8rem] sm:text-sm">
           <span className="text-yellow-500 text-sm sm:text-base">★</span>
           <span className="font-semibold text-gray-800">{avgRating}</span>
@@ -147,14 +169,20 @@ const AgarbattiProductCard = ({ product, selectedPack, setSelectedPack }) => {
 
         <button
           onClick={addCart}
-          disabled={isOut}
+          disabled={isOut || COMING_SOON}
           className={`w-full py-2 font-semibold text-[0.9rem] sm:text-sm tracking-wide rounded-lg ${
-            isOut
+            COMING_SOON
+              ? "bg-gray-500 cursor-not-allowed text-white"
+              : isOut
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-green-700 text-white hover:bg-green-800"
           }`}
         >
-          {isOut ? "OUT OF STOCK" : "ADD TO CART"}
+          {COMING_SOON
+            ? "COMING SOON"
+            : isOut
+            ? "OUT OF STOCK"
+            : "ADD TO CART"}
         </button>
       </div>
     </div>
@@ -176,27 +204,22 @@ export default function AgarbattiCategoryProduct() {
     const load = async () => {
       try {
         setLoading(true);
-
         const { data } = await axios.get(`/api/agarbatti/category/${slug}`);
-
         const items = Array.isArray(data) ? data : [];
         setProducts(items);
         setFilteredProducts(items);
 
         const defaults = {};
         items.forEach((p) => {
-          if (p.packs?.length > 0) {
-            defaults[p._id] = p.packs[0].name;
-          }
+          if (p.packs?.length > 0) defaults[p._id] = p.packs[0].name;
         });
         setSelectedPack(defaults);
       } catch {
-        toast.error("Failed to load");
+        toast.error("Failed to load products");
       } finally {
         setLoading(false);
       }
     };
-
     load();
   }, [slug]);
 
@@ -223,11 +246,9 @@ export default function AgarbattiCategoryProduct() {
       if (filters.rating > 0) {
         temp = temp.filter((p) => {
           if (!p.reviews || p.reviews.length === 0) return false;
-
           const avg =
             p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
             p.reviews.length;
-
           return avg >= filters.rating;
         });
       }
@@ -237,7 +258,6 @@ export default function AgarbattiCategoryProduct() {
         temp = temp.filter((p) => p.stock !== false && p.stockQuantity > 0);
       }
 
-      // ✅ CORRECT STATE SETTER
       setFilteredProducts(temp);
     },
     [products]
@@ -251,6 +271,7 @@ export default function AgarbattiCategoryProduct() {
       <Toaster />
 
       <div className="px-4 sm:px-6 py-8">
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 capitalize border-b pb-2 flex-1">
             {slug} Agarbatti
@@ -265,7 +286,7 @@ export default function AgarbattiCategoryProduct() {
         </div>
 
         <div className="flex gap-6">
-          {/* Sidebar */}
+          {/* SIDEBAR */}
           <div className="hidden md:block w-64 shrink-0 sticky top-24 mr-4">
             <Filter
               minPrice={0}
@@ -275,18 +296,17 @@ export default function AgarbattiCategoryProduct() {
             />
           </div>
 
-          {/* Drawer */}
+          {/* MOBILE DRAWER */}
           {filterOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex z-[999]">
               <div className="flex-1" onClick={() => setFilterOpen(false)} />
-              <div className="w-72 bg-white h-full shadow-lg p-4  overflow-y-auto">
+              <div className="w-72 bg-white h-full shadow-lg p-4 overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Filters</h3>
                   <button onClick={() => setFilterOpen(false)}>
                     <FiX size={22} />
                   </button>
                 </div>
-
                 <Filter
                   minPrice={0}
                   maxPrice={2000}
@@ -297,35 +317,33 @@ export default function AgarbattiCategoryProduct() {
             </div>
           )}
 
-          {/* Product Grid */}
+          {/* PRODUCT GRID */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
-            {loading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <AgarbattiSkeletonCard key={i} />
-              ))
-            ) : filteredProducts.length === 0 ? (
-              <p className="text-gray-600 col-span-full text-center py-20">
-                No products available
-              </p>
-            ) : (
-              filteredProducts.map((p) => (
-                <AgarbattiProductCard
-                  key={p._id}
-                  product={p}
-                  selectedPack={selectedPack[p._id]}
-                  setSelectedPack={(w) =>
-                    setSelectedPack((prev) => ({ ...prev, [p._id]: w }))
-                  }
-                />
-              ))
-            )}
+            {loading
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <AgarbattiSkeletonCard key={i} />
+                ))
+              : filteredProducts.length === 0
+              ? (
+                <p className="text-gray-600 col-span-full text-center py-20">
+                  No products available
+                </p>
+              )
+              : filteredProducts.map((p) => (
+                  <AgarbattiProductCard
+                    key={p._id}
+                    product={p}
+                    selectedPack={selectedPack[p._id]}
+                    setSelectedPack={(w) =>
+                      setSelectedPack((prev) => ({ ...prev, [p._id]: w }))
+                    }
+                  />
+                ))}
           </div>
         </div>
       </div>
-      <div>
-        {" "}
-        <VideoAdvertiseList />{" "}
-      </div>
+
+      <VideoAdvertiseList />
     </div>
   );
 }

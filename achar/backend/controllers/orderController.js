@@ -33,6 +33,16 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+const getFinancialYear = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // Jan = 0
+
+  return month >= 3
+    ? `${year}-${String(year + 1).slice(-2)}`
+    : `${year - 1}-${String(year).slice(-2)}`;
+};
+
 // ======================================================
 // 🧾 CREATE ORDER
 // ======================================================
@@ -170,15 +180,21 @@ export const createOrder = async (req, res) => {
 
     // 🧾 Generate Invoice & Serial Numbers
   // 🧾 Generate Invoice & Serial Numbers
+// 🧾 Generate Invoice Number (FY wise)
+const fy = getFinancialYear(); // e.g. 2024-25
+const counterId = `INVOICE_${fy}`;
+
 const counter = await Counter.findOneAndUpdate(
-  { id: "order" },
+  { id: counterId },
   { $inc: { seq: 1 } },
   { new: true, upsert: true }
 );
 
+const invoiceNumber = `GS/${fy}/${String(counter.seq).padStart(3, "0")}`;
+
 const serialNumber = counter.seq;
 const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-const invoiceNumber = `AMBGS-${String(serialNumber).padStart(4, "0")}`;
+
 
 // 💳 Create Razorpay Order
 const razorpayOrder = await razorpay.orders.create({

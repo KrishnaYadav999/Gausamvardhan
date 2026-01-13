@@ -53,6 +53,16 @@ const couponSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// ---------------- Stock History Schema ----------------
+const stockHistorySchema = new mongoose.Schema(
+  {
+    quantity: { type: Number, required: true },
+    note: { type: String }, // optional (Admin update, Order placed, etc.)
+    date: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 // ---------------- Product Schema ----------------
 const productSchema = new mongoose.Schema(
   {
@@ -77,6 +87,22 @@ const productSchema = new mongoose.Schema(
     stock: { type: Boolean, default: true },
 
     stockQuantity: { type: Number, required: true, default: 0 },
+// ✅ Shopify-style stock status
+stockStatus: {
+  type: String,
+  enum: ["IN_STOCK", "LOW_STOCK", "OUT_OF_STOCK"],
+  default: "IN_STOCK",
+},
+
+// ✅ Last stock update date
+lastStockUpdatedAt: {
+  type: Date,
+  default: Date.now,
+},
+
+// ✅ Date-wise stock tracking
+stockHistory: [stockHistorySchema],
+
     // ✅ Reviews array
     reviews: [reviewSchema],
 
@@ -108,6 +134,21 @@ productSchema.methods.calculateAverageRating = function () {
   }
   return this.save();
 };
+
+productSchema.pre("save", function (next) {
+  if (this.stockQuantity <= 0) {
+    this.stockStatus = "OUT_OF_STOCK";
+    this.stock = false;
+  } else if (this.stockQuantity <= 5) {
+    this.stockStatus = "LOW_STOCK";
+    this.stock = true;
+  } else {
+    this.stockStatus = "IN_STOCK";
+    this.stock = true;
+  }
+
+  next();
+});
 
 const Product = mongoose.model("Product", productSchema);
 export default Product;

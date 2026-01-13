@@ -4,241 +4,216 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-// Convert Number → Words (INR)
+/* ---------------- Number to Words (INR) ---------------- */
 const numberToWords = (num) => {
   const a = [
     "", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
     "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
-    "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+    "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen",
   ];
-
   const b = [
-    "", "", "Twenty", "Thirty", "Forty", "Fifty",
-    "Sixty", "Seventy", "Eighty", "Ninety"
+    "", "", "Twenty", "Thirty", "Forty",
+    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety",
   ];
 
-  if ((num = num.toString()).length > 9) return "Overflow";
-  let n = ("000000000" + num)
-    .substr(-9)
-    .match(/^(\d{2})(\d{2})(\d{2})(\d{3})$/);
-
-  if (!n) return "";
-
+  if (num === 0) return "Zero";
   let str = "";
-  str += n[1] !== "00" ? (a[+n[1]] || b[n[1][0]] + " " + a[n[1][1]]) + " Crore " : "";
-  str += n[2] !== "00" ? (a[+n[2]] || b[n[2][0]] + " " + a[n[2][1]]) + " Lakh " : "";
-  str += n[3] !== "00" ? (a[+n[3]] || b[n[3][0]] + " " + a[n[3][1]]) + " Thousand " : "";
-  str += n[4] !== "000" ? (a[+n[4]] || b[n[4][0]] + " " + a[n[4][1]]) + " " : "";
+
+  if (num > 99) {
+    str += a[Math.floor(num / 100)] + " Hundred ";
+    num %= 100;
+  }
+  if (num > 19) {
+    str += b[Math.floor(num / 10)] + " ";
+    num %= 10;
+  }
+  if (num > 0) str += a[num];
+
   return str.trim();
 };
 
 const Invoice = () => {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const invoiceRef = useRef();
 
+  /* ---------------- Fetch Order ---------------- */
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const res = await axios.get(`/api/orders/${id}`);
-        if (res.data.success) setOrder(res.data.order);
-        else setError("Failed to fetch invoice.");
+        if (res.data.success) {
+          setOrder(res.data.order);
+        }
       } catch (err) {
-        setError(err.response?.data?.message || "Server error.");
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch order:", err);
       }
     };
     fetchOrder();
   }, [id]);
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600 text-lg">
-        Loading Invoice...
-      </div>
-    );
+  if (!order) return <p className="text-center mt-10">Loading order...</p>;
 
-  if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-600 text-lg">
-        {error}
-      </div>
-    );
+  const shipping = order.shippingAddress || {};
 
-  if (!order) return null;
+  /* ---------------- Invoice values from DB ---------------- */
+  const invoiceNo = order.invoiceNumber || order._id;
+  const invoiceDate = order.createdAt
+    ? new Date(order.createdAt).toLocaleDateString("en-GB")
+    : "";
 
-  const shipping = order?.shippingAddress;
-
-  const subtotal = order.totalAmount;
+  const subtotal = order.totalAmount || 0;
   const grandTotal = subtotal;
 
-  // PDF Download
+  const buyerState = shipping.state?.toLowerCase() || "";
+  const isMaharashtra = buyerState.includes("maharashtra");
+
+  /* ---------------- PDF ---------------- */
   const handleDownloadPDF = async () => {
-    const input = invoiceRef.current;
-    const canvas = await html2canvas(input, { scale: 2 });
+    if (!invoiceRef.current) return;
+    const canvas = await html2canvas(invoiceRef.current, { scale: 2 });
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Invoice_${order._id}.pdf`);
+    const width = pdf.internal.pageSize.getWidth();
+    const height = (canvas.height * width) / canvas.width;
+    pdf.addImage(imgData, "PNG", 0, 0, width, height);
+    pdf.save(`Invoice_${invoiceNo}.pdf`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-10 px-4 flex flex-col items-center">
-
+    <div className="min-h-screen bg-gray-100 py-10 px-4 flex justify-center">
       <div
-        className="w-full max-w-4xl bg-white shadow-2xl rounded-2xl p-10 border border-gray-200"
         ref={invoiceRef}
+        className="w-full max-w-4xl bg-white p-10 rounded-xl shadow"
       >
         {/* Header */}
-        <div className="flex justify-between items-center border-b pb-6 mb-6">
-          <img src="/GauSamvardhan.png" alt="Logo" className="h-14" />
-          <h1 className="text-2xl font-bold tracking-wide text-gray-800">
-            TAX INVOICE / CASH MEMO
-          </h1>
+        <div className="flex justify-between border-b pb-4 mb-6">
+          <img src="/GauSamvardhan.png" className="h-12" alt="Logo" />
+          <h1 className="text-xl font-bold">TAX INVOICE</h1>
         </div>
 
         {/* Seller + Buyer */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
-          <div className="bg-gray-50 p-4 rounded-xl border">
-            <h2 className="font-bold text-gray-800 text-lg mb-2">
-              Seller Details
-            </h2>
-            <p>BLDG NO. A-18, FLAT NO. 303</p>
-            <p>Daffodils Road, BADLAPUR</p>
-            <p>SHRUSHTI, Ambarnath</p>
+        <div className="grid grid-cols-2 gap-6 text-sm">
+          <div>
+            <h3 className="font-bold mb-1">Seller</h3>
+            <p>Retailerz Private Limited</p>
             <p>Thane, Maharashtra - 421503</p>
-            <p className="mt-2 font-semibold">GST: 27ABOCS1120M1Z4</p>
-
-            <p className="mt-3 font-semibold text-sm">Dynamic QR Code:</p>
-            <img src="/orcode.jpg" className="h-28 w-28 rounded-md mt-2" />
+            <p>GSTIN: 27ABOCS1120M1Z4</p>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-xl border">
-            <h2 className="font-bold text-gray-800 text-lg mb-2">
-              Billing Address
-            </h2>
-            <p>{shipping?.name}</p>
-            <p>{shipping?.address}</p>
+          <div>
+            <h3 className="font-bold mb-1">Bill To</h3>
+            <p>{shipping.name || "N/A"}</p>
+            <p>{shipping.address || "N/A"}</p>
             <p>
-              {shipping?.city}, {shipping?.state} - {shipping?.pincode}
+              {shipping.city || "N/A"}, {shipping.state || "N/A"} -{" "}
+              {shipping.pincode || "N/A"}
             </p>
-            <p>Phone: {shipping?.phone}</p>
+            <p>{shipping.phone || "N/A"}</p>
           </div>
-        </div>
-
-        {/* Shipping */}
-        <div className="mt-8 bg-gray-50 p-4 rounded-xl border text-sm">
-          <h2 className="font-bold text-gray-800 text-lg mb-1">Shipping Address</h2>
-          <p>{shipping?.name}</p>
-          <p>{shipping?.address}</p>
-          <p>
-            {shipping?.city}, {shipping?.state} - {shipping?.pincode}
-          </p>
-          <p>Phone: {shipping?.phone}</p>
         </div>
 
         {/* Invoice Info */}
-        <div className="grid grid-cols-2 mt-8 text-sm gap-4">
+        <div className="grid grid-cols-2 gap-2 mt-6 text-sm">
           <p>
-            <span className="font-bold">Invoice No:</span>{" "}
-            {order.invoiceNumber}
+            <b>Invoice No:</b> {invoiceNo}
           </p>
           <p>
-            <span className="font-bold">Date:</span>{" "}
-            {new Date(order.createdAt).toLocaleDateString()}
+            <b>Invoice Date:</b> {invoiceDate}
+          </p>
+          <p className="col-span-2">
+            <b>Order ID:</b> {order.orderNumber || order._id}
           </p>
         </div>
 
-        {/* Product Table */}
-        <div className="mt-8 overflow-x-auto">
-          <table className="w-full text-sm border rounded-lg overflow-hidden">
-            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
-              <tr>
-                <th className="px-4 py-2 border">#</th>
-                <th className="px-4 py-2 border text-left">Product</th>
-                <th className="px-4 py-2 border">Qty</th>
-                <th className="px-4 py-2 border">Unit Price</th>
-                <th className="px-4 py-2 border">Total</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {order.products.map((p, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition">
-                  <td className="px-4 py-2 border text-center">{i + 1}</td>
-                  <td className="px-4 py-2 border">
-                    {p.product?.productName || p.product?.title}
+        {/* Products */}
+        <table className="w-full border mt-6 text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border p-2">#</th>
+              <th className="border p-2 text-left">Product</th>
+              <th className="border p-2">Qty</th>
+              <th className="border p-2">Price</th>
+              <th className="border p-2">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.products?.length > 0 ? (
+              order.products.map((p, i) => (
+                <tr key={i}>
+                  <td className="border p-2 text-center">{i + 1}</td>
+                  <td className="border p-2">
+                    {p.product?.productName || "Product not available"}
                   </td>
-                  <td className="px-4 py-2 border text-center">{p.quantity}</td>
-                  <td className="px-4 py-2 border text-center">₹{p.price}</td>
-                  <td className="px-4 py-2 border text-center">
-                    ₹{(p.price * p.quantity).toFixed(2)}
+                  <td className="border p-2 text-center">{p.quantity || 0}</td>
+                  <td className="border p-2 text-center">₹{p.price || 0}</td>
+                  <td className="border p-2 text-center">
+                    ₹{((p.price || 0) * (p.quantity || 0)).toFixed(2)}
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center p-4">
+                  No products found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
         {/* Totals */}
-        <div className="flex justify-end mt-10">
-          <div className="w-full md:w-1/2 bg-gray-50 border rounded-xl p-5 shadow-inner">
-            <div className="flex justify-between text-gray-700 mb-2">
-              <span>Subtotal:</span>
-              <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+        <div className="flex justify-end mt-6">
+          <div className="w-1/2 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
-            <div className="flex justify-between text-gray-900 text-lg font-semibold">
-              <span>Grand Total:</span>
+            {isMaharashtra ? (
+              <>
+                <div className="flex justify-between">
+                  <span>CGST 2.5%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>SGST 2.5%</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-between">
+                <span>IGST 5%</span>
+              </div>
+            )}
+
+            <div className="flex justify-between font-bold text-lg mt-2">
+              <span>Grand Total</span>
               <span>₹{grandTotal.toFixed(2)}</span>
             </div>
 
-            <p className="text-xs mt-2 text-gray-500">
+            <p className="text-xs mt-1">
               Amount in words: {numberToWords(Math.round(grandTotal))} Rupees Only
             </p>
 
-            <p className="text-xs mt-1 italic text-green-700 font-medium">
-              ✔ All taxes and shipping charges are included.
+            <p className="text-xs italic text-green-700 mt-1">
+              ✔ GST @5% included in price
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-10 pt-5 border-t flex justify-between items-center text-sm text-gray-600">
-          <div>
-            <p className="font-medium">For Retailerz Private Limited</p>
-            <p className="text-xs mt-1">This is a computer-generated invoice.</p>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <img src="/mangesh.jpg" className="h-16 rounded-md" />
-            <span className="text-xs mt-1">Authorized Signatory</span>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <div className="border-t mt-6 pt-4 flex justify-between text-sm">
+          <p>This is a computer-generated invoice.</p>
           <button
             onClick={handleDownloadPDF}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg transition"
+            className="bg-green-600 text-white px-4 py-2 rounded"
           >
             Download PDF
           </button>
-
-          <Link
-            to="/profile"
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg transition"
-          >
-            Back to Orders
-          </Link>
         </div>
+
+        <Link to="/profile" className="block text-center mt-4 text-blue-600">
+          Back to Orders
+        </Link>
       </div>
     </div>
   );

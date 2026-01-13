@@ -10,6 +10,8 @@ import { FaHeart } from "react-icons/fa";
 import { Helmet } from "react-helmet-async";
 import VideoAdvertiseList from "./VideoAdvertiseList";
 
+const COMING_SOON = true;
+
 /* ---------------------------------------------------
     PRODUCT CARD
 ----------------------------------------------------*/
@@ -46,11 +48,13 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+
+    if (COMING_SOON) return toast("Coming Soon 🚧");
     if (isOutOfStock) return toast.error("❌ Out of stock");
     if (!selectedWeight) return toast.error("❌ Select weight");
 
     const added = addToCart({
-       ...product,
+      ...product,
       productName: product.title,
       selectedWeight,
       quantity: 1,
@@ -58,9 +62,10 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
       cutPrice: product.cutPrice || 0,
       productImages: product.images || [],
     });
+
     if (added) {
-    toast.success(`🛒 ${product.title} (${selectedWeight}) added!`);
-  }
+      toast.success(`🛒 ${product.title} (${selectedWeight}) added!`);
+    }
   };
 
   const weights = product.pricePerGram
@@ -70,7 +75,13 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
   return (
     <div
       className="bg-white rounded-2xl border shadow-sm hover:shadow-lg transition flex flex-col cursor-pointer h-full"
-      onClick={() => navigate(`/ghee-product/${product.slug}/${product._id}`)}
+      onClick={() => {
+        if (COMING_SOON) {
+          toast("Coming Soon 🚧");
+          return;
+        }
+        navigate(`/ghee-product/${product.slug}/${product._id}`);
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -106,7 +117,38 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
             <FaHeart size={16} className="text-gray-700" />
           </span>
         )}
+         {COMING_SOON && (
+  <div className="absolute inset-0 z-30 flex items-center justify-center">
+    {/* dark animated background */}
+    <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px] animate-fadeIn" />
+
+    {/* glow card */}
+    <div className="relative px-6 py-5 rounded-2xl bg-black/60 border border-white/20 
+      shadow-[0_0_40px_rgba(255,215,0,0.25)]
+      animate-popIn text-center">
+
+      {/* animated text */}
+      <h3 className="text-white text-xl font-extrabold tracking-[0.3em] animate-pulseGlow">
+        COMING&nbsp;SOON
+      </h3>
+
+      {/* underline shimmer */}
+      <div className="mt-2 h-[2px] w-20 mx-auto bg-gradient-to-r 
+        from-transparent via-yellow-400 to-transparent animate-shimmer" />
+
+      {/* subtitle */}
+      <p className="mt-2 text-yellow-200 text-xs tracking-wide animate-fadeUp">
+        Premium Ghee Collection
+      </p>
+
+      {/* floating dots */}
+      <div className="absolute -top-3 -right-3 w-3 h-3 bg-yellow-400 rounded-full animate-float" />
+      <div className="absolute -bottom-3 -left-3 w-2 h-2 bg-orange-400 rounded-full animate-float delay-200" />
+    </div>
+  </div>
+)}
       </div>
+    
 
       {/* DETAILS */}
       <div className="px-4 py-3 flex flex-col flex-1">
@@ -154,14 +196,21 @@ const GheeProductCard = ({ product, selectedWeight, setSelectedWeight }) => {
 
         <button
           onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          className={`w-full py-2 font-semibold text-[0.9rem] sm:text-sm tracking-wide rounded-lg ${
-            isOutOfStock
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-yellow-600 text-white hover:bg-yellow-700"
-          }`}
+          disabled={isOutOfStock || COMING_SOON}
+          className={`w-full py-2 font-semibold text-[0.9rem] sm:text-sm tracking-wide rounded-lg
+    ${
+      COMING_SOON
+        ? "bg-gray-500 cursor-not-allowed text-white"
+        : isOutOfStock
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-yellow-600 text-white hover:bg-yellow-700"
+    }`}
         >
-          {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+          {COMING_SOON
+            ? "COMING SOON"
+            : isOutOfStock
+            ? "OUT OF STOCK"
+            : "ADD TO CART"}
         </button>
       </div>
     </div>
@@ -177,7 +226,7 @@ export default function GheeCategoryProduct() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedWeights, setSelectedWeights] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // FETCH PRODUCTS
   useEffect(() => {
@@ -196,63 +245,55 @@ export default function GheeCategoryProduct() {
         setSelectedWeights(defaults);
       } catch {
         toast.error("Failed to load products");
+      } finally {
+        setLoading(false); // ✅ important
       }
-      finally {
-      setLoading(false); // ✅ important
-    }
     };
     load();
   }, [slug]);
 
-const handleFilter = useCallback(
-  (filters) => {
-    let temp = [...products];
+  const handleFilter = useCallback(
+    (filters) => {
+      let temp = [...products];
 
-    // CATEGORY
-    if (filters.category) {
-      temp = temp.filter(
-        (p) =>
-          p.category === filters.category ||
-          p.categoryId === filters.category
-      );
-    }
+      // CATEGORY
+      if (filters.category) {
+        temp = temp.filter(
+          (p) =>
+            p.category === filters.category || p.categoryId === filters.category
+        );
+      }
 
-    // PRICE
-    temp = temp.filter((p) => {
-      const price =
-        p.currentPrice ||
-        p.current_price ||
-        p.packs?.[0]?.price ||
-        0;
-      return price >= filters.price[0] && price <= filters.price[1];
-    });
-
-    // RATING
-    if (filters.rating > 0) {
+      // PRICE
       temp = temp.filter((p) => {
-        if (!p.reviews || p.reviews.length === 0) return false;
-
-        const avg =
-          p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
-          p.reviews.length;
-
-        return avg >= filters.rating;
+        const price =
+          p.currentPrice || p.current_price || p.packs?.[0]?.price || 0;
+        return price >= filters.price[0] && price <= filters.price[1];
       });
-    }
 
-    // STOCK
-    if (filters.stock) {
-      temp = temp.filter(
-        (p) => p.stock !== false && p.stockQuantity > 0
-      );
-    }
+      // RATING
+      if (filters.rating > 0) {
+        temp = temp.filter((p) => {
+          if (!p.reviews || p.reviews.length === 0) return false;
 
-    // ✅ CORRECT STATE SETTER
-    setFilteredProducts(temp);
-  },
-  [products]
-);
+          const avg =
+            p.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+            p.reviews.length;
 
+          return avg >= filters.rating;
+        });
+      }
+
+      // STOCK
+      if (filters.stock) {
+        temp = temp.filter((p) => p.stock !== false && p.stockQuantity > 0);
+      }
+
+      // ✅ CORRECT STATE SETTER
+      setFilteredProducts(temp);
+    },
+    [products]
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -388,32 +429,34 @@ const handleFilter = useCallback(
           )}
 
           {/* PRODUCT GRID */}
-         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
-  {loading ? (
-    Array.from({ length: 8 }).map((_, i) => (
-      <AllProductSkeletonCard key={i} />
-    ))
-  ) : filteredProducts.length === 0 ? (
-    <p className="text-gray-600 text-[0.9rem] col-span-full text-center py-20">
-      No products found.
-    </p>
-  ) : (
-    filteredProducts.map((p) => (
-      <GheeProductCard
-        key={p._id}
-        product={p}
-        selectedWeight={selectedWeights[p._id]}
-        setSelectedWeight={(w) =>
-          setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
-        }
-      />
-    ))
-  )}
-</div>
-
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 flex-1">
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <AllProductSkeletonCard key={i} />
+              ))
+            ) : filteredProducts.length === 0 ? (
+              <p className="text-gray-600 text-[0.9rem] col-span-full text-center py-20">
+                No products found.
+              </p>
+            ) : (
+              filteredProducts.map((p) => (
+                <GheeProductCard
+                  key={p._id}
+                  product={p}
+                  selectedWeight={selectedWeights[p._id]}
+                  setSelectedWeight={(w) =>
+                    setSelectedWeights((prev) => ({ ...prev, [p._id]: w }))
+                  }
+                />
+              ))
+            )}
+          </div>
         </div>
       </div>
-         <div> <VideoAdvertiseList /> </div>
+      <div>
+        {" "}
+        <VideoAdvertiseList />{" "}
+      </div>
     </div>
   );
 }

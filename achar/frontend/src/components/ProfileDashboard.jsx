@@ -132,17 +132,13 @@ export default function ProfileDashboard() {
   const storedUser = user || JSON.parse(localStorage.getItem("user"));
   if (!storedUser) return null;
 
-const totalSpent = orders
-  .filter(
+  const totalSpent = orders
+    .filter((o) => o.status !== "cancelled" && o.status !== "refunded")
+    .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+
+  const activeOrders = orders.filter(
     (o) => o.status !== "cancelled" && o.status !== "refunded"
-  )
-  .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
-
-const activeOrders = orders.filter(
-  (o) => o.status !== "cancelled" && o.status !== "refunded"
-);
-
-
+  );
 
   // ⭐ FETCH DEFAULT SHIPPING ADDRESS (FIRST ORDER)
   const shipping =
@@ -194,7 +190,7 @@ const activeOrders = orders.filter(
               <FaBoxOpen className="text-white/70" />
               <div>
                 <p className="text-sm text-purple-200">Active Orders</p>
-               <p className="font-semibold">{activeOrders.length}</p>
+                <p className="font-semibold">{activeOrders.length}</p>
               </div>
             </div>
 
@@ -419,10 +415,9 @@ const activeOrders = orders.filter(
                       {/* PRODUCTS */}
                       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {order.products.map((p, idx) => (
-                          <Link
+                          <div
                             key={idx}
-                            to={`/product/${p.product}`}
-                            className="flex items-center gap-3 rounded p-2 hover:bg-white/10 transition border-b border-white/10 last:border-none"
+                            className="flex items-start gap-3 bg-white/5 p-3 rounded-xl shadow-sm"
                           >
                             <img
                               src={p.image || "/no-image.png"}
@@ -445,6 +440,7 @@ const activeOrders = orders.filter(
                                   {p.weight && <span>Weight: {p.weight}</span>}
                                   {p.weight && p.volume && " | "}
                                   {p.volume && <span>Volume: {p.volume}</span>}
+                                  {p.pack && (p.weight || p.volume) && " | "}
                                   {p.pack && <span>Pack: {p.pack}</span>}
                                 </p>
                               )}
@@ -454,7 +450,7 @@ const activeOrders = orders.filter(
                                 {formatCurrency(p.price * p.quantity)}
                               </p>
                             </div>
-                          </Link>
+                          </div>
                         ))}
                       </div>
                     </motion.article>

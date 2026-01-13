@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
-/* ---------------- COMPANY CONFIG ---------------- */
+/* ================= COMPANY CONFIG ================= */
 const COMPANY = {
   name: "Gau Samvardhan",
   address:
@@ -14,10 +14,11 @@ const COMPANY = {
   logo: "/GauSamvardhan.png",
   signature: "/mangesh.jpg",
   qr: "/orcode.jpg",
+  state: "maharashtra",
 };
 
-/* ---------------- CONSTANTS ---------------- */
-const statusOptions = [
+/* ================= CONSTANTS ================= */
+const STATUS = [
   "all",
   "pending",
   "shipped",
@@ -27,389 +28,483 @@ const statusOptions = [
   "refunded",
 ];
 
-const formatPaymentMethod = (method) => {
-  if (!method) return "Unknown";
-  return method.toLowerCase() === "cod"
-    ? "Cash on Delivery"
-    : "Online Payment";
-};
+/* ✅ PAYMENT FORMATTER (FIXED) */
+const paymentLabel = (m) =>
+  m?.toLowerCase() === "cod" ? "Cash on Delivery" : "Online Payment";
 
-/* ---------------- HELPERS ---------------- */
+/* ================= IMAGE LOADER ================= */
 const loadImage = async (src) => {
-  const blob = await fetch(src).then((r) => r.blob());
-  return new Promise((resolve) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(fr.result);
-    fr.readAsDataURL(blob);
-  });
+  try {
+    const blob = await fetch(src).then((r) => r.blob());
+    return await new Promise((res) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
 };
 
-/* ---------------- COMPONENT ---------------- */
+
+
+/* ================= COMPONENT ================= */
 const AdminUserOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [emailLoading, setEmailLoading] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterDate, setFilterDate] = useState("");
   const [error, setError] = useState("");
 
+  /* ---------- FILTER ORDERS BASED ON STATUS + DATE ---------- */
+useEffect(() => {
+  let temp = [...orders];
+
+  // Status Filter
+  if (statusFilter !== "all") temp = temp.filter((o) => o.status === statusFilter);
+
+  // Date Filter
+  const now = new Date();
+  if (dateFilter !== "all") {
+    let days = 0;
+    if (dateFilter === "1d") days = 1;
+    if (dateFilter === "7d") days = 7;
+    if (dateFilter === "30d") days = 30;
+    if (dateFilter === "60d") days = 60;
+    if (dateFilter === "90d") days = 90;
+
+    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    temp = temp.filter((o) => new Date(o.createdAt) >= cutoff);
+  }
+
+  setFiltered(temp);
+}, [orders, statusFilter, dateFilter]);
+
+  /* ---------- FETCH ORDERS ---------- */
   useEffect(() => {
-    fetchOrders();
+    (async () => {
+      try {
+        const res = await axios.get("/api/orders/admin/orders");
+        if (res.data?.success) setOrders(res.data.orders);
+      } catch {
+        setError("Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
+  /* ---------- FILTER ---------- */
   useEffect(() => {
-    let tempOrders = [...orders];
-
-    if (filterStatus !== "all") {
-      tempOrders = tempOrders.filter((o) => o.status === filterStatus);
-    }
-
-    if (filterDate) {
-      tempOrders = tempOrders.filter((o) => {
-        const orderDate = new Date(o.createdAt);
-        const selectedDate = new Date(filterDate);
-        return (
-          orderDate.getFullYear() === selectedDate.getFullYear() &&
-          orderDate.getMonth() === selectedDate.getMonth() &&
-          orderDate.getDate() === selectedDate.getDate()
-        );
-      });
-    }
-
-    setFilteredOrders(tempOrders);
-  }, [filterStatus, filterDate, orders]);
-
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get("/api/orders/admin/orders");
-      if (res.data.success) setOrders(res.data.orders);
-    } catch {
-      setError("Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateStatus = async (orderId, status) => {
-    await axios.post("/api/orders/update-status", { orderId, status });
-    setOrders((prev) =>
-      prev.map((o) => (o._id === orderId ? { ...o, status } : o))
+    setFiltered(
+      statusFilter === "all"
+        ? orders
+        : orders.filter((o) => o.status === statusFilter)
     );
+  }, [orders, statusFilter]);
+
+  /* ---------- UPDATE STATUS ---------- */
+  const updateStatus = async (id, status) => {
+    await axios.post("/api/orders/update-status", { orderId: id, status });
+    setOrders((p) => p.map((o) => (o._id === id ? { ...o, status } : o)));
   };
 
-  const handleCancel = async (orderId) => {
-    const reason = prompt("Enter cancellation reason:");
+  /* ---------- CANCEL ORDER ---------- */
+  const cancelOrder = async (id) => {
+    const reason = prompt("Enter cancellation reason");
     if (!reason) return;
-
-    await axios.post("/api/orders/cancel-order", { orderId, reason });
-    setOrders((prev) =>
-      prev.map((o) =>
-        o._id === orderId
-          ? { ...o, status: "cancelled", isCancelled: true }
-          : o
+    await axios.post("/api/orders/cancel-order", { orderId: id, reason });
+    setOrders((p) =>
+      p.map((o) =>
+        o._id === id ? { ...o, status: "cancelled", isCancelled: true } : o
       )
     );
   };
 
-  const emailInvoice = async (orderId) => {
+  /* ---------- EMAIL INVOICE ---------- */
+  const emailInvoice = async (id) => {
     try {
-      setEmailLoading(orderId);
-      const res = await axios.post("/api/invoice/email", { orderId });
-      if (res.data.success) alert("📧 Invoice emailed successfully");
-      else alert(res.data.message || "Email sending failed");
-    } catch (err) {
-      alert(
-        err.response?.data?.message || "Backend error: Email service not configured"
-      );
+      setEmailLoading(id);
+      await axios.post("/api/invoice/email", { orderId: id });
+      alert("📧 Invoice emailed");
+    } catch {
+      alert("❌ Email failed");
     } finally {
       setEmailLoading(null);
     }
   };
 
+  /* ================= PDF DOWNLOAD (A4 LANDSCAPE) ================= */
   const downloadInvoice = async (order) => {
-    const doc = new jsPDF({ unit: "mm", format: [80, 300] });
-    let y = 8;
-    const logo = await loadImage(COMPANY.logo);
-    const sign = await loadImage(COMPANY.signature);
-    const qr = await loadImage(COMPANY.qr);
-
-    doc.addImage(logo, "PNG", 25, y, 30, 15);
-    y += 18;
-    doc.setFontSize(9).setFont("helvetica", "bold");
-    doc.text(COMPANY.name, 40, y, { align: "center" });
-    y += 4;
-    doc.setFontSize(7).setFont("helvetica", "normal");
-    doc.text(COMPANY.address, 40, y, { align: "center", maxWidth: 70 });
-    y += 6;
-    doc.text(`Phone: ${COMPANY.phone}`, 40, y, { align: "center" });
-    y += 4;
-    doc.text(COMPANY.email, 40, y, { align: "center" });
-    y += 5;
-    doc.line(5, y, 75, y);
-    y += 4;
-    doc.text(`Order: ${order.orderNumber}`, 5, y);
-    y += 4;
-    doc.text(`Invoice: ${order.invoiceNumber}`, 5, y);
-    y += 4;
-    doc.text(`Date: ${new Date(order.createdAt).toLocaleString()}`, 5, y);
-    y += 4;
-    doc.text(`Payment: ${formatPaymentMethod(order.paymentMethod)}`, 5, y);
-    y += 5;
-
-    autoTable(doc, {
-      startY: y,
-      theme: "plain",
-      styles: { fontSize: 7 },
-      head: [["Item", "Qty", "Rate", "Amt"]],
-      body: order.products.map((p) => [p.name, p.quantity, p.price, p.quantity * p.price]),
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
     });
 
-    y = doc.lastAutoTable.finalY + 4;
-    doc.line(5, y, 75, y);
-    y += 4;
-    doc.setFont("helvetica", "bold");
-    doc.text(`TOTAL: ₹${order.totalAmount}`, 5, y);
+    let y = 15;
+
+    const [logo, sign, qr] = await Promise.all([
+      loadImage(COMPANY.logo),
+      loadImage(COMPANY.signature),
+      loadImage(COMPANY.qr),
+    ]);
+
+    const ship = order.shippingAddress || {};
+    const bill = order.billingAddress || ship;
+
+    const sameState = bill.state?.toLowerCase() === COMPANY.state.toLowerCase();
+
+    /* ---------- HEADER ---------- */
+    if (logo) doc.addImage(logo, "PNG", 15, y, 40, 18);
+
+    doc.setFont("helvetica", "bold").setFontSize(16);
+    doc.text(COMPANY.name, 148, y + 8, { align: "center" });
+
+    doc.setFont("helvetica", "normal").setFontSize(10);
+    doc.text(COMPANY.address, 148, y + 14, {
+      align: "center",
+      maxWidth: 260,
+    });
+
+    y += 30;
+    doc.line(10, y, 287, y);
+    y += 10;
+
+    /* ---------- ORDER INFO ---------- */
+    doc.setFont("helvetica", "bold").setFontSize(11);
+    doc.text(`Order #: ${order.orderNumber}`, 10, y);
+    doc.text(`Invoice #: ${order.invoiceNumber}`, 150, y);
     y += 6;
-    doc.addImage(qr, "JPEG", 25, y, 30, 30);
-    y += 32;
-    doc.addImage(sign, "JPEG", 40, y, 25, 10);
+
+    doc.setFont("helvetica", "normal");
+    doc.text(`Date: ${new Date(order.createdAt).toLocaleString()}`, 10, y);
+    doc.text(`Payment: ${paymentLabel(order.paymentMethod)}`, 150, y);
     y += 12;
 
+    /* ================= ADDRESSES ================= */
+    doc.setFont("helvetica", "bold").setFontSize(11);
+    doc.text("BILLING ADDRESS", 10, y);
+    doc.text("SHIPPING ADDRESS", 155, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal").setFontSize(10);
+
+    // ✅ Billing address (same as shipping if billing not stored)
+    const billingText = `
+${bill?.name || ""}
+${bill?.address || ""}
+${bill?.city || ""}, ${bill?.state || ""} - ${bill?.pincode || ""}
+${bill?.country || ""}
+Phone: ${bill?.phone || ""}
+`.trim();
+
+    // ✅ Shipping address
+    const shippingText = `
+${ship?.name || ""}
+${ship?.address || ""}
+${ship?.city || ""}, ${ship?.state || ""} - ${ship?.pincode || ""}
+${ship?.country || ""}
+Phone: ${ship?.phone || ""}
+`.trim();
+
+    // ✅ Auto wrap + full height
+    doc.text(billingText, 10, y, {
+      maxWidth: 130,
+      lineHeightFactor: 1.4,
+    });
+
+    doc.text(shippingText, 155, y, {
+      maxWidth: 130,
+      lineHeightFactor: 1.4,
+    });
+
+    // ✅ Move Y safely after longest address
+    const billingLines = doc.splitTextToSize(billingText, 130).length;
+    const shippingLines = doc.splitTextToSize(shippingText, 130).length;
+    y += Math.max(billingLines, shippingLines) * 6 + 6;
+
+    /* ---------- TABLE ---------- */
+    autoTable(doc, {
+      startY: y,
+      theme: "grid",
+      head: [
+        ["Item", "Qty", "Rate", "Taxable", "CGST", "SGST", "IGST", "Total"],
+      ],
+      body: order.products.map((p) => {
+        const amount = p.price * p.quantity;
+        return [
+          p.name,
+          p.quantity,
+          `₹${p.price}`,
+          `₹${amount}`,
+          sameState ? "2.5%" : "-",
+          sameState ? "2.5%" : "-",
+          !sameState ? "5%" : "-",
+          `₹${amount}`,
+        ];
+      }),
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        halign: "center",
+      },
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+
+    /* ---------- TOTAL ---------- */
+    doc.setFont("helvetica", "bold");
+    doc.text(`Grand Total : ₹${order.totalAmount}`, 10, y);
+
+    if (qr) doc.addImage(qr, "JPEG", 150, y - 10, 40, 40);
+    if (sign) doc.addImage(sign, "JPEG", 80, y + 15, 40, 15);
+
+    /* ---------- CANCELLED ---------- */
     if (order.isCancelled) {
       doc.setTextColor(255, 0, 0);
-      doc.setFontSize(26);
-      doc.text("CANCELLED", 40, 150, { angle: 45, align: "center" });
+      doc.setFontSize(40);
+      doc.text("CANCELLED", 148, 150, {
+        align: "center",
+        angle: 45,
+      });
       doc.setTextColor(0, 0, 0);
     }
 
     doc.save(`invoice_${order.orderNumber}.pdf`);
-    return `invoice_${order.orderNumber}.pdf`; // Return filename for WhatsApp
   };
 
-  const exportAllInvoices = async () => {
-    const doc = new jsPDF({ unit: "mm", format: "a4" });
-    let y = 10;
+const exportExcel = () => {
+  const data = filtered.map((o) => {
+    const billing = o.billingAddress || o.shippingAddress || {};
+    const shipping = o.shippingAddress || {};
 
-    for (let order of filteredOrders) {
-      const logo = await loadImage(COMPANY.logo);
-      doc.addImage(logo, "PNG", 80, y, 50, 25);
-      y += 30;
+    return {
+      /* ================= BASIC ================= */
+      OrderNumber: o.orderNumber,
+      InvoiceNumber: o.invoiceNumber,
+      OrderStatus: o.status,
+      PaymentMethod: paymentLabel(o.paymentMethod),
+      PaymentStatus: o.paymentStatus,
+      TotalAmount: o.totalAmount,
+      IsCancelled: o.isCancelled ? "Yes" : "No",
+      CancelReason: o.cancelReason || "",
 
-      doc.setFontSize(12).setFont("helvetica", "bold");
-      doc.text(`Invoice – Order #${order.orderNumber}`, 15, y);
-      y += 8;
+      /* ================= USER ================= */
+      UserName: o.user?.name || "",
+      UserEmail: o.userEmail || o.user?.email || "",
+      UserPhone: o.user?.phone || "",
 
-      doc.setFontSize(10).setFont("helvetica", "normal");
-      doc.text(`Customer: ${order.user?.name || "N/A"}`, 15, y);
-      y += 5;
-      doc.text(`Email: ${order.user?.email || order.shippingAddress?.email}`, 15, y);
-      y += 5;
-      doc.text(`Phone: ${order.user?.phone || order.shippingAddress?.phone}`, 15, y);
-      y += 5;
-      doc.text(
-        `Address: ${order.shippingAddress?.addressLine1}, ${order.shippingAddress?.city}, ${order.shippingAddress?.state} - ${order.shippingAddress?.zip}`,
-        15,
-        y
-      );
-      y += 7;
+      /* ================= BILLING ADDRESS ================= */
+      BillingName: billing.name || "",
+      BillingAddress: billing.address || "",
+      BillingCity: billing.city || "",
+      BillingState: billing.state || "",
+      BillingPincode: billing.pincode || "",
+      BillingCountry: billing.country || "",
+      BillingPhone: billing.phone || "",
 
-      autoTable(doc, {
-        startY: y,
-        theme: "striped",
-        head: [["Item", "Qty", "Rate", "Amt"]],
-        body: order.products.map((p) => [p.name, p.quantity, p.price, p.quantity * p.price]),
-      });
+      /* ================= SHIPPING ADDRESS ================= */
+      ShippingName: shipping.name || "",
+      ShippingAddress: shipping.address || "",
+      ShippingCity: shipping.city || "",
+      ShippingState: shipping.state || "",
+      ShippingPincode: shipping.pincode || "",
+      ShippingCountry: shipping.country || "",
+      ShippingPhone: shipping.phone || "",
 
-      y = doc.lastAutoTable.finalY + 10;
-      doc.addPage();
-    }
+      /* ================= PRODUCTS (STRINGIFIED) ================= */
+      Products: o.products
+        .map(
+          (p, i) =>
+            `${i + 1}) ${p.name} | Qty:${p.quantity} | Price:${p.price} | Weight:${p.weight || ""} | Volume:${p.volume || ""} | Pack:${p.pack || ""}`
+        )
+        .join(" || "),
 
-    doc.save("All_Invoices.pdf");
-  };
+      /* ================= LOGISTICS / PAYMENT IDS ================= */
+      DelhiveryWaybill: o.delhiveryWaybill || "",
+      RazorpayOrderId: o.razorpayOrderId || "",
+      RazorpayPaymentId: o.razorpayPaymentId || "",
 
-  const exportExcel = () => {
-    const data = filteredOrders.map((order) => ({
-      OrderNumber: order.orderNumber,
-      InvoiceNumber: order.invoiceNumber,
-      CustomerName: order.user?.name || "N/A",
-      Email: order.user?.email || order.shippingAddress?.email,
-      Phone: order.user?.phone || order.shippingAddress?.phone,
-      Status: order.status,
-      TotalAmount: order.totalAmount,
-      Payment: formatPaymentMethod(order.paymentMethod),
-      Address: `${order.shippingAddress?.addressLine1}, ${order.shippingAddress?.city}, ${order.shippingAddress?.state} - ${order.shippingAddress?.zip}`,
-      Items: order.products.map((p) => `${p.name} ×${p.quantity}`).join(", "),
-    }));
+      /* ================= DATES ================= */
+      CreatedAt: new Date(o.createdAt).toLocaleString(),
+      UpdatedAt: new Date(o.updatedAt).toLocaleString(),
+    };
+  });
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Orders");
-    XLSX.writeFile(wb, "Orders.xlsx");
-  };
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Orders");
 
-/* ---------------- WHATSAPP INVOICE ---------------- */
-const shareInvoiceWhatsApp = (order) => {
-  try {
-    // Format items
-    const itemsText = order.products
-      .map((p) => `* ${p.name} (Qty: ${p.quantity}) - ₹${p.quantity * p.price}`)
-      .join("\n");
-
-    // Format seller address
-    const sellerDetails = `🏢 Seller Details
-${COMPANY.name}
-BLDG NO. A-18, FLAT NO. 303
-Daffodils Road, BADLAPUR
-SHRUSHTI, Ambarnath
-Thane, Maharashtra - 421503
-GST: 27ABOCS1120M1Z4
-✔ All taxes and shipping charges are included.\n`;
-
-    // Compose WhatsApp message
-    const message = encodeURIComponent(
-      `🧾 Invoice from ${COMPANY.name}\n\n` +
-      `Order No: ${order.orderNumber}\n` +
-      `Invoice No: ${order.invoiceNumber}\n` +
-      `Date: ${new Date(order.createdAt).toLocaleDateString()}\n` +
-      `Payment: ${formatPaymentMethod(order.paymentMethod)}\n\n` +
-      `🛒 Items\n${itemsText}\n\n` +
-      `💰 Total Amount: ₹${order.totalAmount}\n\n` +
-      `${sellerDetails}` +
-      `Thank you for shopping with us 🛍️\n` +
-      `${COMPANY.name}`
-    );
-
-    const phone = order.user?.phone || order.shippingAddress?.phone;
-    if (!phone) {
-      alert("Customer phone number not available for WhatsApp.");
-      return;
-    }
-
-    // Open WhatsApp chat
-    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to generate WhatsApp invoice link.");
-  }
+  XLSX.writeFile(wb, "All_Orders_Full_Data.xlsx");
 };
 
 
-  if (loading) return <p className="p-6 text-lg">Loading…</p>;
+  if (loading) return <p className="p-6">Loading…</p>;
   if (error) return <p className="p-6 text-red-600">{error}</p>;
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Admin Panel - User Orders</h2>
+      <h2 className="text-3xl font-bold mb-6">Admin – Orders</h2>
 
-      <div className="flex flex-wrap gap-3 mb-4 justify-between">
+      <div className="flex justify-between mb-4">
         <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="border px-3 py-2 rounded shadow-sm text-gray-700"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border px-3 py-2 rounded"
         >
-          {statusOptions.map((s) => (
-            <option key={s} value={s}>{s.toUpperCase()}</option>
+          {STATUS.map((s) => (
+            <option key={s} value={s}>
+              {s.toUpperCase()}
+            </option>
           ))}
         </select>
 
-        <input
-          type="date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-          className="border px-3 py-2 rounded shadow-sm text-gray-700"
-        />
+      <div className="flex justify-between mb-4 flex-wrap gap-2">
+  {/* Status Dropdown */}
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="border px-3 py-2 rounded"
+  >
+    {STATUS.map((s) => (
+      <option key={s} value={s}>
+        {s.toUpperCase()}
+      </option>
+    ))}
+  </select>
 
-        <div className="flex gap-3 flex-wrap">
-          <button
-            onClick={exportAllInvoices}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow-md text-sm transition-colors"
-          >
-            Export All Invoices
-          </button>
+  {/* Date Filter Buttons */}
+  <div className="flex gap-2 flex-wrap">
+    {[
+      { label: "All", value: "all" },
+      { label: "24 Hours", value: "1d" },
+      { label: "7 Days", value: "7d" },
+      { label: "30 Days", value: "30d" },
+      { label: "60 Days", value: "60d" },
+      { label: "90 Days", value: "90d" },
+    ].map((f) => (
+      <button
+        key={f.value}
+        onClick={() => setDateFilter(f.value)}
+        className={`px-3 py-1 rounded text-sm ${
+          dateFilter === f.value
+            ? "bg-blue-600 text-white"
+            : "bg-gray-200 text-gray-800"
+        }`}
+      >
+        {f.label}
+      </button>
+    ))}
+  </div>
 
-          <button
-            onClick={exportExcel}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded shadow-md text-sm transition-colors"
-          >
-            Download Excel
-          </button>
-        </div>
+  {/* Excel Export */}
+  <button
+    onClick={exportExcel}
+    className="bg-yellow-500 text-white px-4 py-2 rounded"
+  >
+    Export Excel
+  </button>
+</div>
+
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredOrders.map((order) => (
-          <div key={order._id} className="bg-white shadow-lg rounded-xl p-5 hover:shadow-2xl transition-shadow border-t-4 border-blue-600">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-gray-700">Order #{order.orderNumber}</h3>
-              <span className={`px-2 py-1 text-sm font-medium rounded-full ${order.status === "delivered" ? "bg-green-100 text-green-800" : order.status === "cancelled" ? "bg-red-100 text-red-800" : "bg-yellow-100 text-yellow-800"}`}>
-                {order.status.toUpperCase()}
-              </span>
-            </div>
+        {filtered.map((o) => {
+          const billing = o.billingAddress || o.shippingAddress || {};
+          const shipping = o.shippingAddress || billing;
 
-            <p className="text-gray-600 mb-1">Total: <span className="font-semibold">₹{order.totalAmount}</span></p>
-            <p className="text-gray-600 mb-1">Payment: <span className="font-semibold">{formatPaymentMethod(order.paymentMethod)}</span></p>
+          return (
+            <div
+              key={o._id}
+              className="bg-white p-5 rounded-xl shadow flex flex-col gap-3"
+            >
+              <h3 className="font-semibold text-lg">Order #{o.orderNumber}</h3>
 
-            <div className="mt-2 p-3 bg-gray-50 rounded shadow-inner text-sm text-gray-700">
-              <p><strong>Name:</strong> {order.user?.name || "N/A"}</p>
-              <p><strong>Email:</strong> {order.user?.email || order.shippingAddress?.email || "N/A"}</p>
-              <p><strong>Phone:</strong> {order.user?.phone || order.shippingAddress?.phone || "N/A"}</p>
-              <p><strong>Address:</strong> {order.shippingAddress?.addressLine1}, {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.zip}</p>
-            </div>
+              <p className="text-sm">
+                <span className="font-medium">Total:</span> ₹{o.totalAmount}
+              </p>
 
-            <div className="flex flex-wrap gap-2 mt-4">
-              <select
-                value={order.status}
-                onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
-                className="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {statusOptions.filter((s) => s !== "all").map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
+              <p className="text-sm">
+                <span className="font-medium">Payment:</span>{" "}
+                {paymentLabel(o.paymentMethod)}
+              </p>
 
-              {!order.isCancelled && (
-                <button
-                  onClick={() => handleCancel(order._id)}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow-md text-sm transition-colors"
+              {/* ================= ADDRESSES ================= */}
+              <div className="border-t pt-3 text-sm space-y-3">
+                <div>
+                  <p className="font-semibold text-gray-700">Billing Address</p>
+                  <p className="text-gray-600 whitespace-pre-line break-words">
+                    {billing.name && `${billing.name}\n`}
+                    {billing.address && `${billing.address}\n`}
+                    {billing.city && billing.city},{" "}
+                    {billing.state && billing.state}{" "}
+                    {billing.pincode && `- ${billing.pincode}`}\n
+                    {billing.country}\n
+                    {billing.phone && `Phone: ${billing.phone}`}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-gray-700">
+                    Shipping Address
+                  </p>
+                  <p className="text-gray-600 whitespace-pre-line break-words">
+                    {shipping.name && `${shipping.name}\n`}
+                    {shipping.address && `${shipping.address}\n`}
+                    {shipping.city && shipping.city},{" "}
+                    {shipping.state && shipping.state}{" "}
+                    {shipping.pincode && `- ${shipping.pincode}`}\n
+                    {shipping.country}\n
+                    {shipping.phone && `Phone: ${shipping.phone}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* ================= ACTIONS ================= */}
+              <div className="mt-3 flex gap-2 flex-wrap">
+                <select
+                  value={o.status}
+                  onChange={(e) => updateStatus(o._id, e.target.value)}
+                  className="border px-2 py-1 rounded text-sm"
                 >
-                  Cancel
+                  {STATUS.filter((s) => s !== "all").map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+
+                {!o.isCancelled && (
+                  <button
+                    onClick={() => cancelOrder(o._id)}
+                    className="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                  >
+                    Cancel
+                  </button>
+                )}
+
+                <button
+                  onClick={() => downloadInvoice(o)}
+                  className="bg-gray-800 text-white px-2 py-1 rounded text-sm"
+                >
+                  PDF
                 </button>
-              )}
 
-              <button
-                onClick={() => downloadInvoice(order)}
-                className="bg-gray-800 hover:bg-black text-white px-3 py-1 rounded shadow-md text-sm transition-colors"
-              >
-                Download PDF
-              </button>
-
-              <button
-                disabled={emailLoading === order._id}
-                onClick={() => emailInvoice(order._id)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded shadow-md text-sm transition-colors disabled:opacity-50"
-              >
-                {emailLoading === order._id ? "Sending…" : "Email Invoice"}
-              </button>
-
-              <button
-                onClick={() => shareInvoiceWhatsApp(order)}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded shadow-md text-sm transition-colors"
-              >
-                WhatsApp Invoice
-              </button>
+                <button
+                  disabled={emailLoading === o._id}
+                  onClick={() => emailInvoice(o._id)}
+                  className="bg-blue-600 text-white px-2 py-1 rounded text-sm"
+                >
+                  {emailLoading === o._id ? "Sending…" : "Email"}
+                </button>
+              </div>
             </div>
-
-            <div className="mt-4">
-              <h4 className="text-sm font-semibold text-gray-600">Items:</h4>
-              <ul className="list-disc pl-5 text-sm text-gray-700">
-                {order.products.map((p) => (
-                  <li key={p._id}>{p.name} × {p.quantity} – ₹{p.quantity * p.price}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

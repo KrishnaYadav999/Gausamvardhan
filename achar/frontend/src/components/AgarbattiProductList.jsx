@@ -8,6 +8,8 @@ import { CartContext } from "../context/CartContext";
 import toast from "react-hot-toast";
 import { FaHeart, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 
+const COMING_SOON = true;
+
 /* ---------------------------------------------------
     ACHAR STYLE CARD (WITH PRICE & RATING)
 ----------------------------------------------------*/
@@ -27,12 +29,13 @@ const AgarbattiCard = ({ product, selectedPack, updatePack }) => {
   const oldPrice = product.cut_price || currentPack?.oldPrice || null;
 
   const goToDetail = () => {
-    if (!isOutOfStock)
-      navigate(`/agarbatti-product/${product.slug}/${product._id}`);
+    if (COMING_SOON || isOutOfStock) return;
+    navigate(`/agarbatti-product/${product.slug}/${product._id}`);
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+    if (COMING_SOON) return toast("Coming Soon 🚧");
     if (isOutOfStock) return toast.error("Out of stock");
 
     const added = addToCart({
@@ -44,9 +47,10 @@ const AgarbattiCard = ({ product, selectedPack, updatePack }) => {
       selectedPack,
       productImages: product.images,
     });
-if(added ){
-toast.success(`${product.title} added to cart`);
-}
+
+    if (added) {
+      toast.success(`${product.title} added to cart`);
+    }
   };
 
   return (
@@ -170,14 +174,21 @@ toast.success(`${product.title} added to cart`);
         {/* ADD TO CART */}
         <button
           onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
-            isOutOfStock
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#A54B4B] hover:bg-[#903E3E] text-white"
-          }`}
+          disabled={isOutOfStock || COMING_SOON}
+          className={`w-full py-3 font-semibold text-sm tracking-wide mt-4
+    ${
+      COMING_SOON
+        ? "bg-gray-500 cursor-not-allowed text-white"
+        : isOutOfStock
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-[#A54B4B] hover:bg-[#903E3E] text-white"
+    }`}
         >
-          {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
+          {COMING_SOON
+            ? "COMING SOON"
+            : isOutOfStock
+            ? "OUT OF STOCK"
+            : "ADD TO CART"}
         </button>
       </div>
     </div>

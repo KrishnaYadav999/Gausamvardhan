@@ -6,6 +6,8 @@ import { CartContext } from "../context/CartContext";
 import toast from "react-hot-toast";
 import { FaHeart, FaChevronLeft, FaChevronRight, FaStar } from "react-icons/fa";
 
+const GANPATI_COMING_SOON = true;
+
 /* ---------------------------------------------------
    GANPATI CARD
 ----------------------------------------------------*/
@@ -27,6 +29,12 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+
+    if (GANPATI_COMING_SOON) {
+      toast("🕒 Ganpati products coming soon", { icon: "⏳" });
+      return;
+    }
+
     if (isOutOfStock) return toast.error("Product is out of stock");
     if (!selectedPack) return toast.error("Select a pack");
 
@@ -59,9 +67,14 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
 
   return (
     <div
-      onClick={goToDetail}
+      onClick={() => {
+        if (GANPATI_COMING_SOON) return;
+        goToDetail();
+      }}
       className={`min-w-[280px] bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all cursor-pointer h-full flex flex-col relative ${
-        isOutOfStock ? "opacity-60 cursor-not-allowed" : ""
+        isOutOfStock || GANPATI_COMING_SOON
+          ? "opacity-60 cursor-not-allowed"
+          : ""
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -160,17 +173,28 @@ const GanpatiCard = ({ product, selectedPack, updatePack }) => {
           </select>
         )}
 
-        <button
-          onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 ${
-            isOutOfStock
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#A54B4B] hover:bg-[#903E3E] text-white"
-          }`}
-        >
-          {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
-        </button>
+      <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleAddToCart(e);
+  }}
+  className={`w-full py-3 font-semibold text-sm tracking-wide mt-4 rounded
+    ${
+      GANPATI_COMING_SOON
+        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+        : isOutOfStock
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-[#A54B4B] hover:bg-[#903E3E] text-white"
+    }`}
+>
+  {GANPATI_COMING_SOON
+    ? "COMING SOON"
+    : isOutOfStock
+    ? "OUT OF STOCK"
+    : "ADD TO CART"}
+</button>
+
       </div>
     </div>
   );
